@@ -2,6 +2,16 @@
 
 ## Description
 
+## Usage
+
+![Usage](../images/highlight/highlight.sh.usage.png)
+
+## Example
+
+![Example](../images/highlight/highlight.sh.png)
+
+## How it works
+
 Most of the work happens with a simple grep loop like this:
 
 ```bash
