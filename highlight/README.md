@@ -1,10 +1,9 @@
 # Highlight patterns
 
-## Description
+## Description and Usage
 
-## Usage
-
-![Usage](../images/highlight/highlight.sh.usage.png)
+![Usage](../images/highlight/highlight.usage1.png)
+![Usage](../images/highlight/highlight.usage2.png)
 
 ## Example
 
