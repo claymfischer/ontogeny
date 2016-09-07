@@ -16,7 +16,14 @@ Most of the work happens with a simple grep loop, like so:
 # Separate files from arguments
 FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
 OFFSET=$((1+FILENUM))
+FILES=$(for f in $1; do printf "$color240${f}$reset, "; done | sed 's/, $//g')
 SEARCHTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
+# Filter to lines containing all patterns for multiple files (to prevent flooding the terminal)
+if [ "$FILENUM" -gt "1" ]; then
+        RETURNALL=""
+else
+        RETURNALL="-e ''"
+fi
 # Begin building up a command
 COMMAND="grep -n '' $FILE"
 i=0
