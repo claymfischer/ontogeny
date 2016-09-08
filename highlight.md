@@ -2,11 +2,11 @@
 
 ## Description and Usage
 
-![Usage](../images/highlight/highlight_usage.png)
+![Usage](images/highlight/highlight_usage.png)
 
 ## Example
 
-![Example](../images/highlight/highlight.sh.png)
+![Example](images/highlight/highlight.sh.png)
 
 ## How it works
 
