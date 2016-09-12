@@ -10,9 +10,22 @@ The optional installer will create a directory and add the shell scripts to it, 
 
 ## hilite.sh
 
-input: `stdin` `file`
-
 ![Example highlighting](/images/highlight/highlight.sh.png)
+
+**Input:** `stdin` `file`
+
+`$ highlight file pattern1 pattern2 ... pattern*n*`
+
+Where `file` can take advantage of filename expansion:
+
+`$ highlight *.txt pattern1 pattern2 ... pattern*n*`
+
+Or just be multiple files:
+
+`$ highlight "file.txt file2.txt" pattern1 pattern2 ... pattern*n*`
+
+Adding multiple files will filter to only lines containing all the patterns.
+
 
 ## colorColumns.sh
 
