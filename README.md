@@ -8,6 +8,44 @@ They are bash shell scripts I have put together while working with biological da
 
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
 
+## conventions
+
+The head of each file contains any information you need to worry about.
+
+```shell
+#!/usr/bin/env bash
+
+#################################################################################
+# https://github.com/claymfischer
+# script.sh
+#################################################################################
+
+###############################################################################
+# Purpose                                                                     #
+###############################################################################
+# This script will...
+
+###############################################################################
+# Usage                                                                       #
+###############################################################################
+$ command options
+
+###############################################################################
+# Limitations                                                                 #
+###############################################################################
+# This script cannot accept stdin, it must use files as input.
+
+###############################################################################
+# Configuration                                                               #
+###############################################################################
+# This is the only part you can edit.
+USER=clay
+PATH=$HOME
+# This contains the color library
+SOURCE ~/bin/library.sh
+
+```
+
 ## hilite.sh
 
 ![Example highlighting](/images/highlight/highlight.sh.png)
