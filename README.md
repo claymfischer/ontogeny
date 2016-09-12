@@ -12,7 +12,7 @@ The optional installer will create a directory and add the shell scripts to it, 
 
 The head of each file contains any information you need to worry about.
 
-```shell
+```bash
 #!/usr/bin/env bash
 
 #################################################################################
