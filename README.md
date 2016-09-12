@@ -10,6 +10,7 @@ The optional installer will create a directory and add the shell scripts to it, 
 
 ## hilite.sh
 
+input: `stdin` `file`
 
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
