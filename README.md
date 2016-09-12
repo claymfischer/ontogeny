@@ -28,7 +28,9 @@ The head of each file contains any information you need to worry about.
 ###############################################################################
 # Usage                                                                       #
 ###############################################################################
-$ command options
+# Run the command with no arguments for usage.
+# Quickstart example:
+#       $ command options
 
 ###############################################################################
 # Limitations                                                                 #
