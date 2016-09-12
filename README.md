@@ -41,7 +41,7 @@ The head of each file contains any information you need to worry about.
 # Configuration                                                               #
 ###############################################################################
 # This is the only part you can edit.
-USER=clay
+USER="clay"
 PATH=$HOME
 # This contains the color library
 SOURCE ~/bin/library.sh
