@@ -26,7 +26,7 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 
 `$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
 
-> Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter in a single file by adding `"/dev/null file.txt"`
+> Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter withinin a single file by also including the empty file `/dev/null`, for example: `$ highlight "/dev/null file.txt" pattern1 pattern2`
 
 ---
 
