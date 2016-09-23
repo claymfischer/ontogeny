@@ -4,7 +4,9 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 They are bash shell scripts I have put together while working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
 
-## hilite.sh
+## Highlight
+
+Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `cat file | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
 
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
