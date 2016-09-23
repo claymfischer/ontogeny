@@ -20,10 +20,11 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 
 `$ highlight "file.txt file2.txt" pattern1 pattern2 ... pattern*n*`
 
-`$ cat file.txt | grep pattern1 | highlight **stdin** pattern2 pattern3 | less -R`
+`$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
 
-Adding multiple files will filter to only lines containing all the patterns.
+> Adding multiple files will filter to only lines containing all the patterns.
 
+---
 
 ## colorColumns.sh
 
