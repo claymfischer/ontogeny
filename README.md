@@ -14,7 +14,7 @@ Highlight any number of search patterns with a variety of colors. Can accept **s
 
 **Input:** `stdin` `file`
 
-`$ highlight file pattern1 pattern2 ... pattern*n*`
+`$ highlight file pattern1 pattern2 ... pattern{n}`
 
 Where `file` can take advantage of filename expansion, be multiple files, or just stdin:
 
@@ -24,7 +24,7 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 
 `$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
 
-> Note: adding multiple files will **filter** to only lines containing all the patterns.
+> Note: adding multiple files will *filter* to only lines containing all the patterns.
 
 ---
 
@@ -40,6 +40,8 @@ This takes advantage of a simple `grep` loop to color columns different colors. 
 
 ![Example column coloring](/images/columns/columns_example2_colored.png)
 
+--- 
+
 ## fastq.sh
 
 Color-codes bases in a gzipped fastq file.
@@ -52,20 +54,27 @@ Color-codes bases in a gzipped fastq file.
 
 ![Example fastq color-coding](/images/fastq/fastq_quality.png)
 
+--- 
 
 ## transfer.sh
 
 This is a simple script that generates a quick SCP command to download 
 
+--- 
 
 ## newLs.sh
 
 
+--- 
+
 
 ## about.sh
 
+--- 
+
 ## list.sh
 
+--- 
 
 ## checkTags.sh
 
@@ -73,11 +82,15 @@ This gives a summary of a relational-alternative, or ra, file. An ra file establ
 
 If an md5sum file is present, it will also validate that there are no collisions.
 
+--- 
+
 ## installation
 
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
 
 Soon, users will be able to simply `make install` from the repository directory instead.
+
+--- 
 
 ## conventions
 
