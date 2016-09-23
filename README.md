@@ -4,9 +4,128 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 They are bash shell scripts I have put together while working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
 
+They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
+
+---
+
+Most UNIX software is designed to be (minimimalist)[https://en.wikipedia.org/wiki/Unix_philosophy]. This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
+
+On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
+
+---
+
+## Highlight
+
+Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
+
+![Example highlighting](/images/highlight/highlight.sh.png)
+
+**Input:** `stdin` `file.txt` `"multiple.txt files.txt"` `file.*`
+
+`$ highlight file pattern1 pattern2 ... pattern{n}`
+
+Where `file` can take advantage of filename expansion, be multiple files, or just stdin:
+
+`$ highlight *.txt pattern1 pattern2 ... pattern*n*`
+
+`$ highlight "file.txt file2.txt" pattern1 pattern2 ... pattern*n*`
+
+`$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
+
+> Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter withinin a single file by also including the empty file `/dev/null`, for example: `$ highlight "/dev/null file.txt" pattern1 pattern2`
+
+---
+
+## Color-code columnar data
+
+In bioinformatics we deal with the lowest common denominator format for data, which is generally plain text in tab-separated columns. These tab-separated columns are computer-readable moreso than human-readable, as the columns do not line up. It can be difficult to tell which column you are looking at when you have a screen of line-wrapped text.
+
+This takes advantage of a simple `grep` loop to color-code the columns.
+
+`$ cat example.tsv`
+
+![Example column coloring](/images/columns/columns_example2.png)
+
+`$ columns example.tsv`
+
+![Example column coloring](/images/columns/columns_example2_colored.png)
+
+--- 
+
+## Color-code sequence and quality score data
+
+Color-codes bases in a gzipped fastq file.
+
+`$ fastq SRR123.fastq.gz
+
+![Example fastq color-coding](/images/fastq/fastq.png)
+
+`$ fastq SRR123.fastq.gz x
+
+![Example fastq color-coding](/images/fastq/fastq_quality.png)
+
+--- 
+
+## Quickly transfer files to-and-from your server
+
+This is a simple script that generates a color-coded SCP command to upload or download files.
+
+![Example transfer](/images/transfer/transfer.png)
+
+`$ transfer file1.txt file2.txt ... file{n}.txt`
+
+It also takes advantage of filename expansion
+
+` $ transfer *.txt`
+
+--- 
+
+## New ls
+
+This lists directories first, then files. It can color-code different types of files.
+
+--- 
+
+
+## About
+
+This will tell you about any file or directory.
+
+# About files
+
+It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it).
+
+It also previews the head and foot of a file. 
+
+`$ about file.txt`
+
+# About directories
+
+Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
+
+--- 
+
+## List contents
+
+This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
+
+--- 
+
+## Check submission
+
+This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
+
+If an md5sum file is present, it will also validate that there are no collisions.
+
+--- 
+
 ## installation
 
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
+
+Soon, users will be able to simply `make install` from the repository directory instead.
+
+--- 
 
 ## conventions
 
@@ -47,50 +166,3 @@ PATH=$HOME
 SOURCE ~/bin/library.sh
 
 ```
-
-## hilite.sh
-
-![Example highlighting](/images/highlight/highlight.sh.png)
-
-**Input:** `stdin` `file`
-
-`$ highlight file pattern1 pattern2 ... pattern*n*`
-
-Where `file` can take advantage of filename expansion:
-
-`$ highlight *.txt pattern1 pattern2 ... pattern*n*`
-
-Or just be multiple files:
-
-`$ highlight "file.txt file2.txt" pattern1 pattern2 ... pattern*n*`
-
-Adding multiple files will filter to only lines containing all the patterns.
-
-
-## colorColumns.sh
-
-
-## fastq.sh
-
-
-
-
-## transfer.sh
-
-This is a simple script that generates a quick SCP command to download 
-
-
-## newLs.sh
-
-
-
-## about.sh
-
-## list.sh
-
-
-## checkTags.sh
-
-This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
-
-If an md5sum file is present, it will also validate that there are no collisions.
