@@ -4,6 +4,8 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 They are bash shell scripts I have put together while working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
 
+---
+
 ## Highlight
 
 Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
@@ -22,7 +24,7 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 
 `$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
 
-> Adding multiple files will filter to only lines containing all the patterns.
+> Note: adding multiple files will **filter** to only lines containing all the patterns.
 
 ---
 
