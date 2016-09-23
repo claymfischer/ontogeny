@@ -69,6 +69,11 @@ Adding multiple files will filter to only lines containing all the patterns.
 
 ## colorColumns.sh
 
+This takes advantage of a simple `grep` loop to color columns different colors. Very useful when dealing with tab-separated data.
+
+![Example column coloring](/images/columns/columns_example.png)
+
+![Example column coloring](/images/columns/columns_example_colored.png)
 
 ## fastq.sh
 
