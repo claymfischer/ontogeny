@@ -30,9 +30,11 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 
 ---
 
-## colorColumns.sh
+## Color-code columnar data
 
-This takes advantage of a simple `grep` loop to color columns different colors. Very useful when dealing with tab-separated data.
+In bioinformatics we deal with the lowest common denominator format for data, which is generally plain text in tab-separated columns. These tab-separated columns are computer-readable moreso than human-readable, as the columns do not line up. It can be difficult to tell which column you are looking at when you have a screen of line-wrapped text.
+
+This takes advantage of a simple `grep` loop to color-code the columns.
 
 `$ cat example.tsv`
 
