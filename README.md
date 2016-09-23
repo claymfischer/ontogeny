@@ -8,7 +8,7 @@ They follow [kent](https://github.com/ucscGenomeBrowser/kent) command convention
 
 ---
 
-Most UNIX software is designed to be minimimalist. This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
+Most UNIX software is designed to be (minimimalist)[https://en.wikipedia.org/wiki/Unix_philosophy]. This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
 
 On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
 
@@ -52,7 +52,7 @@ This takes advantage of a simple `grep` loop to color-code the columns.
 
 --- 
 
-## fastq.sh
+## Color-code sequence and quality score data
 
 Color-codes bases in a gzipped fastq file.
 
@@ -66,27 +66,52 @@ Color-codes bases in a gzipped fastq file.
 
 --- 
 
-## transfer.sh
+## Quickly transfer files to-and-from your server
 
-This is a simple script that generates a quick SCP command to download 
+This is a simple script that generates a color-coded SCP command to upload or download files.
 
---- 
+![Example transfer](/images/transfer/transfer.png)
 
-## newLs.sh
+`$ transfer file1.txt file2.txt ... file{n}.txt`
 
+It also takes advantage of filename expansion
 
---- 
-
-
-## about.sh
+` $ transfer *.txt`
 
 --- 
 
-## list.sh
+## New ls
+
+This lists directories first, then files. It can color-code different types of files.
 
 --- 
 
-## checkTags.sh
+
+## About
+
+This will tell you about any file or directory.
+
+# About files
+
+It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it).
+
+It also previews the head and foot of a file. 
+
+`$ about file.txt`
+
+# About directories
+
+Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
+
+--- 
+
+## List contents
+
+This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
+
+--- 
+
+## Check submission
 
 This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
 
