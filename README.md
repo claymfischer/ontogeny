@@ -6,7 +6,7 @@ They are bash shell scripts I have put together while working with biological da
 
 ## Highlight
 
-Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `cat file | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
+Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
 
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
@@ -14,13 +14,13 @@ Highlight any number of search patterns with a variety of colors. Can accept **s
 
 `$ highlight file pattern1 pattern2 ... pattern*n*`
 
-Where `file` can take advantage of filename expansion:
+Where `file` can take advantage of filename expansion, be multiple files, or just stdin:
 
 `$ highlight *.txt pattern1 pattern2 ... pattern*n*`
 
-Or just be multiple files:
-
 `$ highlight "file.txt file2.txt" pattern1 pattern2 ... pattern*n*`
+
+`$ cat file.txt | grep pattern1 | highlight **stdin** pattern2 pattern3 | less -R`
 
 Adding multiple files will filter to only lines containing all the patterns.
 
