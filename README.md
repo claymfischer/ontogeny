@@ -89,25 +89,32 @@ This lists directories first, then files. It can color-code different types of f
 
 ## About
 
-This will tell you about any file or directory.
+This will tell you about any file or directory. It has lazy usage, or more verbose usage that allows detailed previews of the file. 
+
+*This was my first shell script, and really is not a great example of code. However, it's fast and it does what it needs so I've never updated it.*
 
 # About files
 
-It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it).
+It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it). It also previews the head and foot of a file. 
 
-It also previews the head and foot of a file. 
+![Example about](/images/about/about_files.png)
 
 `$ about file.txt`
+
 
 # About directories
 
 Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
+
+![Example about](/images/about/about_directory.png)
 
 --- 
 
 ## List contents
 
 This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
+
+![Example contents](/images/contents/contents.png)
 
 --- 
 
@@ -116,6 +123,28 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
 
 If an md5sum file is present, it will also validate that there are no collisions.
+
+--- 
+
+## .bashrc aliases
+
+**Check if a file has non-ascii characters**
+
+![Example .bashrc aliases](/images/aliases/ascii.png)
+
+![Example .bashrc aliases](/images/aliases/nonascii.png)
+
+**Figure out which column number you need.**
+
+![Example .bashrc aliases](/images/aliases/whichColumn.png)
+
+This way will preview the second line of the file to help you confirm it's the correct column.
+
+![Example .bashrc aliases](/images/aliases/whichColumns.png)
+
+**Test if your current directory is actively writing anything.**
+
+![Example .bashrc aliases](/images/aliases/writing.png)
 
 --- 
 
