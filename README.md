@@ -4,6 +4,8 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 They are bash shell scripts I have put together while working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
 
+They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
+
 ---
 
 ## Highlight
