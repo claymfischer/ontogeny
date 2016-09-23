@@ -71,13 +71,25 @@ Adding multiple files will filter to only lines containing all the patterns.
 
 This takes advantage of a simple `grep` loop to color columns different colors. Very useful when dealing with tab-separated data.
 
-![Example column coloring](/images/columns/columns_example.png)
+`$ cat example.tsv`
 
-![Example column coloring](/images/columns/columns_example_colored.png)
+![Example column coloring](/images/columns/columns_example2.png)
+
+`$ columns example.tsv`
+
+![Example column coloring](/images/columns/columns_example2_colored.png)
 
 ## fastq.sh
 
+Color-codes bases in a gzipped fastq file.
 
+`$ fastq SRR123.fastq.gz
+
+![Example fastq color-coding](/images/fastq/fastq.png)
+
+`$ fastq SRR123.fastq.gz x
+
+![Example fastq color-coding](/images/fastq/fastq_quality.png)
 
 
 ## transfer.sh
