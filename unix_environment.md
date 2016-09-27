@@ -51,11 +51,26 @@ On your Mac, the startup file is `.bash_profile` not `.bashrc`.
         # This is a script from ontogeny tools that I like to use locally.
         alias transfer='~/Documents/bin/ontogeny_transfer.sh'
 
+        ######################################################################### 
+        # General UNIX/Linux environment configuration                          #
+        ######################################################################### 
+        export EDITOR=vi
+        export MACHTYPE=x86_64
+        export LANG="en_US.UTF-8"
+        export LC_COLLATE=C
+        # get colors on ls in emacs
+        export VISUAL=vi
+
+        # umask line added to allow groups to write to created directories
+        # umask 002
+        
+        ######################################################################### 
+        # Let's clear our screen and print out some ascii art. I use different  #
+        # colors/art on different servers as a quick visual reminder.           #
+        ######################################################################### 
+        clear
         color25=$(printf "\e[38;5;25m")
         reset=$(printf "\e[0m")
-
-        # Let's clear our screen and print out some ascii art. I use different colors/art on different servers as a quick visual reminder.
-        clear
         echo "$color25"
 cat << 'EOF'
 
@@ -69,19 +84,6 @@ EOF
         echo "$reset"
         # Set the window title, otherwise the title often reads as gibberish.
         echo -e "\033]; You're on your local MacBook \007"
-
-        ######################################################################### 
-        # General UNIX/Linux environment configuration                          #
-        ######################################################################### 
-        export EDITOR=vi
-        export MACHTYPE=x86_64
-        export LANG="en_US.UTF-8"
-        export LC_COLLATE=C
-        # get colors on ls in emacs
-        export VISUAL=vi
-
-        # umask line added to allow groups to write to created directories
-        # umask 002
 
 ```
 
