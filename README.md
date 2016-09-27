@@ -152,6 +152,10 @@ Test if your current directory is actively writing anything.
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
+If you find yourself making a lot of `tmp` `temp` or `foo` directories and getting them mixed up, here are a few commands to make a unique directory that you can keep track of.
+
+![Example .bashrc aliases](/images/aliases/mkdir.png)
+
 Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
