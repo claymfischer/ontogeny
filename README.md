@@ -8,7 +8,7 @@ They follow [kent](https://github.com/ucscGenomeBrowser/kent) command convention
 
 ---
 
-Most UNIX software is designed to be (minimimalist)[https://en.wikipedia.org/wiki/Unix_philosophy]. This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
+Most UNIX software is designed to be [minimimalist](https://en.wikipedia.org/wiki/Unix_philosophy). This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
 
 On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
 
