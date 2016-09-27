@@ -103,7 +103,5 @@ set encoding=utf-8
 
 If you log into a server all the time, you'll want to set up your ssh keys so it doesn't prompt you for your password. A typical way to do this:
 
-1. On your laptop, run `$ ssh-keygen` ..
-... Generally, go with the default options. Hit enter at the prompts, leaving them blank. ..
-2. Take the generated contents of `~/.ssh/rsa_id.pub` and paste the line into one line on `~/.ssh/authorized_keys` on the server(s) you want to ssh into.
-... If you run into trouble, be sure to check permissions of `authorized_keys` - it won't work if it's readable by others. Try `$ chmod 600 authorized_keys`.
+1. On your laptop, run `$ ssh-keygen`. Generally, go with the default options. Hit enter at the prompts, leaving them blank. ..
+2. Take the generated contents of `~/.ssh/rsa_id.pub` and paste the line into one line on `~/.ssh/authorized_keys` on the server(s) you want to ssh into. If you run into trouble, be sure to check permissions of `authorized_keys` - it won't work if it's readable by others. Try `$ chmod 600 authorized_keys`.
