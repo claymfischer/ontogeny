@@ -57,7 +57,7 @@ On your Mac, the startup file is `.bash_profile` not `.bashrc`.
         # Let's clear our screen and print out some ascii art. I use different colors/art on different servers as a quick visual reminder.
         clear
         echo "$color25"
-        cat << 'EOF'
+cat << 'EOF'
 
     `-:-.   ,-;"`-:-.   ,-;"`-:-.   ,-;"`-:-.   ,-;"
         `=`,'=/     `=`,'=/     `=`,'=/     `=`,'=/
