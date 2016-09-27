@@ -56,11 +56,11 @@ This takes advantage of a simple `grep` loop to color-code the columns.
 
 Color-codes bases in a gzipped fastq file.
 
-`$ fastq SRR123.fastq.gz
+`$ fastq SRR123.fastq.gz`
 
 ![Example fastq color-coding](/images/fastq/fastq.png)
 
-`$ fastq SRR123.fastq.gz x
+`$ fastq SRR123.fastq.gz x`
 
 ![Example fastq color-coding](/images/fastq/fastq_quality.png)
 
@@ -72,7 +72,7 @@ This is a simple script that generates a color-coded SCP command to upload or do
 
 ![Example transfer](/images/transfer/transfer.png)
 
-`$ transfer file1.txt file2.txt ... file{n}.txt`
+`$ transfer file1.txt file2.txt ... file{n}.txt``
 
 It also takes advantage of filename expansion
 
