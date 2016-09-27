@@ -156,6 +156,17 @@ In bioinformatics we deal with plaintext. This allows you to visually inspect fo
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
+Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias.
+
+![Example .bashrc aliases](/images/aliases/format_plain.png)
+
+![Example .bashrc aliases](/images/aliases/format_formatted.png)
+
+Seeing it aligned can be easier to read than coloring the columns:
+
+![Example .bashrc aliases](/images/aliases/format_colored.png)
+
+
 --- 
 
 ## installation
