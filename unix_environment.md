@@ -11,8 +11,7 @@ Depending on your system and configuration, you may have to deal with `.bashrc`,
 **.bashrc**
 Generally, you will want to set some of the following.
 
-Word of caution: be careful when modifying your `$PATH`. It may be best to edit your `$PATH` in its own file and `source` the file manually to test it. This way, if you mess up the `$PATH`, you can just open another shell and you're fine. If you edited the `$PATH` in your `.bashrc` you'd be in trouble.
-
+Word of caution: be careful when modifying your `$PATH`. This variable is a list of directories for UNIX to look for binaries. It may be best to edit your `$PATH` in its own file and `source` the file manually to test it. This way, if you mess up the `$PATH`, you can just open another shell and you're fine. If you edited the `$PATH` in your `.bashrc` and made a mistake, you'd be in trouble. For instance, setting `$PATH=` at the end of your `.bashrc` would render your command prompt useless.
 
 **.bash_profile**
 
