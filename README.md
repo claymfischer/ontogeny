@@ -152,6 +152,10 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
+In bioinformatics we deal with plaintext. This allows you to visually inspect for multiple spaces or tabs where they shouldn't be.
+
+![Example .bashrc aliases](/images/aliases/cleanUp.png)
+
 --- 
 
 ## installation
