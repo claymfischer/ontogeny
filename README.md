@@ -124,6 +124,8 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 ## Check submission
 
+This is a specific-use case, but the source code may be useful to others.
+
 This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
 
 If an md5sum file is present, it will also validate that there are no collisions.
