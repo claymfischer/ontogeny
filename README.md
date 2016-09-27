@@ -160,6 +160,8 @@ Tab-separated data can be difficult to read if the rows vary in character length
 
 ![Example .bashrc aliases](/images/aliases/format_plain.png)
 
+Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character.
+
 ![Example .bashrc aliases](/images/aliases/format_formatted.png)
 
 Seeing it aligned can be easier to read than coloring the columns:
