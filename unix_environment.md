@@ -64,6 +64,7 @@ On your Mac, the startup file is `.bash_profile` not `.bashrc`.
          y==/        y==/        y==/        y==/
        ,=,-<=`.    ,=,-<=`.    ,=,-<=`.    ,=,-<=`.
     ,-'-'   `-=_,-'-'   `-=_,-'-'   `-=_,-'-'   `-=_
+    
 EOF
         echo "$reset"
         # Set the window title, otherwise the title often reads as gibberish.
