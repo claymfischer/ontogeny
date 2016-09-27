@@ -97,7 +97,7 @@ This will tell you about any file or directory. It has lazy usage, or more verbo
 
 It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it). It also previews the head and foot of a file. 
 
-![Example about](/images/about/about_files.png)
+![Example about](/images/about/about_file.png)
 
 `$ about file.txt`
 
