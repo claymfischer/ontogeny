@@ -134,13 +134,13 @@ If an md5sum file is present, it will also validate that there are no collisions
 
 ## .bashrc aliases
 
-**Check if a file has non-ascii characters**
+Check if a file has non-ascii characters
 
 ![Example .bashrc aliases](/images/aliases/ascii.png)
 
 ![Example .bashrc aliases](/images/aliases/nonascii.png)
 
-**Figure out which column number you need.**
+Figure out which column number you need.
 
 ![Example .bashrc aliases](/images/aliases/whichColumn.png)
 
@@ -148,13 +148,22 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
-**Test if your current directory is actively writing anything.**
+Test if your current directory is actively writing anything.
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
-In bioinformatics we deal with plaintext. This allows you to visually inspect for multiple spaces or tabs where they shouldn't be.
+Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
+
+Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
+Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character. Seeing it aligned can be easier to read than coloring the columns.
+
+![Example .bashrc aliases](/images/aliases/format_plain.png)
+
+![Example .bashrc aliases](/images/aliases/format_formatted.png)
+
+![Example .bashrc aliases](/images/aliases/format_colored.png)
 
 --- 
 
