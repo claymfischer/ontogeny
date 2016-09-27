@@ -9,7 +9,9 @@ There are a number of startup files I edit. The `bash` startup files are loaded 
 Depending on your system and configuration, you may have to deal with `.bashrc`, `.bash_profile`, `.profile` or others - and that's just for bash. If you use a different shell, these don't apply.
 
 **.bashrc**
-Generally, you will want to set some of the following:
+Generally, you will want to set some of the following.
+
+Word of caution: be careful when modifying your `$PATH`. It may be best to edit your `$PATH` in its own file and `source` the file manually to test it. This way, if you mess up the `$PATH`, you can just open another shell and you're fine. If you edited the `$PATH` in your `.bashrc` you'd be in trouble.
 
 
 **.bash_profile**
