@@ -60,6 +60,8 @@ Color-codes bases in a gzipped fastq file.
 
 ![Example fastq color-coding](/images/fastq/fastq.png)
 
+You can also color-code the quality score. Set any third argument.
+
 `$ fastq SRR123.fastq.gz x`
 
 ![Example fastq color-coding](/images/fastq/fastq_quality.png)
@@ -72,7 +74,7 @@ This is a simple script that generates a color-coded SCP command to upload or do
 
 ![Example transfer](/images/transfer/transfer.png)
 
-`$ transfer file1.txt file2.txt ... file{n}.txt``
+`$ transfer file1.txt file2.txt ... file{n}.txt`
 
 It also takes advantage of filename expansion
 
@@ -83,6 +85,8 @@ It also takes advantage of filename expansion
 ## New ls
 
 This lists directories first, then files. It can color-code different types of files.
+
+![Example transfer](/images/new_ls/new_ls.png)
 
 --- 
 
