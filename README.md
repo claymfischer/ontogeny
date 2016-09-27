@@ -93,7 +93,7 @@ This will tell you about any file or directory. It has lazy usage, or more verbo
 
 *This was my first shell script, and really is not a great example of code. However, it's fast and it does what it needs so I've never updated it.*
 
-# About files
+### About files
 
 It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it). It also previews the head and foot of a file. 
 
@@ -102,7 +102,7 @@ It will tell you file size, encoding (ASCII or non-ASCII), when the file was las
 `$ about file.txt`
 
 
-# About directories
+### About directories
 
 Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
 
