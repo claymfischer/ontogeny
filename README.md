@@ -14,6 +14,23 @@ Most UNIX software is designed to be [minimimalist](https://en.wikipedia.org/wik
 
 On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
 
+
+## contribute
+
+This largely hasn't been tested on other systems. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and it does not color things with `echo`, only with `printf`. Portability is important and needs work.
+
+`$ git pull`
+
+`$ vi file.txt`
+
+`$ git add file.txt`
+
+`$ git commit -m "Adding file.txt"`
+
+`$ git diff --stat --cached origin/master`
+
+`$ git push`
+
 ---
 
 # General purpose software
@@ -230,18 +247,13 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 ## installation
 
 First you need to clone. This will create directory called `ontogeny` wherever you run this command:
+
 `$ git clone https://github.com/claymfischer/ontogeny.git`
 
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
 
 Soon, users will be able to simply `make install` from the repository directory instead.
 
-## how to contribute
-
-`$ git pull`
-`$ git add file.txt`
-`$ git commit -m "Adding file.txt"`
-`$ git push`
 
 --- 
 
