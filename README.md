@@ -14,6 +14,8 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 ---
 
+# General purpose software
+
 ## Highlight
 
 Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
@@ -124,16 +126,6 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 --- 
 
-## Check submission
-
-This is a specific-use case, but the source code may be useful to others.
-
-This gives a summary of a relational-alternative, or ra, file. An ra file establishes a record as a set of related tags and values in a blank line-delimited stanza. Indented stanzas inherit parent stanzas, and can overrite parent settings. These are more human-readable than tab-separated files, and less redundant as parent stanzas can convey tags and values shared with the rest of the file.
-
-If an md5sum file is present, it will also validate that there are no collisions.
-
---- 
-
 ## .bashrc aliases
 
 Check if a file has non-ascii characters
@@ -172,6 +164,66 @@ Note that to align this, a character needs to be placed in columns or rows with 
 ![Example .bashrc aliases](/images/aliases/format_colored.png)
 
 --- 
+
+## Change your command prompt
+
+
+![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
+
+This is a silly piece of software that was written to train people in UNIX shell scripting.
+
+It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
+
+
+--- 
+
+# Specific use software
+
+The following software is developed for specific use in data wrangling work. I do keep a repository of it here so we can all collaboratively develop (and the source code may be useful to some), but it is unlikely to find general-purpose use.
+
+A lot of this software is designed to work for:
+
+** ra file, or tag storm **
+
+An ra (relational-alternative) file establishes a record as a set of related tags and values in a blank line-delimited stanza (block of text). Parent stanzas convey tags and values shared with the rest of the file. Indented stanzas inherit parent stanzas, and can override parent settings. 
+
+These are designed to be human-readable, and reduce redundancy of tab-separated files.
+
+** manifest file **
+
+This is a list of files with a unique identifer to link the file with metadata about it. Tab separated columns.
+
+** spreadsheets **
+
+In collaborating with off-site folks who are not familiar with the command-line, it can often be easier to share Google Sheets or Excel Spreadsheets. There is some software to generate input for spreadsheets.
+
+---
+
+## Check submission
+
+This gives a summary of a relational-alternative, or ra, file. 
+
+If an md5sum file is present, it will also validate that there are no collisions and compare it to the md5sum file.
+
+--- 
+
+## Generate spreadsheet input
+
+This takes a tag storm as input, does some calculations and gives a tab-separated output for importing into a tag reconciliation spreadsheet.
+
+---
+
+## Generate a tag storm summary
+
+This gives you a tag-by-tag count of values and totals them for you. Very useful for a high-level look at a tag storm.
+
+---
+
+## Generate a tag summary
+
+This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
+
+---
 
 ## installation
 
