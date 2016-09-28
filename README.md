@@ -14,8 +14,9 @@ Most UNIX software is designed to be [minimimalist](https://en.wikipedia.org/wik
 
 On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
 
+---
 
-## contribute
+## Contribute
 
 This largely hasn't been tested on systems other than CentOS. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and the Mac OS terminal does not color things with `echo`, only with `printf`. 
 
@@ -246,7 +247,7 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 
 ---
 
-## installation
+## Installation
 
 First you need to clone. This will create directory called `ontogeny` wherever you run this command:
 
@@ -255,3 +256,5 @@ First you need to clone. This will create directory called `ontogeny` wherever y
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
 
 Soon, users will be able to simply `make install` from the repository directory instead.
+
+Alternatively, they can `source` the extended `.bashrc` file to run the binaries directly from the git repository.
