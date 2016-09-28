@@ -253,10 +253,10 @@ First you need to clone. This will create directory called `ontogeny` wherever y
 
 `$ git clone https://github.com/claymfischer/ontogeny.git`
 
-Add the following to your .bashrc:
+Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ```bash
 # Ontogeny repository path:
-ONTOGENY_INSTALL_PATH=/cluster/home/clay/biotools
+ONTOGENY_INSTALL_PATH=/path/to/the/repository
 source $ONTOGENY$ONTOGENY_INSTALL_PATH/lib/ontogeny.bashrc
 ```
 
