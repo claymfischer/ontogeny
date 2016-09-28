@@ -253,8 +253,13 @@ First you need to clone. This will create directory called `ontogeny` wherever y
 
 `$ git clone https://github.com/claymfischer/ontogeny.git`
 
-The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
+Add the following to your .bashrc:
+```bash
+# Ontogeny repository path:
+ONTOGENY_INSTALL_PATH=/cluster/home/clay/biotools
+source $ONTOGENY$ONTOGENY_INSTALL_PATH/lib/ontogeny.bashrc
+```
 
-Soon, users will be able to simply `make install` from the repository directory instead.
+~~The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.~~
 
-Alternatively, they can `source` the extended `.bashrc` file to run the binaries directly from the git repository.
+Soon, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
