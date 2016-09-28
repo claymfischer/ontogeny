@@ -183,17 +183,17 @@ The following software is developed for specific use in data wrangling work. I d
 
 A lot of this software is designed to work for:
 
-** ra file, or tag storm **
+**ra file, or tag storm**
 
 An ra (relational-alternative) file establishes a record as a set of related tags and values in a blank line-delimited stanza (block of text). Parent stanzas convey tags and values shared with the rest of the file. Indented stanzas inherit parent stanzas, and can override parent settings. 
 
 These are designed to be human-readable, and reduce redundancy of tab-separated files.
 
-** manifest file **
+**manifest file**
 
 This is a list of files with a unique identifer to link the file with metadata about it. Tab separated columns.
 
-** spreadsheets **
+**spreadsheets**
 
 In collaborating with off-site folks who are not familiar with the command-line, it can often be easier to share Google Sheets or Excel Spreadsheets. There is some software to generate input for spreadsheets.
 
