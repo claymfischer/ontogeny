@@ -229,9 +229,19 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 
 ## installation
 
+First you need to clone. This will create directory called `ontogeny` wherever you run this command:
+`$ git clone https://github.com/claymfischer/ontogeny.git`
+
 The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.
 
 Soon, users will be able to simply `make install` from the repository directory instead.
+
+## how to contribute
+
+`$ git pull`
+`$ git add file.txt`
+`$ git commit -m "Adding file.txt"`
+`$ git push`
 
 --- 
 
