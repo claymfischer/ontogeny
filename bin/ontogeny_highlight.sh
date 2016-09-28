@@ -29,6 +29,8 @@
 #################################################################################
 # Just added stdin feature, needs QA testing
 #
+# Does not check if file exists. If a file doesn't exist, it just returns no match. This is probably graceful enough...
+#
 # If we wanted this to be case-insensitive in our search... or grep -i, which is slow. Apparently converting to all lowercase is faster!
 #if [ "$caseSensitive" = "nocaseglob             off" ]; then
 #	shopt -s nocaseglob; { sleep 3 && shopt -u nocaseglob & };
@@ -82,17 +84,14 @@ echo ""
 #################################################################################
 if [ -t 0 ]; then
 
-
-
-
-#################################################################################
-# If no file is found, display help						#
-#################################################################################
-if [ -z "$1" ]; then
-	clear
-	echo ""
-	echo "$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset"
-	echo "    $bg196 A better™ search® $reset						$color240   version 0.1
+	#################################################################################
+	# If no file is found, display help						#
+	#################################################################################
+	if [ -z "$1" ]; then
+		clear
+		echo ""
+		echo "$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset"
+		echo "    $bg196 A better™ search® $reset						$color240   version 0.1
 							   ~clay/bin/hilite.sh
   ├────────────────────────────────────────────────────────────────────────────┤$reset
     Purpose
@@ -163,18 +162,24 @@ $color240  ├──────────────────────
 "
 	exit 0
 
-fi
-
-	FILE=$1
-	INPUT=$(cat $FILE)
-	INPUTTEXT="cat $FILE"
+	else
+		#########################################################################
+		# Otherwise, a file was set. 						#
+		#########################################################################	
+		FILE=$1
+	#	if [ -a "$1" ]; then
+			INPUT=$(cat $FILE)
+			INPUTTEXT="cat $FILE"
+	#	else
+	#		echo "The file $FILE wasn't found."
+	#		exit 0
+	#	fi
+	fi
 else
 	FILE=stdin
 	INPUT=""
 	INPUTTEXT=""
 fi
-
-
 
 #################################################################################
 # Pipe to less -R automatically if over 75 lines?				#
@@ -198,8 +203,8 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	# shuffle our colors. Just doing $rand from the array would result in the same color being used multiple times
 	#########################################################################
 	# Let's start with very different colors to maintain contrast between matches
-	# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
 	BASECOLORS="117 202 106 196 25 201"
+	# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
 	EXTENDEDCOLORS="240 99 22 210 81 203 105"
 	NEEDEDCOLORS=$((SEARCHTERMNUM-12))
 	if [ "$NUMARGS" -lt "7" ]; then
@@ -264,7 +269,7 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
 		else
-			# Default pattern match
+		# Default pattern match
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e '$f' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e '$f' $RETURNALL "
 		fi
