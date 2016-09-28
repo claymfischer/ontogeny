@@ -86,6 +86,8 @@ It also takes advantage of filename expansion
 
 This lists directories first, then files. It can color-code different types of files.
 
+If you are new to shell scripting, this is a fantastic example to begin modifying.
+
 ![Example transfer](/images/new_ls/new_ls.png)
 
 --- 
