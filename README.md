@@ -249,9 +249,13 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 
 ## Installation
 
+**Clone**
+
 First you need to clone. This will create directory called `ontogeny` wherever you run this command:
 
 `$ git clone https://github.com/claymfischer/ontogeny.git`
+
+**bash startup file**
 
 Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ```bash
@@ -259,7 +263,5 @@ Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ONTOGENY_INSTALL_PATH=/path/to/the/repository
 source $ONTOGENY$ONTOGENY_INSTALL_PATH/lib/ontogeny.bashrc
 ```
-
-~~The optional installer will create a directory and add the shell scripts to it, update your bash startup file extending your $PATH to access the new binaries, and add some useful aliases.~~
 
 Soon, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
