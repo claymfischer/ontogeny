@@ -216,7 +216,7 @@ It's even easier to read than the color-coded `column` program from above:
 
 ![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
 
-This is a silly piece of software that was written to train people in UNIX shell scripting.
+This is a silly piece of software with no practical purpose, written as an exercise when learn bash shell scripting.
 
 It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
 
