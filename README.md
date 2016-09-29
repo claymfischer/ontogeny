@@ -148,7 +148,7 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 --- 
 
-## .bashrc aliases and functionality
+## ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
