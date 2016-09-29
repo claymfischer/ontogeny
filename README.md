@@ -16,34 +16,14 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 ---
 
-* Contribute
-* General purpose software
-⋅⋅* highlight
-⋅⋅* color-code columns
-* ontogeny_toolkit.sh
-* Specific-use software
-⋅⋅⋅this is...
-
-1. First ordered list item
-2. Another item
-⋅⋅*Unordered sub-list. 
-1. Actual numbers don't matter, just that it's a number
-⋅⋅1. Ordered sub-list
-4. And another item.
-
-⋅⋅⋅You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).
-
-⋅⋅⋅To have a line break without a paragraph, you will need to use two trailing spaces.⋅⋅
-⋅⋅⋅Note that this line is separate, but within the same paragraph.⋅⋅
-⋅⋅⋅(This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)
-
-* Unordered list can use asterisks
-- Or minuses
-+ Or pluses
-
+1. <a href="#Contribute">Contribute</a>
+2. General purpose software
+2. ontogeny_toolkit.sh
+3. Specific-use software
+4. Installation
 
 ---
-
+<a name="Contribute"></a>
 # Contribute
 
 This largely hasn't been tested on systems other than CentOS. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and the Mac OS terminal does not color things with `echo`, only with `printf`. 
