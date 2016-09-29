@@ -17,10 +17,10 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 ---
 
 1. <a href="#Contribute">Contribute</a>
-2. General purpose software
-2. ontogeny_toolkit.sh
-3. Specific-use software
-4. Installation
+2. <a href="#General">General purpose software</a>
+2. <a href="#toolkit">ontogeny_toolkit.sh</a>
+3. <a href="#Specific">Specific-use software</a>
+4. <a href="#Installation">Installation</a>
 
 ---
 <a name="Contribute"></a>
@@ -43,7 +43,7 @@ Portability is important and needs work.
 `$ git push`
 
 ---
-
+<a name="General"></a>
 # General purpose software
 
 ## Highlight
@@ -155,7 +155,7 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 ![Example contents](/images/contents/contents.png)
 
 --- 
-
+<a name="toolkit"></a>
 # ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
@@ -222,7 +222,7 @@ It allows you to change your command prompt to any character. It can give you a 
 
 
 --- 
-
+<a name="Specific"></a>
 # Specific use software
 
 The following software is developed for specific use in data wrangling work. I do keep a repository of it here so we can all collaboratively develop (and the source code may be useful to some), but it is unlikely to find general-purpose use.
@@ -270,7 +270,7 @@ This gives you a tag-by-tag count of values and totals them for you. Very useful
 This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
 
 ---
-
+<a name="Installation"></a>
 # Installation
 
 **Clone**
