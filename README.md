@@ -277,7 +277,7 @@ Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ```bash
 # Ontogeny repository path:
 ONTOGENY_INSTALL_PATH=/path/to/the/repository
-source $ONTOGENY$ONTOGENY_INSTALL_PATH/lib/ontogeny.bashrc
+source $ONTOGENY$ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh
 ```
 
 Soon, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
