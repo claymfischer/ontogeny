@@ -1,4 +1,4 @@
-# ontogeny tools
+# about the ontogeny toolkit
 
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
 
@@ -18,7 +18,7 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 1. <a href="#Contribute">Contribute</a>
 2. <a href="#General">General purpose software</a>
-2. <a href="#toolkit">ontogeny_toolkit.sh</a>
+2. <a href="#toolkit">ontogeny_toolkit.sh (extensions to you bash startup file)</a>
 3. <a href="#Specific">Specific-use software</a>
 4. <a href="#Installation">Installation</a>
 
