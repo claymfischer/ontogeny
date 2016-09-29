@@ -18,7 +18,7 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 1. <a href="#Contribute">Contribute</a>
 2. <a href="#General">General purpose software</a>
-2. <a href="#toolkit">ontogeny_toolkit.sh (extensions to you bash startup file)</a>
+2. <a href="#toolkit">ontogeny_toolkit.sh (extensions to your bash startup file)</a>
 3. <a href="#Specific">Specific-use software</a>
 4. <a href="#Installation">Installation</a>
 
