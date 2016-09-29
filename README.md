@@ -4,7 +4,7 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
-They are bash shell scripts I have put together while working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
+They are bash shell scripts put together as I learn, working with biological data on UNIX/Linux servers. I try and maintain cross-platform compatibility where possible. 
 
 They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
 
