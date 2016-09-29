@@ -55,7 +55,7 @@ This software is not specific to internal work projects, and much of it can be e
 5. <a href="#newls">New ls</a>
 6. <a href="#about">About</a>
 7. <a href="#contents">List contents</a>
-7. <a href="#prompt">List contents</a>
+7. <a href="#prompt">Change your command prompt for no good reason</a>
 
 <a name="highlight"></a>
 ## Highlight
@@ -157,16 +157,6 @@ Gives you the real and apparent size of directory (eg. if transferring the conte
 ![Example about](/images/about/about_directory.png)
 
 --- 
-<a name="prompt"></a>
-## Change your command prompt
-
-![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
-
-This is a silly piece of software with no practical purpose, it was written as an exercise when learn bash shell scripting.
-
-It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
-
---- 
 
 <a name="contents"></a>
 ## List contents
@@ -176,20 +166,33 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 ![Example contents](/images/contents/contents.png)
 
 --- 
+
+<a name="prompt"></a>
+## Change your command prompt
+
+![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
+
+This is a silly piece of software with no practical purpose, it was written as an exercise challenge when learn bash shell scripting.
+
+It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
+
+--- 
 <a name="toolkit"></a>
 # ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
-1. Screen sessions
-2. grep help
-3. Highlight non-ascii characters
-4. List header and example row with column number
-5. Test if current directory is actively writing
-6. Make better tmp directories
-7. Visually locate multiple spaces/tabs
-8. Align your columns so they're easier to read
+1. <a href="#screen">Screen sessions</a>
+2. <a href="#grep">grep help</a>
+3. <a href="#nonascii">Highlight non-ascii characters</a>
+4. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
+5. <a href="#writing">Test if current directory is actively writing</a>
+6. <a href="#tmp">Make better tmp directories</a>
+7. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
+8. <a href="#format">Align your columns so they're easier to read</a>
 
+---
+<a name="screen"></a>
 Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
 
 ![Example .bashrc aliases](/images/aliases/screen.png)
@@ -198,16 +201,19 @@ You can also invoke help either in the screen session or on the command line for
 
 ![Example .bashrc aliases](/images/aliases/screenHelp.png)
 
+<a name="grep"></a>
 Since `grep` is such an important tool for bioinformaticians to learn, there's also a `howtogrep` refresher.
 
 ![Example .bashrc aliases](/images/aliases/howtogrep.png)
 
+<a name="nonascii"></a>
 Check if a file has non-ascii characters
 
 ![Example .bashrc aliases](/images/aliases/ascii.png)
 
 ![Example .bashrc aliases](/images/aliases/nonascii.png)
 
+<a name="whichcolumns"></a>
 Figure out which column number you need.
 
 ![Example .bashrc aliases](/images/aliases/whichColumn.png)
@@ -216,18 +222,22 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
+<a name="writing"></a>
 Test if your current directory is actively writing anything.
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
+<a name="tmp"></a>
 If you find yourself making a lot of `tmp` `temp` or `foo` directories and getting them mixed up, here are a few commands to make a unique directory that you can keep track of.
 
 ![Example .bashrc aliases](/images/aliases/mkdir.png)
 
+<a name="cleanUp"></a>
 Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
+<a name="format"></a>
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
 Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character. Seeing it aligned can be easier to read than coloring the columns.
 
