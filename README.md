@@ -160,6 +160,10 @@ You can also invoke help either in the screen session or on the command line for
 
 ![Example .bashrc aliases](/images/aliases/screenHelp.png)
 
+Since `grep` is such an important tool for bioinformaticians to learn, there's also a `howtogrep` refresher.
+
+![Example .bashrc aliases](/images/aliases/howtogrep.png)
+
 Check if a file has non-ascii characters
 
 ![Example .bashrc aliases](/images/aliases/ascii.png)
