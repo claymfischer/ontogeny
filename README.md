@@ -16,7 +16,17 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 ---
 
-## Contribute
+* Contribute
+* General purpose software
+⋅⋅* highlight
+⋅⋅* color-code columns
+* ontogeny_toolkit.sh
+* Specific-use software
+⋅⋅⋅this is...
+
+---
+
+# Contribute
 
 This largely hasn't been tested on systems other than CentOS. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and the Mac OS terminal does not color things with `echo`, only with `printf`. 
 
@@ -263,7 +273,7 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 
 ---
 
-## Installation
+# Installation
 
 **Clone**
 
