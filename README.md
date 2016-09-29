@@ -271,6 +271,11 @@ This is a list of files with a unique identifer to link the file with metadata a
 
 In collaborating with off-site folks who are not familiar with the command-line, it can often be easier to share Google Sheets or Excel Spreadsheets. There is some software to generate input for spreadsheets.
 
+1. Check submission
+2. Generate spreadsheet input
+3. Generate a tag storm summary
+4. Generate a tag summary
+
 ---
 
 ## Check submission
