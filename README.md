@@ -321,4 +321,6 @@ ONTOGENY_INSTALL_PATH=/path/to/the/repository
 source $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh
 ```
 
-Soon, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
+**make**
+
+Next, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
