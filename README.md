@@ -148,7 +148,7 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 --- 
 
-## ontogeny_toolkit.sh - extension to your .bashrc
+# ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
@@ -196,6 +196,8 @@ Note that to align this, a character needs to be placed in columns or rows with 
 ![Example .bashrc aliases](/images/aliases/format_plain.png)
 
 ![Example .bashrc aliases](/images/aliases/format_formatted.png)
+
+It's even easier to read than the color-coded `column` program from above:
 
 ![Example .bashrc aliases](/images/aliases/format_colored.png)
 
