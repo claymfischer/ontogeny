@@ -148,7 +148,17 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 --- 
 
-## .bashrc aliases
+## .bashrc aliases and functionality
+
+The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
+
+Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
+
+![Example .bashrc aliases](/images/aliases/screen.png)
+
+You can also invoke help either in the screen session or on the command line for a quick refresher, as well as to see a list of screens screens.
+
+![Example .bashrc aliases](/images/aliases/screenHelp.png)
 
 Check if a file has non-ascii characters
 
