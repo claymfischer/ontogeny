@@ -46,6 +46,17 @@ Portability is important and needs work.
 <a name="General"></a>
 # General purpose software
 
+This software is not specific to internal work projects, and much of it can be employed for any general command-line use. 
+
+1. <a href="#highlight">Highlight</a>
+2. <a href="#columns">Color-code columns</a>
+3. <a href="#sequence">Color-code sequence data</a>
+4. <a href="#transfer">Transfer files</a>
+5. <a href="#newls">New ls</a>
+6. <a href="#about">About</a>
+7. <a href="#contents">List contents</a>
+7. <a href="#prompt">List contents</a>
+<a name="highlight"></a>
 ## Highlight
 
 Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
@@ -67,7 +78,7 @@ Where `file` can take advantage of filename expansion, be multiple files, or jus
 > Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter withinin a single file by also including the empty file `/dev/null`, for example: `$ highlight "/dev/null file.txt" pattern1 pattern2`
 
 ---
-
+<a name="columns"></a>
 ## Color-code columnar data
 
 In bioinformatics we deal with the lowest common denominator format for data, which is generally plain text in tab-separated columns. These tab-separated columns are computer-readable moreso than human-readable, as the columns do not line up. It can be difficult to tell which column you are looking at when you have a screen of line-wrapped text.
@@ -83,7 +94,7 @@ This takes advantage of a simple `grep` loop to color-code the columns.
 ![Example column coloring](/images/columns/columns_example2_colored.png)
 
 --- 
-
+<a name="sequence"></a>
 ## Color-code sequence and quality score data
 
 Color-codes bases in a gzipped fastq file.
@@ -99,7 +110,7 @@ You can also color-code the quality score. Set any third argument.
 ![Example fastq color-coding](/images/fastq/fastq_quality.png)
 
 --- 
-
+<a name="transfer"></a>
 ## Quickly transfer files to-and-from your server
 
 This is a simple script that generates a color-coded SCP command to upload or download files.
@@ -113,7 +124,7 @@ It also takes advantage of filename expansion
 ` $ transfer *.txt`
 
 --- 
-
+<a name="newls"></a>
 ## New ls
 
 This lists directories first, then files. It can color-code different types of files.
@@ -123,8 +134,7 @@ If you are new to shell scripting, this is a fantastic example to begin modifyin
 ![Example transfer](/images/new_ls/new_ls.png)
 
 --- 
-
-
+<a name="about"></a>
 ## About
 
 This will tell you about any file or directory. It has lazy usage, or more verbose usage that allows detailed previews of the file. 
@@ -139,7 +149,6 @@ It will tell you file size, encoding (ASCII or non-ASCII), when the file was las
 
 `$ about file.txt`
 
-
 ### About directories
 
 Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
@@ -147,7 +156,18 @@ Gives you the real and apparent size of directory (eg. if transferring the conte
 ![Example about](/images/about/about_directory.png)
 
 --- 
+<a name="prompt"></a>
+## Change your command prompt
 
+![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
+
+This is a silly piece of software with no practical purpose, it was written as an exercise when learn bash shell scripting.
+
+It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
+
+--- 
+
+<a name="contents"></a>
 ## List contents
 
 This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
@@ -159,6 +179,15 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 # ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
+
+1. Screen sessions
+2. grep help
+3. Highlight non-ascii characters
+4. List header and example row with column number
+5. Test if current directory is actively writing
+6. Make better tmp directories
+7. Visually locate multiple spaces/tabs
+8. Align your columns so they're easier to read
 
 Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
 
@@ -208,18 +237,6 @@ Note that to align this, a character needs to be placed in columns or rows with 
 It's even easier to read than the color-coded `column` program from above:
 
 ![Example .bashrc aliases](/images/aliases/format_colored.png)
-
---- 
-
-## Change your command prompt
-
-
-![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
-
-This is a silly piece of software with no practical purpose, written as an exercise when learn bash shell scripting.
-
-It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
-
 
 --- 
 <a name="Specific"></a>
