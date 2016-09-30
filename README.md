@@ -285,7 +285,7 @@ This gives a summary of a relational-alternative, or ra, file.
 
 If an md5sum file is present, it will also validate that there are no collisions and compare it to the md5sum file.
 
-![checkSubmission](/images/checkSubmission/checkSubmission.png)
+![checkSubmission](/images/checkSubmission/checkSubmission_fail.png)
 
 --- 
 
