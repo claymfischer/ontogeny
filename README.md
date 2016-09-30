@@ -126,13 +126,14 @@ It also takes advantage of filename expansion
 
 --- 
 <a name="newls"></a>
-## New ls
+## New ls and new list
 
 This lists directories first, then files. It can color-code different types of files.
 
-If you are new to shell scripting, this is a fantastic example to begin modifying.
+If you are new to shell scripting, these are a fantastic example to begin modifying.
 
 ![Example transfer](/images/new_ls/new_ls.png)
+![Example transfer](/images/new_ls/new_list.png)
 
 --- 
 <a name="about"></a>
