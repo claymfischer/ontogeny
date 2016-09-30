@@ -131,7 +131,7 @@ It also takes advantage of filename expansion
 
 This lists directories first, then files. It can color-code different types of files.
 
-If you are new to shell scripting, these are a fantastic example to begin modifying.
+If you are new to shell scripting, these are fantastic examples to begin modifying. They were written as tutorials for how to write shell scripts. They are similar, except `list` will also do a line count for text files.
 
 ![Example transfer](/images/new_ls/new_ls.png)
 ![Example transfer](/images/new_ls/new_list.png)
