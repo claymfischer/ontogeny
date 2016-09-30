@@ -242,5 +242,12 @@ EOF
 		# ansi escape sequence color: \e[38;5;240m (240 can be 0-255)
 		# ansi escape sequence reset: \e[0m 
 		# to make sure the CLI knows the size, escape with \[ \] or it will be wonky and broken
-		export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
+		WHICHSERVER=$(uname -n)
+		if [ "$WHICHSERVER" == "hgwdev" ]; then
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
+		else
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡ \[\e[0m\] '
+		fi
+
+
 
