@@ -4,7 +4,7 @@ Ontogeny tools are designed for biologists with no background in bioinformatics.
 
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
-They are bash shell scripts put together as I learn, working with biological data on UNIX/Linux servers (data wrangling). I try and maintain cross-platform compatibility where possible. 
+They are bash shell scripts put together while I learn how to work with biological data on UNIX/Linux servers (data wrangling). I try and maintain cross-platform compatibility where possible. 
 
 They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
 
@@ -174,7 +174,7 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 ![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
 
-This is a silly piece of software with no practical purpose, it was written as an exercise challenge when learn bash shell scripting.
+This is a silly piece of software with no practical purpose, it was written as an exercise challenge when learning bash shell scripting.
 
 It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
 
