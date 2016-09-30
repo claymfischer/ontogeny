@@ -309,7 +309,7 @@ This gives you a tag-by-tag count of values and totals them for you. Very useful
 
 This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
 
-![tagSummary](/images/tagSummary/tagStormSummary.png)
+![tagSummary](/images/tagSummary/tagSummary.png)
 
 ---
 
@@ -318,7 +318,6 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 ![colors](/images/palette_fg.png)
 
 ![colors](/images/palette_bg.png)
-
 
 ![colors](/images/gradients.png)
 
