@@ -1,4 +1,4 @@
-# about the ontogeny toolkit
+# About the ontogeny toolkit
 
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
 
@@ -20,7 +20,8 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 2. <a href="#General">General purpose software</a>
 2. <a href="#toolkit">ontogeny_toolkit.sh (extensions to your bash startup file)</a>
 3. <a href="#Specific">Specific-use software</a>
-4. <a href="#Installation">Installation</a>
+4. <a href="#Colors">Palette library</a>
+5. <a href="#Installation">Installation</a>
 
 ---
 <a name="Contribute"></a>
@@ -312,8 +313,8 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 ![tagSummary](/images/tagSummary/tagSummary.png)
 
 ---
-
-# Colors
+<a name="Colors"></a>
+# Palette library
 
 If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
 
