@@ -315,6 +315,8 @@ This gives a summary of a tag from a tag storm, providing counts and showing all
 
 # Colors
 
+If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
+
 ![colors](/images/palette_fg.png)
 
 ![colors](/images/palette_bg.png)
