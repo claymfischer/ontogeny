@@ -285,11 +285,15 @@ This gives a summary of a relational-alternative, or ra, file.
 
 If an md5sum file is present, it will also validate that there are no collisions and compare it to the md5sum file.
 
+![checkSubmission](/images/checkSubmission/checkSubmission.png)
+
 --- 
 
 ## Generate spreadsheet input
 
 This takes a tag storm as input, does some calculations and gives a tab-separated output for importing into a tag reconciliation spreadsheet.
+
+![generate spreadsheet input](/images/spreadsheetInput/spreadsheetInput.png)
 
 ---
 
@@ -297,11 +301,27 @@ This takes a tag storm as input, does some calculations and gives a tab-separate
 
 This gives you a tag-by-tag count of values and totals them for you. Very useful for a high-level look at a tag storm.
 
+![tagStormSummary](/images/tagStormSummary/tagStormSummary.png)
+
 ---
 
 ## Generate a tag summary
 
 This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
+
+![tagSummary](/images/tagSummary/tagSummary.png)
+
+---
+
+# Colors
+
+If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
+
+![colors](/images/palette_fg.png)
+
+![colors](/images/palette_bg.png)
+
+![colors](/images/gradients.png)
 
 ---
 <a name="Installation"></a>
