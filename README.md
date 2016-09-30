@@ -28,7 +28,7 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 This largely hasn't been tested on systems other than CentOS. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and the Mac OS terminal does not color things with `echo`, only with `printf`. 
 
-Portability is important and needs work.
+Portability is important and needs work. Ensuring consistent usage statements (and -h and --help flags) also needs work.
 
 `$ git pull`
 
