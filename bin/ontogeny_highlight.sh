@@ -91,9 +91,8 @@ if [ -t 0 ]; then
 		clear
 		echo ""
 		echo "$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset"
-		echo "    $bg196 A better™ search® $reset						$color240   version 0.1
-							   ~clay/bin/hilite.sh
-  ├────────────────────────────────────────────────────────────────────────────┤$reset
+		echo "    $bg196 A better™ search® $reset				$color240      github.com/claymfischer/
+   ────────────────────────────────────────────────────────────────────────────$reset
     Purpose
 
 	A more efficent method of searching. It will highlight your patterns
@@ -103,7 +102,8 @@ if [ -t 0 ]; then
 
 	It can also be used to filter down to only the lines containing the patterns.
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset"
-	printf "    Usage: \n\n\t\t$color240$ highlight ${color25}file.txt$color117 pattern1 pattern2 ... pattern{n}$reset\n" | sed 's/^\t//g'
+	printf "    Usage: \n\n\t$color240$ highlight ${color25}file.txt$color117 pattern1 pattern2 ... pattern{n}$reset\n\n"
+	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}stdin$color117 pattern1 pattern2 ... pattern{n}$reset\n"
 	echo "
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset
     Patterns with special meaning
@@ -126,10 +126,9 @@ $color240  ├──────────────────────
 	If there is overlap of patterns, put the longer one first or they won't both highlight.
 	$color240$ highlight file.txt another ther$reset		${bg25}ano${bg106}ther$reset
 
-	Searching at the beginning of the line currently doesn't work in order to show
-	the filename and line number.
+	Searching at the beginning of the line is not currently implemented: a choice to
+	display the line number (and filename if multiple files) was made, instead.
 
-	Right now this doesn't accept stdin. This would be quick to implement, though.
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     Protips
 	
@@ -155,8 +154,6 @@ $color240  ├──────────────────────
 	Extensive regex support! For example, try these types of patterns:
 	
 	$bg106 ^[[:blank:]]*GEO $reset $bg25 fastq.gz$ $reset $bg200 file_[[:digit:]]* $reset $bg202 ^[[:blank:]]$ $reset $bg117 $'\$' $reset
-
-	Use the asterisk if it is needed for your regex, otherwise don't.
 
  $color240 └────────────────────────────────────────────────────────────────────────────┘$reset
 "
