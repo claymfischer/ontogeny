@@ -27,6 +27,8 @@
 #################################################################################
 # Limitations
 #################################################################################
+# I'd like to add a -f patterns.txt ability
+#
 # Just added stdin feature, needs QA testing
 #
 # Does not check if file exists. If a file doesn't exist, it just returns no match. This is probably graceful enough...

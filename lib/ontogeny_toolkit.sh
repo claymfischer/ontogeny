@@ -126,7 +126,7 @@
 		alias about="$ONTOGENY_INSTALL_PATH/bin/ontogeny_about.sh"
 		alias list="$ONTOGENY_INSTALL_PATH/bin/ontogeny_list.sh"
 		alias newls="$ONTOGENY_INSTALL_PATH/bin/ontogeny_newLs.sh"
-		alias contents="clear; printf "\n\t$color240"; pwd; printf "$reset"; $ONTOGENY_INSTALL_PATH/bin/ontogeny_contents.sh;"
+		alias contents="clear; printf \"\n\t$color240\"; pwd; printf \"$reset\"; $ONTOGENY_INSTALL_PATH/bin/ontogeny_contents.sh;"
 
 		#########################################################################
 		# Tag Storms								#
