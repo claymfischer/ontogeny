@@ -61,7 +61,7 @@ This software is not specific to internal work projects, and much of it can be e
 <a name="highlight"></a>
 ## Highlight
 
-Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [usage](https://github.com/claymfischer/ontogeny/blob/master/images/highlight/highlight_usage.png?raw=true).
+Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [documentation and usage](https://github.com/claymfischer/ontogeny/blob/master/docs_highlight.md).
 
 
 `$ highlight file.txt pattern1 pattern2 ... pattern{n}`
