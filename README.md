@@ -49,7 +49,7 @@ Portability is important and needs work. Ensuring consistent usage statements (a
 
 This software is not specific to internal work projects, and much of it can be employed for any general command-line use. 
 
-1. <a href="#highlight">Highlight</a>
+1.  [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh) <a href="#highlight">Highlight</a>
 2. <a href="#columns">Color-code columns</a>
 3. <a href="#sequence">Color-code sequence data</a>
 4. <a href="#transfer">Transfer files</a>
@@ -59,8 +59,9 @@ This software is not specific to internal work projects, and much of it can be e
 7. <a href="#prompt">Change your command prompt for no good reason</a>
 
 <a name="highlight"></a>
-## Highlight [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh)
-
+## Highlight
+ [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh)
+ 
 Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [documentation and usage](https://github.com/claymfischer/ontogeny/blob/master/docs_highlight.md).
 
 
