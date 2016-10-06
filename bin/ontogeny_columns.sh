@@ -23,22 +23,74 @@
 # 	Seems to have trouble if columns don't have content in every cell... perhaps pipe through a simple sed 's/\t\t/\t\.\t/g' or more elegant solution
 #	Needs expanded usage statement
 #	Currently uses tab as delimiter, could easily add a -d flag for user override.
+#	If the window is big, sometimes it won't wrap? tput cols = 185... new lines are added, just empt
+
 
 #################################################################################
 # Config									#
 #################################################################################
 color25=$(echo -en "\e[38;5;25m"); 
+color117=$(echo -en "\e[38;5;117m"); 
+color199=$(echo -en "\e[38;5;199m"); 
 color202=$(echo -en "\e[38;5;202m"); 
 color240=$(echo -en "\e[38;5;240m"); 
 bg25=$(echo -en "\e[48;5;25m"); 
+bg107=$(echo -en "\e[48;5;107m"); 
 bg196=$(echo -en "\e[48;5;196m"); 
+bg200=$(echo -en "\e[48;5;199m"); 
 reset=$(echo -en "\033[0m")
 
+	FILE=$1
+#################################################################################
+# Usage statement								#
+#################################################################################
+if [ -z "$FILE" ]; then
+	clear
+	echo "
+
+$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset
+    $bg200 Color-code columnar data $reset                   $color240     github.com/claymfischer/
+   ────────────────────────────────────────────────────────────────────────────$reset
+    PURPOSE
+
+	Colors tab-separated (columnar) text, making it easier to read (example 
+	below this usage). 
+
+$color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
+    USAGE
+
+$color240	$ ${color25}columns$color117 file.txt
+
+$color240	$ cat$color117 file.txt ${color240}| ${color25}columns
+
+$color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
+    LIMITATIONS
+
+	Currently hardcoded to use tab as delimiter. Easy to edit:$color240 \\\$'\(${color199}\t${color240}[^${color199}\t${color240}]*\)\{\$COL\}\\\$'$reset
+
+	Assumes equal number of tabs in each row. Wonky if not.
+
+$color240 └────────────────────────────────────────────────────────────────────────────┘$reset
+
+
+[38;5;240m
+First field goes here [1]	Another field, but this one is different! [2]	shortField [3]	Still, it knows how to remain tab-separated... [4]	[0m
+
+[00;38;5;25m[KFirst field goes here[00;38;5;117m[K	Another field, but this one is different![00;38;5;106m[K	shortField[00;38;5;202m[K	Still, it knows how to remain tab-separated...[m[K[m[K[m[K[m[K
+[00;38;5;25m[K123[00;38;5;117m[K	Roses are red,[00;38;5;106m[K	[00;38;5;202m[K	It doesn't matter how wide a row in a column is[m[K[m[K[m[K[m[K
+[00;38;5;25m[K124[00;38;5;117m[K	Violets are blue,[00;38;5;106m[K	[00;38;5;202m[K	It can still figure it out![m[K[m[K[m[K[m[K
+[00;38;5;25m[K125[00;38;5;117m[K	If you were to cat this file[00;38;5;106m[K	[00;38;5;202m[K	Even when a row or column is empty.[m[K[m[K[m[K[m[K
+[00;38;5;25m[K126[00;38;5;117m[K	I would have..[00;38;5;106m[K	[00;38;5;202m[K	[m[K[m[K[m[K[m[K
+[00;38;5;25m[K127[00;38;5;117m[K	no clue![00;38;5;106m[K	Empty rows are no problem for us![00;38;5;196m[K	[m[K[m[K[m[K[m[K [0m
+
+
+"
+	exit 0
+fi
 #################################################################################
 # Handle input from file vs. stdin (this isn't super reliable)			#
 #################################################################################
 if [ -t 0 ]; then
-	FILE=$1
 	if [ -a "$FILE" ]; then
 		printf ""
 	else
@@ -78,23 +130,6 @@ else
 	FILE=stdin
 fi
 
-#################################################################################
-# Usage statement								#
-#################################################################################
-if [ -z "$FILE" ]; then
-	echo "
-    PURPOSE: 
-
-	Colors tab-separated (columnar) text, making it easier to read.
-
-    USAGE:
-
-	$ columns file.txt
-
-	$ cat file.txt | columns
-"
-	exit 0
-fi
 
 if [ "$FILE" != "stdin" ]; then
 	COLS=$(awk -F'\t' '{print NF}' $FILE | sort -nu | tail -n 1) # in case there are varying column counts, let's grab the top
@@ -144,30 +179,35 @@ fi
 	# Set up our command loop						#
 	#########################################################################
 	color=${array[i]} 
+
 	# This is here in case we want the first column colored
 	# COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	# COMMAND="cat $FILE | $COMMAND sed 's/^//g'"
+
 	COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 
 	#########################################################################
 	# Format and execute							#
 	#########################################################################
-#	if [ "$COLS" == "$MINCOLS" ]; then
-		# Print out column numbers with header, just in case someone cares...
-		echo "$color240"
-		cat $FILE | awk -F'\t' ' { for (i=1; i <=NF; ++i) printf "%s [" i "]\t", $i; exit }'
-		echo "$reset"
-		# Execute the simple grep loop from above
-		echo 
-		eval $COMMAND
+	if [ "$COLS" != "$MINCOLS" ]; then
 		echo
-		echo $reset
-#	else
-#		echo 
-#		echo "$bg196 Error with file $reset"
-#		echo
-#		echo "The file $FILE does not appear to have a consistent number of columns in each row." 
-#		echo "The max number of columns we found is $COLS and the minimum number of columns is $MINCOLS."
-#		echo
-#	fi
+		echo "$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset"
+		echo "    $bg196 Error with file $reset"
+		echo "$color240   ────────────────────────────────────────────────────────────────────────────$reset"
+		echo "    The file $FILE does not appear to have a consistent number of columns." 
+		echo "    The max number of columns we found is $COLS and the minimum number of columns is $MINCOLS."
+		echo "    Resulting output may be wonky."
+		echo "$color240  └────────────────────────────────────────────────────────────────────────────┘$reset"
+		echo
+	fi
+	# Print out column numbers with header, just in case someone cares...
+	echo "$color240"
+	cat $FILE | awk -F'\t' ' { for (i=1; i <=NF; ++i) printf "%s [" i "]\t", $i; exit }'
+	echo "$reset"
+	# Execute the simple grep loop from above
+	echo 
+	eval $COMMAND
+	echo
+	echo $reset
+
 
