@@ -27,7 +27,8 @@
 
 
 # To do
-# 	The curated colors appear on teh right side of the column. Make them appear first.
+# 	Maybe color in the column numbers?
+#	Could also alternate foreground/bg coloring... would need to change definition of grep loop to not include preceding tag. 
 #	Fix stdin. It simply needs to know the number of columns to assign colors.
 
 #################################################################################
