@@ -289,27 +289,23 @@ EOF
 
 	if [ -n "$4" ] ; then
 		echo "$line1"
-		echo ""
-		# Could check for ascii either way...
-		# this would prevent line-wrapping which LOOKS nice, but isn't useful
-		# tput rmam; { sleep 3 && tput smam & };
+		echo 
 		echo "	${bg107} Non-ASCII $reset"
 		export GREP_COLOR='00;48;5;107'
 		COUNTER=82;
 		separator=$(until [  $COUNTER -lt 10 ]; do printf "━"; let COUNTER-=1 ; done;)
 		LC_CTYPE=C grep --color=always -n -P '[\x80-\xFF]' $FILE | sed 's/:/\t/g' | while read line; do printf "\n$color107━━━\t$separator$reset\n";  echo "$line" | fmt -w 80 | sed -e '1s/^/ /' -e '2,$s/^/\t/'; done  | sed "s/^/\t/" 
-	#	LC_CTYPE=C grep --color=always -n -P '[\x80-\xFF]' $FILE | sed 's/:/\t/g' | while read line; do printf "\n"; echo "$line" | fmt -w 150 | sed -e '1s/^/ /' -e '2,$s/^/\t/'; done  | sed "s/^/\t/" 
-		echo ""
+		echo
 		echo "$line1m"
 		export GREP_COLOR='00;48;5;25'
-		echo ""
+		echo
 		echo "	${bg25} Non-ASCII [trimmed] $reset"
-		echo ""
+		echo
 		echo "	${color25}Trimmed down to only show regions immediately flanking non-ASCII$reset"
-		echo ""
+		echo
 		LC_CTYPE=C grep -n -P -o ".{0,40}[\x80-\xFF].{0,40}" $FILE | sed 's/:/\t/g' | sed "s/^/\t/" | LC_CTYPE=C grep --color=always -P '[\x80-\xFF]'
 		echo "$reset"
-		echo ""
+		echo
 		echo "$line1b"
 	fi
 	echo ""
@@ -330,9 +326,9 @@ EOF
 			
 			# Okay, we probably have an md5sum file
 			echo "$line1"
-			echo ""
+			echo
 			echo "	Here's an md5sum file we found:$color25 $MD5SUMFILE$reset"
-			echo ""
+			echo
 
 			# Now check for md5 collisons
 			MD5SUMCOLUMNUNIQ=$(echo "$MD5SUMCOLUMN" | sort | uniq | wc -l)
@@ -373,8 +369,8 @@ EOF
 				echo "$color240	Appears to be a valid md5sum file for $FILECOLUMNUNIQ files. The manifest ($FILE2) contains $NUMMANIFILES files.$reset"
 			fi
 
-			echo ""
-			echo ""
+			echo
+			echo
 			echo "$line1b"
 		else
 			echo "	Found what seemed to be an md5sum file ($color25$MD5SUMFILE$reset) but it doesn't appear valid. The first column is not consistently 32 characters."
