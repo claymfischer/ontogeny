@@ -346,6 +346,7 @@ Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ONTOGENY_INSTALL_PATH=/path/to/the/repository
 source $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh
 ```
+Protip: put this at the *top* of your `.bashrc` file. This way it won't override your own settings of the same variables. For instance, if you have a `PS1` set in your .bashrc, it won't get overridden if this is sourced at the top.
 
 **make**
 
