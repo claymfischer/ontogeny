@@ -6,7 +6,7 @@ The name *ontogeny* refers to the development of an individual from embryo to ma
 
 They are bash shell scripts cobbled together while learning how to work with biological data on UNIX/Linux servers (data wrangling).
 
-They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
+They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the `-h` or `--help` flags.
 
 ---
 
