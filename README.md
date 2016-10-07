@@ -338,7 +338,7 @@ First you need to clone. This will create directory called `ontogeny` wherever y
 
 `$ git clone https://github.com/claymfischer/ontogeny.git`
 
-If you want to learn more about `git` and why it is useful when dealing with biological data, I highly recommend the book [Bioinformatics Data Skills](http://proquest.safaribooksonline.com/book/bioinformatics/9781449367480). It has a fantastic chapter on git and what you need to know, and explains it in a no-nonsense manner, assuming you have no background in bioinformatics. The entire book is an amazing resource well worth every penny.
+If you want to learn more about `git` and why it is useful when dealing with biological data, I highly recommend the book [Bioinformatics Data Skills](http://proquest.safaribooksonline.com/book/bioinformatics/9781449367480). It has a fantastic chapter on `git` and what you need to know, and explains it in a no-nonsense manner, assuming you have no background in bioinformatics. The entire book is an amazing resource well worth every penny.
 
 **bash startup file**
 
