@@ -26,6 +26,10 @@
 #	If the window is big, sometimes it won't wrap? tput cols = 185... new lines are added, just empt
 
 
+# To do
+# 	The curated colors appear on teh right side of the column. Make them appear first.
+#	Fix stdin. It simply needs to know the number of columns to assign colors.
+
 #################################################################################
 # Config									#
 #################################################################################
@@ -134,6 +138,12 @@ fi
 if [ "$FILE" != "stdin" ]; then
 	COLS=$(awk -F'\t' '{print NF}' $FILE | sort -nu | tail -n 1) # in case there are varying column counts, let's grab the top
 	MINCOLS=$(awk -F'\t' '{print NF}' $FILE | sort -rnu | tail -n 1) # in case there are varying column counts, we may want to exit
+else
+	# This is the only thing preventing us from piping input in
+#	COLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
+#	MINCOLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
+	COLS=$2
+	MINCOLS=$COLS
 fi
 
 #################################################################################
@@ -161,7 +171,7 @@ fi
 	#########################################################################
 	# initialize stuff for a loop						#
 	#########################################################################
-	i=1 # Set to 1 if you want first column colored
+	i=$COLS
 	COL=1
 	COUNTER=$COLS
 	COMMAND=""
@@ -170,21 +180,22 @@ fi
 	#########################################################################
 	while [ "$COUNTER" -gt "1" ]; do
 		color=${array[i]}
+		# To make your eyes hurt, set 38 to 48 instead!
 		COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
 		((COUNTER--))
 		((COL++))
-		((i++))
+		((i--))
 	done	
 	#########################################################################
 	# Set up our command loop						#
 	#########################################################################
 	color=${array[i]} 
 
-	# This is here in case we want the first column colored
-	# COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
-	# COMMAND="cat $FILE | $COMMAND sed 's/^//g'"
-
-	COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+	if [ "$FILE" != "stdin" ]; then
+		COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+	else
+		COMMAND="$COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+	fi
 
 	#########################################################################
 	# Format and execute							#
@@ -202,7 +213,9 @@ fi
 	fi
 	# Print out column numbers with header, just in case someone cares...
 	echo "$color240"
-	cat $FILE | awk -F'\t' ' { for (i=1; i <=NF; ++i) printf "%s [" i "]\t", $i; exit }'
+	if [ "$FILE" != "stdin" ]; then
+		cat $FILE | awk -F'\t' ' { for (i=1; i <=NF; ++i) printf "%s [" i "]\t", $i; exit }'
+	fi
 	echo "$reset"
 	# Execute the simple grep loop from above
 	echo 
