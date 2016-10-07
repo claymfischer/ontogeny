@@ -83,6 +83,10 @@ Input examples:
 
 > Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter withinin a single file by also including the empty file `/dev/null`, for example: `$ highlight "/dev/null file.txt" pattern1 pattern2`
 
+As this can handle any number of patterns (and will color them randomly with 256 colors), it's useful for a lot of QA purposes, making visual connections easier. For example, you could use command substitution to generate your pattern list:
+
+'$ highlight file.txt $(cat listOfAssemblyNames.tsv | cut -f 2 | awk NF | sort | uniq)`
+
 ---
 <a name="columns"></a>
 ## Color-code columnar data
