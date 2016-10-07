@@ -193,7 +193,6 @@ if [ -z "$GETVALUES" ]; then
 		fi
 		if [ "$k" == "7" ]; then
 			((order++))
-			# i=$(($i + 6))
 			k=1
 			if [ "$rev" == "1" ]; then
 				if [ "$switch" == "0" ]; then i=$(($i + 7)); else i=$(($i + 5)); fi
@@ -249,11 +248,11 @@ else
 			done 
 			echo " ╔════════════════════════════════════════════════════════════════════════════════╗"
 			echo "   ${color240}tagStormSummary.sh $FILE ${color202}$2 $3$reset"
-			echo ""
+			echo
 			echo "   Limiting to $FORMAT values for each of the $color202$numberOfTags$reset tags in $FILE."
 			printf "$WRAP"
 			echo " ╚════════════════════════════════════════════════════════════════════════════════╝"
-			echo ""
+			echo 
 		else
 			########################################################
 			# Probably worth considering tallying up numbers of instances... adds extra processing. Would be nice to just dump this to a file with random name (to avoid collisions) and reduce processing burden. That would require writing, which may increase overhead processing...
@@ -261,12 +260,12 @@ else
 			cat $FILE | sed 's/\t//g' | sort -f -u -k1,1 | cut -d " " -f 1  | awk NF | while read line; do echo "${color25}$line$reset"; cat $FILE | grep -i "^\([[:blank:]]*\)$line " | sed 's/\t//g' | sort | uniq | awk NF | cut -d " " -f 2- ; printf "\n\n"; done
 			echo " ╔════════════════════════════════════════════════════════════════════════════════╗"
 			echo "   ${color240}tagStormSummary.sh $FILE ${color25}$2 $3$reset"
-			echo ""
+			echo
 			echo "   Showing all values for each tag in $FILE. Use a number for the third" 
 			echo "   argument if this flooded your screen."
 			printf "$WRAP"
 			echo " ╚════════════════════════════════════════════════════════════════════════════════╝"
-			echo ""
+			echo
 		fi
 	else
 		################################################################
@@ -275,11 +274,11 @@ else
 		cat $FILE | sed 's/\t//g' | sort -f -u -k1,1 | cut -d " " -f 1  | awk NF | while read line; do echo "${color114}$line$reset"; cat $FILE | grep -i "^\([[:blank:]]*\)$line " | sed 's/\t//g' | sort | uniq | awk NF | cut -d " " -f 2- | tr '\n' '|' | sed 's/|$//g' | sed 's/|/ | /g' ; printf "\n\n"; done
 		echo " ╔════════════════════════════════════════════════════════════════════════════════╗"
 		echo "   ${color240}tagStormSummary.sh $FILE ${color114}$2$reset"
-		echo ""
+		echo
 		echo "   Showing all values as bar-separated. Set a third argument to print as lines."
 		printf "$WRAP"
 		echo " ╚════════════════════════════════════════════════════════════════════════════════╝"
-		echo ""
+		echo
 	fi
 	if [ "$GETVALUES" != "w" ]; then
 		tput smam &
