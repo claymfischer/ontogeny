@@ -6,7 +6,7 @@ The name *ontogeny* refers to the development of an individual from embryo to ma
 
 They are bash shell scripts cobbled together while learning how to work with biological data on UNIX/Linux servers (data wrangling).
 
-They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the -h or --help flags.
+They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the `-h` or `--help` flags.
 
 ---
 
@@ -338,6 +338,8 @@ First you need to clone. This will create directory called `ontogeny` wherever y
 
 `$ git clone https://github.com/claymfischer/ontogeny.git`
 
+If you want to learn more about `git` and why it is useful when dealing with biological data, I highly recommend the book [Bioinformatics Data Skills](http://proquest.safaribooksonline.com/book/bioinformatics/9781449367480). It has a fantastic chapter on `git` and what you need to know, and explains it in a no-nonsense manner, assuming you have no background in bioinformatics. The entire book is an amazing resource well worth every penny.
+
 **bash startup file**
 
 Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
@@ -346,7 +348,8 @@ Add the following to your `.bashrc` and edit the `ONTOGENY_INSTALL_PATH`:
 ONTOGENY_INSTALL_PATH=/path/to/the/repository
 source $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh
 ```
+Protip: put this at the *top* of your `.bashrc` file. This way it won't override your own settings of the same variables. For instance, if you have a `PS1` set in your .bashrc, it won't get overridden if this is sourced at the top.
 
 **make**
 
-Next, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
+Currently looking into enabling users to simply `make install` from the repository directory to copy executables to where they need to be.
