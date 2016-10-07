@@ -352,4 +352,4 @@ Protip: put this at the *top* of your `.bashrc` file. This way it won't override
 
 **make**
 
-Next, users will be able to simply `make install` from the repository directory to copy executables to where they need to be.
+Currently looking into enabling users to simply `make install` from the repository directory to copy executables to where they need to be.
