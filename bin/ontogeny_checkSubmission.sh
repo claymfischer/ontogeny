@@ -27,6 +27,7 @@
 # Doesn't fix anything, just generates a report for you.
 # Could cleanse the tags of non-alphanumerics............. cut at the first space on any line
 # sed -e 's/[^[:alnum:]|-]//g'
+# When displaying tags, maybe count how many unique ones there are.
 
 ################################################################################
 # Config 
