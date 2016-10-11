@@ -140,10 +140,15 @@ if [ "$FILE" != "stdin" ]; then
 	COLS=$(awk -F'\t' '{print NF}' $FILE | sort -nu | tail -n 1) # in case there are varying column counts, let's grab the top
 	MINCOLS=$(awk -F'\t' '{print NF}' $FILE | sort -rnu | tail -n 1) # in case there are varying column counts, we may want to exit
 else
-	# This is the only thing preventing us from piping input in
-#	COLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
-#	MINCOLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
-	COLS=$2
+	if [ "$2" == "" ]; then
+		COLS=1
+		# Need to read number of columns from stdin in here
+		# This is the only thing preventing us from piping input in
+		# COLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
+		# MINCOLS=$( awk -F'\t' '{print NF}' | sort -nu | tail -n 1)
+	else
+		COLS=$2
+	fi
 	MINCOLS=$COLS
 fi
 
@@ -186,6 +191,7 @@ fi
 		((COUNTER--))
 		((COL++))
 		((i--))
+		COLHEADER="$COLHEADER\t$COL"
 	done	
 	#########################################################################
 	# Set up our command loop						#
@@ -195,6 +201,7 @@ fi
 	if [ "$FILE" != "stdin" ]; then
 		COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	else
+	#	COMMAND="$COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 		COMMAND="$COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	fi
 
@@ -219,7 +226,10 @@ fi
 	fi
 	echo "$reset"
 	# Execute the simple grep loop from above
-	echo 
+	echo
+	if [ "$FILE" == "stdin" ]; then 
+		COMMAND="sed '1s/^/$COLHEADER\n/' | $COMMAND"
+	fi
 	eval $COMMAND
 	echo
 	echo $reset

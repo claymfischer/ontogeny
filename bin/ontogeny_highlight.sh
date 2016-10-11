@@ -27,6 +27,8 @@
 #################################################################################
 # Limitations
 #################################################################################
+# Maybe if using /dev/null to "filter" in a single file, show context? 
+#
 # I'd like to add a -f patterns.txt ability
 #
 # Just added stdin feature, needs QA testing
