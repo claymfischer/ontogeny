@@ -19,11 +19,11 @@
 # 	$ colorColumns.sh file.txt
 #
 # Limitations
-#	currently does not accept stdin (will add shortly)
+#	currently does not accept stdin without defining number of columns
 # 	Seems to have trouble if columns don't have content in every cell... perhaps pipe through a simple sed 's/\t\t/\t\.\t/g' or more elegant solution
 #	Needs expanded usage statement
 #	Currently uses tab as delimiter, could easily add a -d flag for user override.
-#	If the window is big, sometimes it won't wrap? tput cols = 185... new lines are added, just empt
+#	If the window is big, sometimes it won't wrap? tput cols = 185... new lines are added, just empty. Not sure what's up with that...
 
 
 # To do
@@ -66,8 +66,10 @@ $color240  ├──────────────────────
 
 $color240	$ ${color25}columns$color117 file.txt
 
-$color240	$ cat$color117 file.txt ${color240}| ${color25}columns
+$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin n$reset
 
+$color240	(Where ${color117}n$color240 is number of columns, need to automate it)
+	
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     LIMITATIONS
 
@@ -188,20 +190,25 @@ fi
 		color=${array[i]}
 		# To make your eyes hurt, set 38 to 48 instead!
 		COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+		# This $colors variable was just used to see which ansii escape codes are being printed when debugging.
+		colors="$i \e[38;5;${color}m$color\033[0m]    $colors"
+		COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
+		COLHEADER="$COLHEADER\t$COL"
 		((COUNTER--))
 		((COL++))
 		((i--))
-		COLHEADER="$COLHEADER\t$COL"
 	done	
 	#########################################################################
 	# Set up our command loop						#
 	#########################################################################
 	color=${array[i]} 
-
+	# These are here in order to color the first column.
+	colors="1 [\e[38;5;${color}m$color\033[0m]    $colors"
+	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m     $COLUMNLEGEND"
+	# Handle stdin vs file
 	if [ "$FILE" != "stdin" ]; then
 		COMMAND="cat $FILE | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	else
-	#	COMMAND="$COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 		COMMAND="$COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	fi
 
@@ -219,19 +226,9 @@ fi
 		echo "$color240  └────────────────────────────────────────────────────────────────────────────┘$reset"
 		echo
 	fi
-	# Print out column numbers with header, just in case someone cares...
-	echo "$color240"
-	if [ "$FILE" != "stdin" ]; then
-		cat $FILE | awk -F'\t' ' { for (i=1; i <=NF; ++i) printf "%s [" i "]\t", $i; exit }'
-	fi
-	echo "$reset"
 	# Execute the simple grep loop from above
-	echo
-	if [ "$FILE" == "stdin" ]; then 
-		COMMAND="sed '1s/^/$COLHEADER\n/' | $COMMAND"
-	fi
+	printf "\n$COLUMNLEGEND\n\n"
 	eval $COMMAND
-	echo
-	echo $reset
+	printf "\n$COLUMNLEGEND$reset\n\n"
 
 
