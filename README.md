@@ -85,7 +85,7 @@ Input examples:
 
 As this can handle any number of patterns (and will color them randomly with 256 colors), it's useful for a lot of QA purposes, making visual connections easier. For example, you could use command substitution to generate your pattern list:
 
-`$ highlight file.txt $(cat listOfAssemblyNames.tsv | cut -f 2 | awk NF | sort | uniq)`
+`$ highlight file.txt $( cat listOfAssemblyNames.tsv | cut -f 2 | awk NF | sort | uniq | tr '\n' ' ' )`
 
 ---
 <a name="columns"></a>
