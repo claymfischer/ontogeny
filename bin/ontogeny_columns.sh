@@ -62,16 +62,18 @@ $color240  ├──────────────────────
 
 $color240	$ ${color25}columns$color117 file.txt
 
-$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin n$reset
+$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin$reset
 
-	Any additional arguments will be treated as numbers, with those columns highlighted.
+	Any additional arguments will be treated as numbers, coloring only those columns:
+
+$color240	$ ${color25}columns ${color117}file.txt ${color25}6 19 3$reset 
+
+$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin ${color25}6 19 3$reset 
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     LIMITATIONS
 
 	Currently hardcoded to use tab as delimiter. Easy to edit:$color240 \\\$'\(${color199}\t${color240}[^${color199}\t${color240}]*\)\{\$COL\}\\\$'$reset
-
-	Assumes equal number of tabs in each row. Wonky if not.
 
 $color240 └────────────────────────────────────────────────────────────────────────────┘$reset
 
@@ -170,7 +172,7 @@ fi
 	# Let's start with very different colors to maintain contrast between matches
 	BASECOLORS="117 202 106 196 25 201"
 	#EXTENDEDCOLORS="240 99 22 210 81 203 105"
-	EXTENDEDCOLORS="240 99 64 214 86 210 67"
+	EXTENDEDCOLORS="247 99 64 214 86 210 67"
 	# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of color variety with many search terms
 	if [ "$COLS" -lt "7" ]; then
 		array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
@@ -195,9 +197,24 @@ fi
 	while [ "$COUNTER" -gt "1" ]; do
 		color=${array[i]}
 		# To make your eyes hurt, set 38 to 48 instead!
-		if [ "$SPECIFICCOL" == "y" ] && [ "$2" == "$i" ] ||  [ "$3" == "$i" ] ||  [ "$4" == "$i" ] ; then
-			COLUMNLEGEND="\e[48;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
-			COMMAND="GREP_COLOR='00;48;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+		if [ "$SPECIFICCOL" == "y" ]; then
+
+			# First arg is the file, so let's just grab args after that
+			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
+			for f in $ARGS; do 
+				if [ "$f" == "$i" ]; then
+					BULLSEYE=y
+					COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+					COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
+				fi
+			done
+			if [ "$BULLSEYE" = "y" ]; then
+				BULLSEYE=
+			else
+					COMMAND="GREP_COLOR='00;38;5;240' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+					COLUMNLEGEND="\e[38;5;240m $i\033[0m    $COLUMNLEGEND"
+			fi
+
 		else
 			COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
 			COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
@@ -214,7 +231,11 @@ fi
 	#########################################################################
 	# Set up our command loop						#
 	#########################################################################
-	color=${array[i]} 
+	if [ "$SPECIFICCOL" == "y" ]; then
+		color=240
+	else
+		color=${array[i]} 
+	fi
 	# These are here in order to color the first column.
 	colors="1 [\e[38;5;${color}m$color\033[0m]    $colors"
 	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m     $COLUMNLEGEND"
