@@ -28,6 +28,7 @@
 	# I edit my .bashrc often enough that this is useful to me.
 	alias load='source ~/.bashrc; source ~/.bash_profile'
 	alias bashrc='vi ~/.bashrc'
+	alias ontogeny_toolkit='vi $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh'
 
 	# Some of my commonly-used background colors:
 	bg25=$(echo -en "\e[48;5;25m")
@@ -49,8 +50,8 @@
 	# Setting LANG to anything other than 'C' may affect sort behavior. 
 	# To fix, either 1) set everything =C, 2) LC_COLLATE=C LC_ALL=C after LANG if you insist on using it 3) or sort +0 -1
 	# I set LC_ALL at the end which seems to make my sort work as anticipated.
-	export LANG="en_US.UTF-8"
 	export TERM=xterm-256color
+	export LANG="en_US.UTF-8"
 	export LESSCHARSET=utf-8
 	export LC_ALL=C
 
@@ -107,6 +108,7 @@
 		# This will show where you have tabs and multiple spaces. Usage: 
 		#	cat file.txt | cleanUp
 		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
+		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 
 	#################################################################################
 	# Ontogeny repository/bin aliases\						#
@@ -245,8 +247,11 @@ EOF
 		WHICHSERVER=$(uname -n)
 		if [ "$WHICHSERVER" == "hgwdev" ]; then
 			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
 		else
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡ \[\e[0m\] '
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[38;5;240m\]\W/\[\e[0m\]⚡   \[\e[0m\] '
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡  \[\e[0m\] '
+			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
 		fi
 
 
