@@ -31,6 +31,10 @@
 #
 # Line numbers should be an argument, not default. It can be annoying.
 #
+# If doing stdin, it won't give number of occurences
+#
+# Line numbers should be an argument, not default. It can be annoying.
+#
 # Maybe if using /dev/null to "filter" in a single file, show context? 
 #
 # I'd like to add a -f patterns.txt ability
