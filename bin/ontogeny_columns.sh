@@ -22,9 +22,6 @@
 # Limitations
 #	In oder to color columns with stdin, it's processed in a slightly slow way.
 #	Currently uses tab as delimiter, could easily add a -d flag for user override.
-# To do
-# 	Make additional arguments columns to highlight
-#	Could also alternate foreground/bg coloring... would need to change definition of grep loop to not include preceding tag. 
 
 #################################################################################
 # Config									#
@@ -114,7 +111,7 @@ if [ -t 0 ]; then
 			echo "	(setting case insensitive for an instant)" 
                 	echo ""
                 	echo "                $ ls -d ${FILE:0:1}*$color25"
-                	# some directories have a ton fo files that may match, like srr*, so let's split this up to avoid a flood.
+                	# some directories have a ton of files that may match, like srr*, so let's split this up to avoid a flood.
                 	if [ "$similarfiles" -lt 20 ]; then
                         	ls -d ${FILE:0:1}* | sort | sed "s/^/                /"
                 	else
@@ -133,13 +130,9 @@ if [ -t 0 ]; then
 	fi	
 else
 	FILE=stdin
-	# Silly trick to see if bash will be able to use $1 as an integer
-	if [ "$1" -eq "$1" ] 2>/dev/null; then
-		SPECIFICCOL="y"
-	else
-		SPECIFICCOL=""
-	fi
 fi
+
+# Silly trick to see if bash will be able to use $1 as an integer
 if [ "$2" -eq "$2" ] 2>/dev/null; then
 	SPECIFICCOL="y"
 else
@@ -171,7 +164,6 @@ fi
 	#########################################################################
 	# Let's start with very different colors to maintain contrast between matches
 	BASECOLORS="117 202 106 196 25 201"
-	#EXTENDEDCOLORS="240 99 22 210 81 203 105"
 	EXTENDEDCOLORS="247 99 64 214 86 210 67"
 	# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of color variety with many search terms
 	if [ "$COLS" -lt "7" ]; then
@@ -183,7 +175,6 @@ fi
 		FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
 		array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
 	fi
-	# Implication here is that the high-contrast colors will appear on the far right, not at left. Could pass to tail and -R...
 	#########################################################################
 	# initialize stuff for a loop						#
 	#########################################################################
@@ -207,6 +198,9 @@ fi
 					COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
 					COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
 				fi
+				if [ "$f" == "1" ]; then
+					FIRSTCOL="y"
+				fi
 			done
 			if [ "$BULLSEYE" = "y" ]; then
 				BULLSEYE=
@@ -221,7 +215,6 @@ fi
 		fi
 		# This $colors variable was just used to see which ansii escape codes are being printed when debugging.
 		# colors="$i \e[38;5;${color}m$color\033[0m]    $colors"
-		#COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
 		COLHEADER="$COLHEADER\t$COL"
 		((COUNTER--))
 		((COL++))
@@ -231,7 +224,7 @@ fi
 	#########################################################################
 	# Set up our command loop						#
 	#########################################################################
-	if [ "$SPECIFICCOL" == "y" ]; then
+	if [ "$SPECIFICCOL" == "y" ] && [ "$FIRSTCOL" != "y" ]; then
 		color=240
 	else
 		color=${array[i]} 
