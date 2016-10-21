@@ -3,11 +3,24 @@
 This is a utility that helps make tab-separated data easier to view on the command line. Accepts `stdin`, you'll need to provide the argument `stdin` instead of `file.tsv`. There are color legends both at the top at bottom, allowing you to pipe to `head` or `tail`.
 
 `$ columns file.tsv`
+
 `$ cat file.tsv | columns stdin`
+
+---
+
+## Usage/help
+
+`$ columns`
+
+`$ columns -h`
+
+`$columns --help`
 
 ![Column color coding](images/columns/columns_usage.png)
 
 ---
+
+## Basic usage
 
 This is what it looks like when viewing columnar-data on the command line. It can be difficult to ascertain what belongs to which column.
 
@@ -35,7 +48,7 @@ Simply add any [integer] arguments after the filename to highlight those columns
 
 ---
 
-Another example.
+## Another example.
 
 ![Column color coding](images/columns/columns_example.png)
 
