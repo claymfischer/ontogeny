@@ -93,7 +93,7 @@ As this can handle any number of patterns (and will color them randomly with 256
 
 In bioinformatics we deal with the lowest common denominator format for data, which is generally plain text in tab-separated columns. These tab-separated columns are computer-readable moreso than human-readable, as the columns do not line up. It can be difficult to tell which column you are looking at when you have a screen of line-wrapped text.
 
-This takes advantage of a simple `grep` loop to color-code the columns. Accepts `stdin`.
+This takes advantage of a simple `grep` loop to color-code the columns. Accepts `stdin`, you'll need to provide the argument `stdin` instead of `file.tsv`. There are color legends both at the top at bottom, allowing you to pipe to `head` or `tail`.
 
 `$ cat example.tsv`
 
