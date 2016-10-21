@@ -16,7 +16,7 @@ This is a utility that helps make tab-separated data easier to view on the comma
 
 `$columns --help`
 
-![Column color coding](images/columns/column_usage_2.png)
+![Column color coding](images/columns/columns_usage_2.png)
 
 ---
 
