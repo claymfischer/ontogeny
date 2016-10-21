@@ -27,6 +27,14 @@
 #################################################################################
 # Limitations
 #################################################################################
+# If doing stdin, it won't give number of occurences
+#
+# Line numbers should be an argument, not default. It can be annoying.
+#
+# If doing stdin, it won't give number of occurences
+#
+# Line numbers should be an argument, not default. It can be annoying.
+#
 # Maybe if using /dev/null to "filter" in a single file, show context? 
 #
 # I'd like to add a -f patterns.txt ability
@@ -82,6 +90,15 @@ reset=$(echo -en "\033[0m")
 # Begin main output								#
 #################################################################################
 echo ""
+	while getopts "ns" opt
+		do
+		case $opt in
+			n) 	echo "test"; SHOWLINENUMBERS=$(echo "-n")
+				;;
+			s) 	SHOWLINENUMBERS=$(echo "-n")
+				;;
+		esac
+	done
 
 #################################################################################
 # Handle stdin
@@ -91,7 +108,7 @@ if [ -t 0 ]; then
 	#################################################################################
 	# If no file is found, display help						#
 	#################################################################################
-	if [ -z "$1" ]; then
+	if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
 		clear
 		echo ""
 		echo "$color240  ┌────────────────────────────────────────────────────────────────────────────┐$reset"
@@ -236,10 +253,10 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	# Not a graceful way ot get the name/line of a file when looking at multiple files - fix
 	#########################################################################
 	if [ "$FILE" == "stdin" ]; then
-		COMMAND=" grep -n '' "
+		COMMAND=" grep $SHOWLINENUMBERS '' "
 		
 	else
-		COMMAND="grep -n '' $FILE"
+		COMMAND="grep $SHOWLINENUMBERS '' $FILE"
 	fi
 	i=0
 	TERMS=0
@@ -266,6 +283,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		elif [ "$f" == "TABS" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+' $RETURNALL "
+		elif [ "$f" == "CLEANUP" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+\|  \+' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+\|  \+' $RETURNALL "
 		elif [ "$f" == "SPACETAB" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
@@ -306,4 +326,5 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	# 
 	#########################################################################
 	eval "$COMMAND $CLEANLINE"
+	#echo $COMMAND
 	printf "$PRINTSEARCHBAR\n\n"
