@@ -22,6 +22,14 @@
 # Limitations
 #	In oder to color columns with stdin, it's processed in a slightly slow way.
 #	Currently uses tab as delimiter, could easily add a -d flag for user override.
+#
+# To do
+#	Would be nice to be able to color groups, eg. higlight from column 8-end.
+#	$ columns file.tsv 8-
+#
+#	Maybe color based on indentation...
+#
+#	When doing stdin, if a column is empty... doens't work? Found when dealing with MISCE
 
 #################################################################################
 # Config									#
@@ -144,12 +152,17 @@ fi
 if [ "$FILE" != "stdin" ]; then
 	COLS=$(awk -F'\t' '{print NF}' $FILE | sort -nu | tail -n 1) # in case there are varying column counts, let's grab the top
 	MINCOLS=$(awk -F'\t' '{print NF}' $FILE | sort -rnu | tail -n 1) # in case there are varying column counts, we may want to exit
+	NUMLINES=$(wc -l $FILE | cut -f 1 -d " ")
 else
 	COLS=1
-	while read line; do COLSTHIS=$(echo "$line" | awk -F'\t' '{print NF}' | sort -nu | tail -n 1); 
+	NUMLINES=0
+	# To read leading white space, set IFS and read -r
+	while IFS= read -r line; do 
+		COLSTHIS=$(echo "$line" | awk -F'\t' '{print NF}' | sort -nu | tail -n 1); 
 		if [ "$COLSTHIS" -gt "$COLS" ]; then
 			COLS=$COLSTHIS
 		fi
+		((NUMLINES++))
 		 LINES="$LINES 
 $line"; done 
 	MINCOLS=$COLS
@@ -196,7 +209,7 @@ fi
 				if [ "$f" == "$i" ]; then
 					BULLSEYE=y
 					COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
-					COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
+					COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m  $COLUMNLEGEND"
 				fi
 				if [ "$f" == "1" ]; then
 					FIRSTCOL="y"
@@ -206,11 +219,11 @@ fi
 				BULLSEYE=
 			else
 					COMMAND="GREP_COLOR='00;38;5;240' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
-					COLUMNLEGEND="\e[38;5;240m $i\033[0m    $COLUMNLEGEND"
+					COLUMNLEGEND="\e[38;5;240m $i\033[0m  $COLUMNLEGEND"
 			fi
 
 		else
-			COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m    $COLUMNLEGEND"
+			COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m  $COLUMNLEGEND"
 			COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
 		fi
 		# This $colors variable was just used to see which ansii escape codes are being printed when debugging.
@@ -231,7 +244,7 @@ fi
 	fi
 	# These are here in order to color the first column.
 	colors="1 [\e[38;5;${color}m$color\033[0m]    $colors"
-	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m     $COLUMNLEGEND"
+	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m  $COLUMNLEGEND[$NUMLINES rows]"
 	if [ "$FILE" != "stdin" ]; then
 		COMMAND="cat $FILE | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
 	else
@@ -253,8 +266,13 @@ fi
 		echo
 	fi
 	# Execute the simple grep loop from above
-	printf "\n$COLUMNLEGEND\n\n"
+	border=1
+	WINDOW=$(tput cols)
+	while [ "$border" -lt "$WINDOW" ]; do
+		WALL="=$WALL";
+		((border++))
+	done
+	WALL="$color240$WALL$reset"
+	printf "\n$COLUMNLEGEND\n$WALL\n"
 	eval $COMMAND
-	printf "\n$COLUMNLEGEND$reset\n\n"
-	
-
+	printf "$WALL\n$COLUMNLEGEND$reset\n\n"
