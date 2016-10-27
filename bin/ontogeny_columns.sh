@@ -28,8 +28,6 @@
 #	$ columns file.tsv 8-
 #
 #	Maybe color based on indentation...
-#
-#	When doing stdin, if a column is empty... doens't work? Found when dealing with MISCE
 
 #################################################################################
 # Config									#
@@ -46,6 +44,18 @@ bg200=$(echo -en "\e[48;5;199m");
 reset=$(echo -en "\033[0m")
 
 FILE=$1
+
+	#########################################################################
+	# Make a custom border							#
+	#########################################################################
+	border=1
+	WINDOW=$(tput cols)
+	while [ "$border" -lt "$WINDOW" ]; do
+		WALL="=$WALL";
+		((border++))
+	done
+	WALL="$color240$WALL$reset"
+
 #################################################################################
 # Usage statement								#
 #################################################################################
@@ -69,32 +79,53 @@ $color240	$ ${color25}columns$color117 file.txt
 
 $color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin$reset
 
-	Any additional arguments will be treated as numbers, coloring only those columns:
+	Any additional arguments will be treated as numbers, coloring only those 
+	columns (see second example):
 
 $color240	$ ${color25}columns ${color117}file.txt ${color25}6 19 3$reset 
 
 $color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin ${color25}6 19 3$reset 
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
-    LIMITATIONS
 
-	Currently hardcoded to use tab as delimiter. Easy to edit:$color240 \\\$'\(${color199}\t${color240}[^${color199}\t${color240}]*\)\{\$COL\}\\\$'$reset
+    PROTIP
+	
+	Combine with other programs, for instance here's how you can highlight the line numbers.
+
+$color240	$ nl$color117 file.txt ${color240}| highlight stdin $'^[[:blank:]]*[[:digit:]]*' | ${color25}columns ${color117}stdin$reset 
 
 $color240 └────────────────────────────────────────────────────────────────────────────┘$reset
 
 
-[38;5;240m
-First field goes here [1]	Another field, but this one is different! [2]	shortField [3]	Still, it knows how to remain tab-separated... [4]	[0m
-
+[00;38;5;25m[KColumn 1[00;38;5;117m[K  Column 2[00;38;5;106m[K  Column 3[00;38;5;202m[K  Column 4[m[K[m[K[m[K[m[K  [6 rows]
+$WALL
 [00;38;5;25m[KFirst field goes here[00;38;5;117m[K	Another field, but this one is different![00;38;5;106m[K	shortField[00;38;5;202m[K	Still, it knows how to remain tab-separated...[m[K[m[K[m[K[m[K
 [00;38;5;25m[K123[00;38;5;117m[K	Roses are red,[00;38;5;106m[K	[00;38;5;202m[K	It doesn't matter how wide a row in a column is[m[K[m[K[m[K[m[K
 [00;38;5;25m[K124[00;38;5;117m[K	Violets are blue,[00;38;5;106m[K	[00;38;5;202m[K	It can still figure it out![m[K[m[K[m[K[m[K
 [00;38;5;25m[K125[00;38;5;117m[K	If you were to cat this file[00;38;5;106m[K	[00;38;5;202m[K	Even when a row or column is empty.[m[K[m[K[m[K[m[K
 [00;38;5;25m[K126[00;38;5;117m[K	I would have..[00;38;5;106m[K	[00;38;5;202m[K	[m[K[m[K[m[K[m[K
 [00;38;5;25m[K127[00;38;5;117m[K	no clue![00;38;5;106m[K	Empty rows are no problem for us![00;38;5;196m[K	[m[K[m[K[m[K[m[K [0m
+$WALL
+[00;38;5;25m[KColumn 1[00;38;5;117m[K  Column 2[00;38;5;106m[K  Column 3[00;38;5;202m[K  Column 4[m[K[m[K[m[K[m[K  [6 rows]
 
+
+[00;38;5;240m[KColumn 1[00;38;5;117m[K  Column 2[00;38;5;240m[K  3[00;38;5;240m[K  4[m[K[m[K[m[K[m[K  [6 rows]
+$WALL
+[00;38;5;240m[KFirst field goes here[00;38;5;117m[K	Another field, but this one is different![00;38;5;240m[K	shortField[00;38;5;240m[K	Still, it knows how to remain tab-separated...[m[K[m[K[m[K[m[K
+[00;38;5;240m[K123[00;38;5;117m[K	Roses are red,[00;38;5;240m[K	[00;38;5;240m[K	It doesn't matter how wide a row in a column is[m[K[m[K[m[K[m[K
+[00;38;5;240m[K124[00;38;5;117m[K	Violets are blue,[00;38;5;240m[K	[00;38;5;240m[K	It can still figure it out![m[K[m[K[m[K[m[K
+[00;38;5;240m[K125[00;38;5;117m[K	If you were to cat this file[00;38;5;240m[K	[00;38;5;240m[K	Even when a row or column is empty.[m[K[m[K[m[K[m[K
+[00;38;5;240m[K126[00;38;5;117m[K	I would have..[00;38;5;240m[K	[00;38;5;240m[K	[m[K[m[K[m[K[m[K
+[00;38;5;240m[K127[00;38;5;117m[K	no clue![00;38;5;240m[K	Empty rows are no problem for us![00;38;5;196m[K	[m[K[m[K[m[K[m[K [0m
+$WALL
+[00;38;5;240m[KColumn 1[00;38;5;117m[K  Column 2[00;38;5;240m[K  3[00;38;5;240m[K  4[m[K[m[K[m[K[m[K  [6 rows]
 
 "
+#$color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
+#    LIMITATIONS
+#
+#	Currently hardcoded to use tab as delimiter. Easy to edit:$color240 \\\$'\(${color199}\t${color240}[^${color199}\t${color240}]*\)\{\$COL\}\\\$'$reset
+
 	exit 0
 fi
 #################################################################################
@@ -208,7 +239,7 @@ fi
 			for f in $ARGS; do 
 				if [ "$f" == "$i" ]; then
 					BULLSEYE=y
-					COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+					COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$\|' | $COMMAND "
 					COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m  $COLUMNLEGEND"
 				fi
 				if [ "$f" == "1" ]; then
@@ -218,13 +249,13 @@ fi
 			if [ "$BULLSEYE" = "y" ]; then
 				BULLSEYE=
 			else
-					COMMAND="GREP_COLOR='00;38;5;240' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+					COMMAND="GREP_COLOR='00;38;5;240' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$\|' | $COMMAND "
 					COLUMNLEGEND="\e[38;5;240m $i\033[0m  $COLUMNLEGEND"
 			fi
 
 		else
 			COLUMNLEGEND="\e[38;5;${color}mColumn $i\033[0m  $COLUMNLEGEND"
-			COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$' | $COMMAND "
+			COMMAND="GREP_COLOR='00;38;5;$color' grep --color=always \$'\(\t[^\t]*\)\{$COL\}\$\|' | $COMMAND "
 		fi
 		# This $colors variable was just used to see which ansii escape codes are being printed when debugging.
 		# colors="$i \e[38;5;${color}m$color\033[0m]    $colors"
@@ -261,18 +292,11 @@ fi
 		echo "$color240   ────────────────────────────────────────────────────────────────────────────$reset"
 		echo "    The file $FILE does not appear to have a consistent number of columns." 
 		echo "    The max number of columns we found is $COLS and the minimum number of columns is $MINCOLS."
-		echo "    Resulting output may be wonky."
+		echo "    Resulting output may be wonky, or those rows may be excluded from this output."
 		echo "$color240  └────────────────────────────────────────────────────────────────────────────┘$reset"
 		echo
 	fi
 	# Execute the simple grep loop from above
-	border=1
-	WINDOW=$(tput cols)
-	while [ "$border" -lt "$WINDOW" ]; do
-		WALL="=$WALL";
-		((border++))
-	done
-	WALL="$color240$WALL$reset"
-	printf "\n$COLUMNLEGEND\n$WALL\n"
+	printf "\n$COLUMNLEGEND\n$WALL"
 	eval $COMMAND
 	printf "$WALL\n$COLUMNLEGEND$reset\n\n"
