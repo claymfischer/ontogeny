@@ -139,7 +139,9 @@ if [ -t 0 ]; then
 
 	${bg196} SPACETAB $reset highlights space next to a tab/vice-versa	${color240}-e $'\t ' -e $' \t' $reset
 
-	   ${bg202} ASCII $reset higlights any non-ascii characters		${color240}-P '[\x80-\xFF]'$reset
+	   ${bg202} ASCII $reset highlights any non-ascii characters		${color240}-P '[\x80-\xFF]'$reset
+
+	 ${bg200} CLEANUP $reset highlights areas with multiple spaces or tabs ${color240}$'\t\t\+\|  \+'$reset
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     Limitations
@@ -262,7 +264,8 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	TERMS=0
 	OCCURRENCES=""
 	TOTES=0
-	SEARCH="printf \"\n	"
+	SEARCH="printf \"
+        "
 	for f in $SEARCHTERMS; do 
 		# Count how many pattern matched - NOT how many lines matched - complicated if multiiple files...
 		color=${array[i]}
@@ -295,9 +298,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e '$f' $RETURNALL "
 		fi
 		if [ "$FILE" == "stdin" ]; then
-			SEARCH="$SEARCH \e[48;5;${color}m ${f} \033[0m"
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} \033[0m"
 		else
-			SEARCH="$SEARCH \e[48;5;${color}m ${f} ($OCCURRENCES) \033[0m"
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} ($OCCURRENCES) \033[0m"
 		fi
 		((i++))
 		((TERMS++))
