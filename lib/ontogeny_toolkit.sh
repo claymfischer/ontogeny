@@ -152,13 +152,20 @@
 		#########################################################################
 		# This is useful for looking for chunks that match a pattern, eg. 	#
 		# errors in a log file.	Gives you nicely formatted output.		#
+		#									#
+		#	$ showMatches file.txt pattern [10]				#
+		#									#
+		#	The pattern can use basic regex.				#
 		#########################################################################
 		showMatches() {
-			# showMatches file.txt pattern [10]
-			DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
-			if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
-			# cat test.txt | nl | sed 's/\(.*before*.\)/=======\n\1/g' | grep -A10 =======
-			cat $1 | nl | sed "s/\(.*$2*.\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER"
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern [10]"; return 0; fi
+			if [ -s "$1" ]; then
+				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
+				if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
+				cat $1 | nl | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|" 
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
 		}
 
 	#################################################################################
