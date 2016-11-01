@@ -126,8 +126,9 @@
 		headAndTail() {
 			if [ -s "$1" ]; then
 				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
+				if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
 				if [ "$BIGENOUGH" -gt "20" ]; then
-				(echo "$WALL"; head -n 5; echo $WALL; tail -n 5; echo $WALL) < $1 
+				(echo "$WALL"; head -n $PREVIEWLINES; echo $WALL; nl --body-numbering=a  | tail -n $PREVIEWLINES; echo $WALL) < $1 
 				else
 					echo "This file is too small to inspect the head and tail."
 				fi
