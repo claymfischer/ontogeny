@@ -109,12 +109,25 @@
 		#	cat file.txt | cleanUp
 		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
+		# This is for files that sometimes don't have a newline on the last line... it messes things up...
 		alias fixNewLine="sed -e '\$a\'"
+		# This is a way of looking at the top and bottom of a file.
+		#########################################################################
+		# Make a custom border							#
+		#########################################################################
+		border=1
+		WALL=
+		WINDOW=$(tput cols)
+		while [ "$border" -lt "$WINDOW" ]; do
+			WALL="=$WALL";
+			((border++))
+		done
+		WALL="$color240$WALL$reset"
 		headAndTail() {
 			if [ -s "$1" ]; then
 				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
 				if [ "$BIGENOUGH" -gt "20" ]; then
-				(head; echo; echo; tail) < $1 
+				(echo "$WALL"; head -n 5; echo $WALL; tail -n 5; echo $WALL) < $1 
 				else
 					echo "This file is too small to inspect the head and tail."
 				fi
