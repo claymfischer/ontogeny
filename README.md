@@ -41,6 +41,8 @@ Portability is important and needs work. Ensuring consistent usage statements (a
 
 `$ git diff --stat --cached origin/master`
 
+`$ git log --stat --pretty=short --graph`
+
 `$ git push`
 
 ---
