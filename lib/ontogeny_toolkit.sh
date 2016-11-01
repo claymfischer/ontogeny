@@ -128,6 +128,7 @@
 		# This is a way of looking at the top and bottom of a file.
 		#########################################################################
 		headAndTail() {
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ inspect file 10"; return 0; fi
 			if [ -s "$1" ]; then
 				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
 				if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
@@ -158,7 +159,7 @@
 		#	The pattern can use basic regex.				#
 		#########################################################################
 		showMatches() {
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern [10]"; return 0; fi
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
 			if [ -s "$1" ]; then
 				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
 				if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
