@@ -51,14 +51,14 @@ Portability is important and needs work. Ensuring consistent usage statements (a
 
 This software is not specific to internal work projects, and much of it can be employed for any general command-line use. 
 
-1.  [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh) <a href="#highlight">Highlight</a>
-2. <a href="#columns">Color-code columns</a>
-3. <a href="#sequence">Color-code sequence data</a>
-4. <a href="#transfer">Transfer files</a>
-5. <a href="#newls">New ls</a>
-6. <a href="#about">About</a>
-7. <a href="#contents">List contents</a>
-7. <a href="#prompt">Change your command prompt for no good reason</a>
+1. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh) <a href="#highlight">Highlight</a>
+2. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_columns.sh) <a href="#columns">Color-code columns</a>
+3. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_fastq.sh) <a href="#sequence">Color-code sequence data</a>
+4. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_transfer.sh) <a href="#transfer">Transfer files</a>
+5. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_newLs.sh) <a href="#newls">New ls</a>
+6. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_about.sh) <a href="#about">About</a>
+7. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_list.sh) <a href="#contents">List contents</a>
+7. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_chnagePrompt.sh) <a href="#prompt">Change your command prompt for no good reason</a>
 
 <a name="highlight"></a>
 ## Highlight
