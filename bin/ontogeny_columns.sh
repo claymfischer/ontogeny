@@ -28,6 +28,7 @@
 #	$ columns file.tsv 8-
 #
 #	Maybe color based on indentation...
+# hashtag on mani didn't appear
 
 #################################################################################
 # Config									#
@@ -77,22 +78,26 @@ $color240  ├──────────────────────
 
 $color240	$ ${color25}columns$color117 file.txt
 
-$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin$reset
+$color240	$ cat$color117 file.tsv ${color240}| ${color25}columns ${color117}stdin$reset
 
 	Any additional arguments will be treated as numbers, coloring only those 
 	columns (see second example):
 
-$color240	$ ${color25}columns ${color117}file.txt ${color25}6 19 3$reset 
+$color240	$ ${color25}columns ${color117}file.tsv ${color25}6 19 3$reset 
 
-$color240	$ cat$color117 file.txt ${color240}| ${color25}columns ${color117}stdin ${color25}6 19 3$reset 
+$color240	$ cat$color117 file.tsv ${color240}| ${color25}columns ${color117}stdin ${color25}6 19 3$reset 
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
 
-    PROTIP
+    PROTIPS
 	
 	Combine with other programs, for instance here's how you can highlight the line numbers.
 
-$color240	$ nl$color117 file.txt ${color240}| highlight stdin $'^[[:blank:]]*[[:digit:]]*' | ${color25}columns ${color117}stdin$reset 
+$color240	$ nl$color117 file.tsv ${color240}| highlight stdin $'^[[:blank:]]*[[:digit:]]*' | ${color25}columns ${color117}stdin$reset 
+
+	If you want to see the top and bottom of a large file, try:
+
+$color240	$ (head; tail) < ${color117}file.tsv$color240 | ${color25}columns ${color117}stdin$reset 
 
 $color240 └────────────────────────────────────────────────────────────────────────────┘$reset
 

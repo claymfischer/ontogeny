@@ -110,8 +110,9 @@
 		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 		# This is for files that sometimes don't have a newline on the last line... it messes things up...
-		alias fixNewLine="sed -e '\$a\'"
-		# This is a way of looking at the top and bottom of a file.
+		alias fixLastLine="sed -e '\$a\'"
+		alias fixCLFR="sed -e 's/[\\r\\n]//g'"
+		alias fixNewLines=fixCLFR
 		#########################################################################
 		# Make a custom border							#
 		#########################################################################
@@ -123,12 +124,15 @@
 			((border++))
 		done
 		WALL="$color240$WALL$reset"
+		#########################################################################
+		# This is a way of looking at the top and bottom of a file.
+		#########################################################################
 		headAndTail() {
 			if [ -s "$1" ]; then
 				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
 				if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
 				if [ "$BIGENOUGH" -gt "20" ]; then
-				(echo "$WALL"; head -n $PREVIEWLINES; echo $WALL; nl --body-numbering=a  | tail -n $PREVIEWLINES; echo $WALL) < $1 
+					(echo "$WALL"; head -n $PREVIEWLINES; echo $WALL; nl --body-numbering=a  | sed 's/^\([[:blank:]]*[[:digit:]]\+\)\t/\1 /g' | tail -n $PREVIEWLINES; echo $WALL) < $1 
 				else
 					echo "This file is too small to inspect the head and tail."
 				fi
@@ -138,7 +142,24 @@
 		}
 
 		alias inspect=headAndTail
+		#########################################################################
+		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
+		#########################################################################
+		allTheThings() {
+			inspect $1 $2 | highlight stdin LINENUMBERS | columns stdin
+		}
 
+		#########################################################################
+		# This is useful for looking for chunks that match a pattern, eg. 	#
+		# errors in a log file.	Gives you nicely formatted output.		#
+		#########################################################################
+		showMatches() {
+			# showMatches file.txt pattern [10]
+			DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
+			if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
+			# cat test.txt | nl | sed 's/\(.*before*.\)/=======\n\1/g' | grep -A10 =======
+			cat $1 | nl | sed "s/\(.*$2*.\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER"
+		}
 
 	#################################################################################
 	# Ontogeny repository/bin aliases						#
