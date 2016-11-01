@@ -82,6 +82,7 @@ bg117=$(echo -en "\e[48;5;117m") ;
 bg196=$(echo -en "\e[48;5;196m") ;
 bg200=$(echo -en "\e[48;5;200m") ;
 bg202=$(echo -en "\e[48;5;202m") ;
+bg220=$(echo -en "\e[48;5;214m") ;
 bg240=$(echo -en "\e[48;5;240m") ;
 
 reset=$(echo -en "\033[0m")
@@ -142,6 +143,8 @@ if [ -t 0 ]; then
 	   ${bg202} ASCII $reset highlights any non-ascii characters		${color240}-P '[\x80-\xFF]'$reset
 
 	 ${bg200} CLEANUP $reset highlights areas with multiple spaces or tabs ${color240}$'\t\t\+\|  \+'$reset
+
+     ${bg220} LINENUMBERS $reset highlights the line number, eg. from nl output ${color240}$'^[[:blank:]]*[[:digit:]]\+'$reset
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     Limitations
@@ -292,6 +295,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		elif [ "$f" == "SPACETAB" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
+		elif [ "$f" == "LINENUMBERS" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'^[[:blank:]]*[[:digit:]]\+' $RETURNALL "
 		else
 		# Default pattern match
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e '$f' | wc -l)"
