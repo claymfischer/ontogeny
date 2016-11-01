@@ -161,6 +161,7 @@
 		showMatches() {
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
 			if [ -s "$1" ]; then
+				if [ "$2" == "" ]; then echo "You didn't provide a valid pattern"; return 0; fi
 				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
 				if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
 				cat $1 | nl | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|" 
