@@ -11,6 +11,8 @@
 	# This extends a user's .bashrc to take advantage of ontogeny tools and provide
 	# aliases to the shell scripts and UNIX command-line tools useful when dealing
 	# with big data.
+	#
+	# The things most users would wnat to change are at the top (except the PS1 variable near the bottom)
 
 	#################################################################################
 	# Install									#
@@ -23,8 +25,13 @@
 	#################################################################################
 	# Config									#
 	#################################################################################
-	# Edit this to what you want. I like a lot of history.
-	export HISTSIZE=5000
+	# Edit this to what you want. I like a lot of history, and this makes it act sorta like mosh...
+	unset HISTFILESIZE
+	HISTSIZE=5000
+	PROMPT_COMMAND="history -a"
+	export HISTSIZE PROMPT_COMMAND
+	shopt -s histappend
+	
 	# I edit my .bashrc often enough that this is useful to me.
 	alias load='source ~/.bashrc; source ~/.bash_profile'
 	alias bashrc='vi ~/.bashrc'
@@ -35,6 +42,7 @@
 	bg107=$(echo -en "\e[48;5;107m")
 	bg117=$(echo -en "\e[48;5;117m")
 	bg196=$(echo -en "\e[48;5;196m")
+	bg201=$(echo -en "\e[48;5;201m")
 	bg202=$(echo -en "\e[48;5;202m")
 	bg240=$(echo -en "\e[48;5;240m")
 	# Some of my commonly-used foreground colors:
@@ -42,6 +50,7 @@
 	color107=$(echo -en "\e[38;5;107m")
 	color117=$(echo -en "\e[38;5;117m")
 	color196=$(echo -en "\e[38;5;196m")
+	color201=$(echo -en "\e[38;5;201m")
 	color202=$(echo -en "\e[38;5;202m")
 	color240=$(echo -en "\e[38;5;240m")
 	#
@@ -55,6 +64,11 @@
 	export LESSCHARSET=utf-8
 	export LC_ALL=C
 
+	#########################################################################
+	# umask line added to allow groups to write to created directories	#
+	#########################################################################
+	umask 002
+
 	#################################################################################
 	# General UNIX/Linux tools							#
 	#################################################################################
@@ -67,7 +81,7 @@
 		alias ldir="ls -lph | egrep '^d' | GREP_COLORS='mt=38;5;25' grep --color=always -P '\S+\/$|'"
 
 		#########################################################################
-		# Screen formatting							#
+		# Screen formatting (temporary)						#
 		#########################################################################
 		alias noWrap='tput rmam; { sleep 20 && tput smam & };'
 
@@ -79,6 +93,18 @@
 		#	cat file.txt | nonascii
 		alias nonascii=' GREP_COLOR="00;48;5;107" LC_CTYPE=C grep --color=always -n -P "[\x80-\xFF]"  | sed "s/:/\t/g" | while read line; do printf "\n"; echo "$line" | fmt -w 150 | sed -e "1s/^/ /" -e '\''2,$s/^/\t/'\''; done  | sed "s/^/\t/" | sed "1s/^/\n\t $bg107 non-ascii characters $reset $bg240 in context $reset\n/"; printf "\n\n"'
 		alias    ascii=' GREP_COLOR="00;48;5;202" LC_CTYPE=C grep -n -P -o ".{0,40}[\x80-\xFF].{0,40}" | sed "s/:/\t/g" | sed "s/^/\t/" | GREP_COLOR="00;48;5;202" LC_CTYPE=C grep --color=always -P "[\x80-\xFF]" | sed "1s/^/\n\t$bg202 non-ascii characters $reset $bg240 trimmed from context $reset\n\n/"; printf "\n\n"'
+		# This will show where you have tabs and multiple spaces. Usage: 
+		#	cat file.txt | cleanUp
+		# GREP_COLOR='00;48;5;201' grep --color=always -e $'\t$' -e ''
+		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
+		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
+		alias cleanUpEnds="GREP_COLOR='00;48;5;117' grep --color=always -e \$' \$' -e '' |   GREP_COLOR='00;48;5;201' grep --color=always -e \$'\t\$' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg201 tab line endings $reset $bg117 space line endings $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
+		# This is for files that sometimes don't have a newline on the last line... it messes things up...
+		alias fixLastLine="sed -e '\$a\'"
+		# Data from Windows or some rich text will have lines end with both a carriage return and newline character, this fixes it.
+		alias fixCLFR="sed -e 's/[\\r\\n]//g'"
+		alias fixNewLines=fixCLFR
+		alias deleteBlankLines="sed '/^\s*$/d' "
 
 		#########################################################################
 		# If you need a quick folder, don't use foo or temp...			#
@@ -105,14 +131,7 @@
 		# Shows column numbers with header and example row. Usage:
 		# 	cat file.txt | whichColumns
 		alias whichColumns=" head -n 2 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] \"     \t\" \$i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, \"\", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'"
-		# This will show where you have tabs and multiple spaces. Usage: 
-		#	cat file.txt | cleanUp
-		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
-		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
-		# This is for files that sometimes don't have a newline on the last line... it messes things up...
-		alias fixLastLine="sed -e '\$a\'"
-		alias fixCLFR="sed -e 's/[\\r\\n]//g'"
-		alias fixNewLines=fixCLFR
+
 		#########################################################################
 		# Make a custom border							#
 		#########################################################################
@@ -159,7 +178,7 @@
 		#	The pattern can use basic regex.				#
 		#########################################################################
 		showMatches() {
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
 			if [ -s "$1" ]; then
 				if [ "$2" == "" ]; then echo "You didn't provide a valid pattern"; return 0; fi
 				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
@@ -169,6 +188,58 @@
 				echo "Please provide a filename that exists and has content."
 			fi
 		}
+		#########################################################################
+		# This collapses a tag storm
+		#########################################################################
+		listAllTags() {
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
+			if [ -s "$1" ]; then
+				cat $1 | sed 's/^[[:blank:]]*//g' | cut -f 1 -d " " | cut -f 1 | sort | uniq | awk NF | sed "s/$/ /g"
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+		alias listTags=listAllTags
+		#########################################################################
+		# This parses cdwValid.c and returns a cleaned-up list of tags
+		#########################################################################
+		listValidTags() {
+			#if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
+			#if [ -s "$1" ]; then
+				cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
+				misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
+				allTags=$( printf "$cdwTags\n$misceTags\n" | sort | uniq)
+				echo "$allTags" # | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g"
+			#else
+			#	echo "Please provide a filename that exists and has content."
+			#fi
+		}
+		#########################################################################
+		# This collapses a tag storm, then passes it to highlight. Only valid tags are highlighted.
+		#########################################################################
+		checkTagsValid() {
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
+			if [ -s "$1" ]; then
+				listAllTags $1 | ~clay/ontogeny/bin/ontogeny_highlight.sh stdin $(listValidTags | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g") | tail -n +5 | sed '$d' | sed '$d'  | sed '$d'
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+		
+		#########################################################################
+		# This will show the content between two matches. Note that the first match is used.
+		#########################################################################
+		grabBetween(){
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabBetween file.txt firstPattern secondPattern"; return 0; fi
+			if [ -s "$1" ]; then
+				# nl --body-numbering=a
+				cat $1 | grep --no-group-separator -A500 $2 | grep --no-group-separator -B500 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+
+		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_'"
 
 	#################################################################################
 	# Ontogeny repository/bin aliases						#
@@ -202,10 +273,6 @@
 		#########################################################################
 		alias checkSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_checkSubmission.sh"
 
-	#########################################################################
-	# umask line added to allow groups to write to created directories	#
-	#########################################################################
-	umask 002
 
 #########################################################################
 # Help messages								#
