@@ -163,6 +163,95 @@
 
 		alias inspect=headAndTail
 		#########################################################################
+		# Template for a function
+		# o - accept multiple (unlimited) files
+		# o - parses multiple (unlimited) arguments 
+		# o - assigns different colors to each argument, with the first 6 and then 13 colors curated for visibility
+		#########################################################################
+		# Usage:
+		# 	allTheArguments "$(ls *.txt)"  arg1 arg2 arg3 arg4
+		allTheArguments() {
+			echo
+			# First arg is the file, so let's just grab args after that
+			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
+			# Sometimes multiple files are used, so we need to account for that
+			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+			# We know that we will be off by at least one argument, because the first arg is the file.
+			OFFSET=$((1+FILENUM))
+			# This will give us a straight list of our arguments separated from the files
+			ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
+			# Convert the argument terms to a number
+			ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
+			#########################################################################
+			# Let's start with very different colors to maintain contrast between matches
+			#########################################################################
+			NEEDEDCOLORS=$((ARGTERMNUM-12))
+			BASECOLORS="117 202 106 196 25 201"
+			# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
+			EXTENDEDCOLORS="240 99 22 210 81 203 105"
+			if [ "$ARGTERMNUM" -lt "7" ]; then
+				array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			elif [ "$ARGTERMNUM" -lt "14" ] && [ "$ARGTERMNUM" -gt "6" ]; then
+				array=( $(echo "$BASECOLORS $EXTENDEDCOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			else
+				FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
+				array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			fi
+			echo $WALL
+			echo "File(s):	$color240$(echo $1 | tr ' ' ',\s' | sed 's/,$//g' )$reset"
+			echo "Arguments: $color240$ARGTERMNUM$reset"
+			echo $WALL
+			i=0
+			ARGNUM=1
+			for f in $ARGTERMS; do 
+				color=${array[i]}
+				printf "\e[38;5;${color}m$ARGNUM: $f$reset\n"
+				((ARGNUM++))
+				((i++))
+			done
+			echo $WALL
+			echo
+		}
+
+		#########################################################################
+		# Template to accept flags in a function
+		# o - be sure to unset any variables and flags needed, or assign them under 'local'
+		# o - set your flags on the while loop
+		# o - shows help with incorrect usage
+		#########################################################################
+		# Usage:
+		# 	functionFlags -a "Let's see" -b "Another thing"
+		functionFlags() {
+			get_help() { echo "usage: command -a <arg> -b <arg>" 1>&2; }
+			# Set your flags as local or they may inherit values from calling itself multiple times
+			local OPTIND f a b flagVar2
+			# Set getopts flags you'll allow. If the flag requires an argument, follow it with a colon
+			while getopts ":a:b:" f; do
+				case "${f}" in
+					a)	a=$OPTARG
+						;;
+					b)	if [ -n "$OPTARG" ]; then
+							flagVar2=$OPTARG
+						fi
+						;;
+					*)	get_help >&2
+						echo "	non-option arguments: $*"
+						return 0
+						;;
+				esac
+			done
+			if [ -n "$a" ]; then
+				echo "Hello, world!"
+			fi
+			shift $((OPTIND-1))
+			echo
+			echo "Here's what you set:"
+			echo "	a: $a"
+			echo "	b: $flagVar2"
+			echo 
+		}
+
+		#########################################################################
 		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
 		#########################################################################
 		allTheThings() {
