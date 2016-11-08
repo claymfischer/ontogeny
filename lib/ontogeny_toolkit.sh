@@ -360,6 +360,7 @@
 		# General purpose							#
 		#########################################################################
 		alias checkSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_checkSubmission.sh"
+		#alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
 
 	#################################################################################
 	# CIRM-specific stuff								#
@@ -372,6 +373,12 @@
 		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
 		alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
+
+		#########################################################################
+		# Wrangler-curated stuff						#
+		#########################################################################
+		alias cdwDataSets="hgsql cdw -e 'select id,name,label,description,metaDivTags,metaLabelTags from cdwDataset\G' | GREP_COLOR='00;38;5;107' grep --color=always \$'^[[:blank:]]*name.*\|' | GREP_COLOR='00;38;5;200' grep --color=always \$'^[[:blank:]]*label.*\|' | GREP_COLOR='00;38;5;117' grep --color=always \$'^[[:blank:]]*description.*\|' | GREP_COLOR='00;38;5;202' grep --color=always \$'^[[:blank:]]*metaDivTags.*\|' | GREP_COLOR='00;38;5;25' grep --color=always \$'^[[:blank:]]*metaLabelTags.*\|' | GREP_COLOR='00;38;5;236' grep --color=always \$'^\**.*\|'"
+		alias cdwLabs="hgsql cdw -e 'select id,name,pi,institution,url from cdwLab\G' | GREP_COLOR='00;38;5;202' grep --color=always \$'^[[:blank:]]*name.*\|' | GREP_COLOR='00;38;5;200' grep --color=always \$'^[[:blank:]]*institution.*\|' | GREP_COLOR='00;38;5;25' grep --color=always \$'^[[:blank:]]*url.*\|' | GREP_COLOR='00;38;5;117' grep --color=always \$'^[[:blank:]]*pi.*\|' | GREP_COLOR='00;38;5;236' grep --color=always \$'^\**.*\|'"
 
 #########################################################################
 # Help messages								#
