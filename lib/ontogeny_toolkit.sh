@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 #################################################################################
 # https://github.com/claymfischer/ontogeny
@@ -135,20 +134,23 @@
 		#########################################################################
 		# Make a custom border							#
 		#########################################################################
-		border=1
-		WALL=
-		WINDOW=$(tput cols)
-		while [ "$border" -lt "$WINDOW" ]; do
-			WALL="=$WALL";
-			((border++))
-		done
-		WALL="$color240$WALL$reset"
+		wall() {
+			border=1
+			WALL=
+			WINDOW=$(tput cols)
+			while [ "$border" -lt "$WINDOW" ]; do
+				WALL="=$WALL";
+				((border++))
+			done
+			export WALL="$color240$WALL$reset"
+		}
 		#########################################################################
 		# This is a way of looking at the top and bottom of a file.
 		#########################################################################
 		headAndTail() {
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ inspect file 10"; return 0; fi
 			if [ -s "$1" ]; then
+				wall
 				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
 				if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
 				if [ "$BIGENOUGH" -gt "20" ]; then
@@ -172,6 +174,7 @@
 		# 	allTheArguments "$(ls *.txt)"  arg1 arg2 arg3 arg4
 		allTheArguments() {
 			echo
+			wall
 			# First arg is the file, so let's just grab args after that
 			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
 			# Sometimes multiple files are used, so we need to account for that
@@ -211,6 +214,10 @@
 			done
 			echo $WALL
 			echo
+		}
+
+		colorize() {
+			printf "";
 		}
 
 		#########################################################################
@@ -277,6 +284,36 @@
 				echo "Please provide a filename that exists and has content."
 			fi
 		}
+		grabTagStorm() {
+			if [ -z "$TAGSTORM" ]; then
+				# Let's grab the most recent file that matches the below configuration
+				TAGSTORM=$(ls -t *meta* | head -n 1)
+				if [ -s "$TAGSTORM" ]; then
+					printf ""
+				else
+					TAGSTORM="help"
+				fi
+				ASSUMED=1
+			fi
+		}
+		grabManifest() {
+			if [ -z "$MANIFEST" ]; then
+				# Let's grab the most recent file that matches the below configuration
+				MANIFEST=$(ls -t *maniF* | head -n 1)
+				if [ -s "$MANIFEST" ]; then
+					printf ""
+				else
+					MANIFEST="help"
+				fi
+				ASSUMED=1
+			fi
+		}
+		needHelp() {
+			if [ "$FILE" == "-h" ] || [ "$FILE" == "--help" ]; then
+				FILE="help"
+			fi
+		}
+		
 		#########################################################################
 		# This collapses a tag storm
 		#########################################################################
@@ -307,6 +344,11 @@
 		# This collapses a tag storm, then passes it to highlight. Only valid tags are highlighted.
 		#########################################################################
 		checkTagsValid() {
+		#	grabTagStorm
+
+		#	OR GRAB MANIFEST COLUMN
+		#
+			echo $TAGSTORM
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
 			if [ -s "$1" ]; then
 				listAllTags $1 | ~clay/ontogeny/bin/ontogeny_highlight.sh stdin $(listValidTags | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g") | tail -n +5 | sed '$d' | sed '$d'  | sed '$d'
@@ -328,7 +370,7 @@
 			fi
 		}
 
-		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_'"
+		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
 	#################################################################################
 	# Ontogeny repository/bin aliases						#
 	#################################################################################
@@ -337,6 +379,7 @@
 		# General UNIX software							#
 		#########################################################################
 		alias columns="$ONTOGENY_INSTALL_PATH/bin/ontogeny_columns.sh"
+		alias colorCode="$ONTOGENY_INSTALL_PATH/bin/ontogeny_columnColorizer.sh"
 		alias highlight="$ONTOGENY_INSTALL_PATH/bin/ontogeny_highlight.sh"
 		alias transfer="$ONTOGENY_INSTALL_PATH/bin/ontogeny_transfer.sh"
 		alias changePrompt="source $ONTOGENY_INSTALL_PATH/bin/ontogeny_changePrompt.sh" # This is silly and serves no practical purpose
@@ -359,6 +402,9 @@
 		#########################################################################
 		# General purpose							#
 		#########################################################################
+		alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
+		alias whatHappened=inspectSubmission
+		alias inspectHere=inspectSubmission
 		alias checkSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_checkSubmission.sh"
 		#alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
 
@@ -370,9 +416,9 @@
 		# Submissions								#
 		#########################################################################
 		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+	#	alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-		alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
+	#	alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
 
 		#########################################################################
 		# Wrangler-curated stuff						#
