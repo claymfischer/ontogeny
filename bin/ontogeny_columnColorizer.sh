@@ -15,7 +15,55 @@
 #	Usage
 #		input | colorizer.sh "\t" 2 5
 
+#################################################################################
+# Config									#
+#################################################################################
+color25=$(echo -en "\e[38;5;25m"); 
+color107=$(echo -en "\e[38;5;107m"); 
+color117=$(echo -en "\e[38;5;117m"); 
+color199=$(echo -en "\e[38;5;199m"); 
+color202=$(echo -en "\e[38;5;202m"); 
+color240=$(echo -en "\e[38;5;240m"); 
+bg25=$(echo -en "\e[48;5;25m"); 
+bg107=$(echo -en "\e[48;5;107m"); 
+bg196=$(echo -en "\e[48;5;196m"); 
+bg200=$(echo -en "\e[48;5;199m"); 
+reset=$(echo -en "\033[0m")
+	#########################################################################
+	# Make a custom border							#
+	#########################################################################
+	border=1
+	WINDOW=$(tput cols)
+	while [ "$border" -lt "$WINDOW" ]; do
+		WALL="=$WALL";
+		((border++))
+	done
+	WALL="$color240$WALL$reset"
+
 	delimiter="$1"
+	if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+		echo
+		echo "$WALL"
+		echo "${color107}Color Code$reset"
+		echo	
+		echo "A minimalist column-colorizer. Please note this utility $bg196 only accepts stdin $reset."
+		echo
+		echo "Basic usage assumes tab as your delimiter:"
+		echo
+		echo "$color240	piped input | ${color117}colorCode$reset"
+		echo
+		echo "To define a specific delimiter:"
+		echo
+		echo "$color240	piped input | ${color117}colorCode$reset $color25\"|\"$reset"
+		echo
+		echo "To color specific columns, define your delimiter and add the column numbers you want colored as your arguments."
+		echo
+		echo "$color240	piped input | ${color117}colorCode$reset $color25\"|\" ${color107}2 5 8$reset"
+		echo "$WALL"
+		echo 
+		exit 0
+	fi
+
 	if [ -z "$1" ]; then
 		delimiter="\t"
 	fi
