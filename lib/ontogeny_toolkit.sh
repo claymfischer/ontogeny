@@ -126,6 +126,16 @@
 		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
 		align() {
 			wall
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+				echo
+				echo "Usage:"
+				echo
+				echo "	${color117}align$color107 file.txt $color25'delimiter'$reset"
+				echo
+				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+				echo
+				return 0;
+			fi
 			if [ -z "$2" ]; then 
 				delimiter=$'\t'
 				aligningOn="tab"
