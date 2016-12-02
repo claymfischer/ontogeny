@@ -124,6 +124,22 @@
 		# 	$ cat file.txt | format
 		#alias format="  sed 's/\t\t/\t\.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t\./g' | column -ts $'\t' "
 		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
+		align() {
+			wall
+			if [ -z "$2" ]; then 
+				delimiter=$'\t'
+				aligningOn="tab"
+			else
+				delimiter=$2
+				aligningOn=$2
+			fi
+			echo 
+			echo "${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
+			echo "$WALL" 
+			cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+			#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
+			echo "$WALL"
+		}
 		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
 		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
 		alias numColumns="awk -F '\t' '{print NF; exit}'"
