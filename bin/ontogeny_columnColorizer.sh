@@ -33,6 +33,7 @@ reset=$(echo -en "\033[0m")
 	# Make a custom border							#
 	#########################################################################
 	border=1
+	WALL=
 	WINDOW=$(tput cols)
 	while [ "$border" -lt "$WINDOW" ]; do
 		WALL="=$WALL";
