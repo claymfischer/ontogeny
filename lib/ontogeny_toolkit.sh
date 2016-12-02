@@ -123,7 +123,7 @@
 		# Usage: 
 		# 	$ cat file.txt | format
 		#alias format="  sed 's/\t\t/\t\.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t\./g' | column -ts $'\t' "
-		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t'"
+		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
 		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
 		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
 		alias numColumns="awk -F '\t' '{print NF; exit}'"
