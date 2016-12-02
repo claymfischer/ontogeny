@@ -10,6 +10,8 @@
 #################################################################################
 # color columns with no delimiter gray?
 #
+# This is a minimalist version of the column colorizer. It only accepts stdin, and you can set any delimiter you want as your first argument
+#
 #	Usage
 #		input | colorizer.sh "\t" 2 5
 
