@@ -122,7 +122,8 @@
 		alias writing='echo ""; echo "$(( ($(du  --apparent-size -s | cut -f 1) - $(sleep 1; du --apparent-size -s | cut -f 1)) / -1 | bc -l  )) bytes written in the last second in $PWD"; printf "\n\n"'
 		# Usage: 
 		# 	$ cat file.txt | format
-		alias format=" sed 's/\t\t/\t\.\t/g' |  sed 's/\t$/\t\./g' | column -ts $'\t' "
+		#alias format="  sed 's/\t\t/\t\.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t\./g' | column -ts $'\t' "
+		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t'"
 		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
 		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
 		alias numColumns="awk -F '\t' '{print NF; exit}'"
@@ -130,7 +131,9 @@
 		# Shows column numbers with header and example row. Usage:
 		# 	cat file.txt | whichColumns
 		alias whichColumns=" head -n 2 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] \"     \t\" \$i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, \"\", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'"
-
+		describeColumns() {
+			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'
+		}
 		#########################################################################
 		# Make a custom border							#
 		#########################################################################
@@ -415,10 +418,10 @@
 		#########################################################################
 		# Submissions								#
 		#########################################################################
-		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-	#	alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-	#	alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
+#		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
+#		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+#		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
+#		alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
 
 		#########################################################################
 		# Wrangler-curated stuff						#
