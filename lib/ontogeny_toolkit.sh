@@ -410,6 +410,9 @@
 		alias inspectHere=inspectSubmission
 		alias checkSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_checkSubmission.sh"
 		#alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
+		alias rainbow="$ONTOGENY_INSTALL_PATH/bin/ontogeny_palette.sh"
+		alias showColors=rainbow
+		alias palette=rainbow
 
 	#################################################################################
 	# CIRM-specific stuff								#
