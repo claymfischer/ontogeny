@@ -23,11 +23,11 @@ echo "+-------------------------------------------------------------------------
 	if [ "$WHICHSERVER" == "hgwdev" ]; then
 		colorAsciiArt=$(echo -en "\e[38;5;107m")
 		echo -e "\033]; 🌀  Welcome to hgwdev \007"
-		alias exit='echo -e "\033]; Exited dev \007"; exit'
+		alias exit='echo -e "\033]; ❌  Exited dev \007"; exit'
 	else
 		colorAsciiArt=$(echo -en "\e[38;5;166m")
 		echo -e "\033]; ☢  Welcome to cirm \007"
-		alias exit='echo -e "\033]; Exited cirm \007"; exit'
+		alias exit='echo -e "\033]; ❌  Exited cirm \007"; exit'
 	fi
 
 
