@@ -4,6 +4,10 @@
 # ontogeny_toolkit.sh
 #################################################################################
 
+echo "+-------------------------------------------------------------------------------+"
+echo "| Loading $PWD/ontogeny_toolkit.sh				|"
+echo "+-------------------------------------------------------------------------------+"
+
 	#################################################################################
 	# Purpose									#
 	#################################################################################
@@ -150,6 +154,10 @@
 			#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
 			echo "$WALL"
 		}
+		alias splitAndAlign=align
+		alias breakAndSeparate=align
+		alias chop=align
+		alias explode=align
 		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
 		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
 		alias numColumns="awk -F '\t' '{print NF; exit}'"
