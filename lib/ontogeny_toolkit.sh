@@ -140,19 +140,21 @@ echo "+-------------------------------------------------------------------------
 				echo
 				return 0;
 			fi
-			if [ -z "$2" ]; then 
+			if [ -z "$2" ] || [ "$2" == "tab" ]; then 
 				delimiter=$'\t'
 				aligningOn="tab"
 			else
 				delimiter=$2
 				aligningOn=$2
 			fi
+			tput rmam
 			echo 
-			echo "${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
+			echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
 			echo "$WALL" 
 			cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
 			#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
 			echo "$WALL"
+			tput smam
 		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
@@ -168,6 +170,41 @@ echo "+-------------------------------------------------------------------------
 		describeColumns() {
 			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'
 		}
+		alias colorRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
+		followRows() {
+		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
+			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+			while read line; do 
+				color=${array[z]}
+				lastColor=$( echo ${array[${#array[@]}-1]} )
+				if [ "$lastColor" == "$color" ]; then 
+					array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+					printf ""
+					z=0
+				fi
+				if [ -z "$alternate" ]; then 
+					alternate=0; 
+				else 
+				((alternate++)); 
+				fi; 
+				if [ $((alternate%2)) -eq 0 ]; then 
+					alternateRow=$(echo -en "\e[38;5;255m\e[${fgbg};5;${color}m"); 
+					((z++)); 
+				else 
+					alternateRow=$(echo -en "\e[38;5;255m") ; 
+				fi
+				echo "$reset$alternateRow$line$reset";
+			done
+		}
+		organize() {
+			# organize file.tsv tab x
+			align $1 $2 | followRows $3
+		}
+		alias mani="organize"
+		grid() {
+			align $1 $2 | followRows x
+		}
 		#########################################################################
 		# Make a custom border							#
 		#########################################################################
@@ -179,7 +216,7 @@ echo "+-------------------------------------------------------------------------
 				WALL="=$WALL";
 				((border++))
 			done
-			export WALL="$color240$WALL$reset"
+			export WALL="$reset$color240$WALL$reset"
 		}
 		#########################################################################
 		# This is a way of looking at the top and bottom of a file.
