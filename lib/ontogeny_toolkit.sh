@@ -36,12 +36,17 @@ fi
 	# Config									#
 	#################################################################################
 	# Edit this to what you want. I like a lot of history, and this makes it act sorta like mosh...
-	if [ "$SHELL" == "/bin/bash" ]; then
+	if [ -n "$ZSH_VERSION" ]; then
+		var=
+	elif [ -n "$BASH_VERSION" ]; then
 		unset HISTFILESIZE
 		HISTSIZE=5000
 		PROMPT_COMMAND="history -a"
 		export HISTSIZE PROMPT_COMMAND
 		shopt -s histappend
+
+	else
+		var=
 	fi
 	
 	# I edit my .bashrc often enough that this is useful to me.
