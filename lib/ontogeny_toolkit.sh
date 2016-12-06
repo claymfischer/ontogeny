@@ -36,11 +36,13 @@ fi
 	# Config									#
 	#################################################################################
 	# Edit this to what you want. I like a lot of history, and this makes it act sorta like mosh...
-	unset HISTFILESIZE
-	HISTSIZE=5000
-	PROMPT_COMMAND="history -a"
-	export HISTSIZE PROMPT_COMMAND
-	shopt -s histappend
+	if [ "$SHELL" == "/bin/bash" ]; then
+		unset HISTFILESIZE
+		HISTSIZE=5000
+		PROMPT_COMMAND="history -a"
+		export HISTSIZE PROMPT_COMMAND
+		shopt -s histappend
+	fi
 	
 	# I edit my .bashrc often enough that this is useful to me.
 	alias load='source ~/.bashrc; source ~/.bash_profile'
