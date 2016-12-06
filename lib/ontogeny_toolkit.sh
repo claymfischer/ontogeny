@@ -44,7 +44,6 @@ fi
 		PROMPT_COMMAND="history -a"
 		export HISTSIZE PROMPT_COMMAND
 		shopt -s histappend
-
 	else
 		var=
 	fi
@@ -607,14 +606,20 @@ EOF
 		# ansi escape sequence color: \e[38;5;240m (240 can be 0-255)
 		# ansi escape sequence reset: \e[0m 
 		# to make sure the CLI knows the size, escape with \[ \] or it will be wonky and broken
-		WHICHSERVER=$(uname -n)
-		if [ "$WHICHSERVER" == "hgwdev" ]; then
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
+		if [ -n "$ZSH_VERSION" ]; then
+			var=
+		elif [ -n "$BASH_VERSION" ]; then
+			WHICHSERVER=$(uname -n)
+			if [ "$WHICHSERVER" == "hgwdev" ]; then
+				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
+				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
+			else
+				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[38;5;240m\]\W/\[\e[0m\]⚡   \[\e[0m\] '
+				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡  \[\e[0m\] '
+				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
+			fi
 		else
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[38;5;240m\]\W/\[\e[0m\]⚡   \[\e[0m\] '
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡  \[\e[0m\] '
-			export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
+			var=
 		fi
 
 		#########################################################################
