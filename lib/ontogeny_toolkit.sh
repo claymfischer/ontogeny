@@ -4,7 +4,7 @@
 # ontogeny_toolkit.sh
 #################################################################################
 
-if [ -z $PS1 ]
+if [ -z "$PS1" ]
 then
 	var=
 else
@@ -267,6 +267,7 @@ fi
 		makeBlocks() {
 			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
 			color=238
+			textColor=252
 			while read line; do 
 				if [ -z "$alternate" ]; then 
 					alternate=0; 
@@ -274,8 +275,8 @@ fi
 				((alternate++)); 
 				fi; 
 				if [ $((alternate%2)) -eq 0 ]; then 
-					alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
-					COLOR=`echo -e "\e[48;5;${color}m"`
+					alternateRow=$(echo -en "\e[38;5;${textColor}m\e[${fgbg};5;${color}m"); 
+					COLOR=`echo -e "\e[38;5;${textColor}m\e[48;5;${color}m"`
 					NORMAL=`echo -e '\033[0m'`
 					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
 					((z++)); 

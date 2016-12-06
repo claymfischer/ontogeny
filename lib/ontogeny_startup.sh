@@ -5,7 +5,7 @@
 #################################################################################
 # This is only loaded on startup, whereas your .bashrc can be loaded when executing programs.
 
-if [ -z $PS1 ]
+if [ -z "$PS1" ]
 then
 	var=
 else
