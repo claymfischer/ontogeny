@@ -169,6 +169,29 @@ fi
 			echo "$WALL"
 			tput smam
 		}
+		# this is just ailgn, but testing.
+		arrange() {
+			wall
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+				echo
+				echo "Usage:"
+				echo
+				echo "	${color117}align$color107 file.txt $color25'delimiter'$reset"
+				echo
+				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+				echo
+				return 0;
+			fi
+			if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+				delimiter=$'\t'
+				aligningOn="tab"
+			else
+				delimiter=$2
+				aligningOn=$2
+			fi
+		#	echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
+			cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
 		alias chop=align
@@ -183,7 +206,7 @@ fi
 		describeColumns() {
 			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'
 		}
-		alias colorRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
+		alias alternateRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
 		followRows() {
 		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
 			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
@@ -202,21 +225,77 @@ fi
 				((alternate++)); 
 				fi; 
 				if [ $((alternate%2)) -eq 0 ]; then 
-					alternateRow=$(echo -en "\e[38;5;255m\e[${fgbg};5;${color}m"); 
+					alternateRow=$(echo -en "\e[38;5;255m\e[${fgbg};5;${color}m");
 					((z++)); 
 				else 
-					alternateRow=$(echo -en "\e[38;5;255m") ; 
+					alternateRow= #$(echo -en "\e[38;5;255m") ; 
 				fi
 				echo "$reset$alternateRow$line$reset";
 			done
 		}
+		alias colorRows=followRows
+		makeGrid() {
+		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
+			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+			while read line; do 
+				color=${array[z]}
+				lastColor=$( echo ${array[${#array[@]}-1]} )
+				if [ "$lastColor" == "$color" ]; then 
+					array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+					printf ""
+					z=0
+				fi
+				if [ -z "$alternate" ]; then 
+					alternate=0; 
+				else 
+				((alternate++)); 
+				fi; 
+				if [ $((alternate%2)) -eq 0 ]; then 
+					alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
+					COLOR=`echo -e "\e[48;5;${color}m"`
+					NORMAL=`echo -e '\033[0m'`
+					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+					((z++)); 
+				else 
+					alternateRow= #$(echo -en "\e[38;5;255m") ; 
+					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
+				fi
+				echo "$reset$alternateRow$griddedLine$reset";
+			done
+		}
+		makeBlocks() {
+			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+			color=238
+			while read line; do 
+				if [ -z "$alternate" ]; then 
+					alternate=0; 
+				else 
+				((alternate++)); 
+				fi; 
+				if [ $((alternate%2)) -eq 0 ]; then 
+					alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
+					COLOR=`echo -e "\e[48;5;${color}m"`
+					NORMAL=`echo -e '\033[0m'`
+					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+					((z++)); 
+				else 
+					alternateRow= #$(echo -en "\e[38;5;255m") ; 
+					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
+				fi
+				echo "$reset$alternateRow$griddedLine$reset";
+			done
+		}
 		organize() {
 			# organize file.tsv tab x
-			align $1 $2 | followRows $3
+			align $1 $2 | followRows x
 		}
 		alias mani="organize"
 		grid() {
-			align $1 $2 | followRows x
+			arrange $1 $2 | makeGrid x
+		}
+		blocks() {
+			arrange $1 $2 | makeBlocks x
 		}
 		#########################################################################
 		# Make a custom border							#
