@@ -189,10 +189,22 @@ fi
 				delimiter=$2
 				aligningOn=$2
 			fi
-			if [ -z "$3" ]; then truncate=20; else truncate=$3; fi
+			# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
+			if [ -z "$3" ]; then truncate=58; else truncate=$(($3+8)); fi
+
 		#	echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
 			# cat truncate.txt | while read line; do echo "$line" | tr '\t' '\n' | while read line; do echo "$line" | sed "s/\(.\{0,5\}\).*/\1/"  | tr '\n' '\t'; done; printf "\n"; done
-			cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+		#	cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+
+
+
+			# This works, but doesn't handle leading whtiespace
+		#	cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+
+		#	cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
+		#	Works, first column 8 chars longer:
+		#	cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
+			cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
 		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
@@ -257,11 +269,11 @@ fi
 					alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
 					COLOR=`echo -e "\e[48;5;${color}m"`
 					NORMAL=`echo -e '\033[0m'`
-					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+					griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/$NORMAL $COLOR/g" | sed "s/\.\.\.\.\.\.\.\.\././g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
 					((z++)); 
 				else 
 					alternateRow= #$(echo -en "\e[38;5;255m") ; 
-					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
+					griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/ /g" | sed "s/\.\.\.\.\.\.\.\.\././g")
 				fi
 				echo "$reset$alternateRow$griddedLine$reset";
 			done
