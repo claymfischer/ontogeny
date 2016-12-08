@@ -189,8 +189,10 @@ fi
 				delimiter=$2
 				aligningOn=$2
 			fi
+			if [ -z "$3" ]; then truncate=20; else truncate=$3; fi
 		#	echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
-			cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+			# cat truncate.txt | while read line; do echo "$line" | tr '\t' '\n' | while read line; do echo "$line" | sed "s/\(.\{0,5\}\).*/\1/"  | tr '\n' '\t'; done; printf "\n"; done
+			cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
 		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
@@ -293,7 +295,7 @@ fi
 		}
 		alias mani="organize"
 		grid() {
-			arrange $1 $2 | makeGrid x
+			arrange $1 $2 $3 | makeGrid x
 		}
 		blocks() {
 			arrange $1 $2 | makeBlocks x
