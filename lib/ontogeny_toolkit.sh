@@ -657,7 +657,9 @@ EOF
 		if [ -n "$STY" ]; then 
 			screenMessage=$(printf "\n\n\tYou are in the screen session $color25$STY$reset"); 
 		else 
-			screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
+			if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
+				screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
+			fi
 		fi
 		screenHelp() {
 			cat << EOF
