@@ -85,6 +85,20 @@ fi
 	#########################################################################
 	umask 002
 
+		#########################################################################
+		# Make a custom border							#
+		#########################################################################
+		wall() {
+			border=1
+			WALL=
+			WINDOW=$(tput cols)
+			while [ "$border" -lt "$WINDOW" ]; do
+				WALL="=$WALL";
+				((border++))
+			done
+			export WALL="$reset$color240$WALL$reset"
+		}
+		wall
 	#################################################################################
 	# General UNIX/Linux tools							#
 	#################################################################################
@@ -121,6 +135,12 @@ fi
 		alias fixCLFR="sed -e 's/[\\r\\n]//g'"
 		alias fixNewLines=fixCLFR
 		alias deleteBlankLines="sed '/^\s*$/d' "
+		# This will reduce multiple blank lines to one.
+		alias reduceMultipleBlankLines='grep -A1 . | grep -v "^--$"'
+		alias columnLengths="awk ' { thislen=length($0); printf(\"%-5s %d\n\", NR, thislen); totlen+=thislen} END { printf(\"average: %d\n\", totlen/NR); } '"
+		# cut -f 3 file.tsv | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } '
+		alias columnAvg="awk ' { thislen=length($0); totlen+=thislen} END { printf(\"%d\n\", totlen/NR); } '"
+
 
 		#########################################################################
 		# If you need a quick folder, don't use foo or temp...			#
@@ -169,7 +189,7 @@ fi
 			echo "$WALL"
 			tput smam
 		}
-		# this is just ailgn, but testing.
+		# this is like align, but it adds in some strings to be cut out to make the grid later. Not really a useful tool on its own.
 		arrange() {
 			wall
 			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
@@ -186,25 +206,56 @@ fi
 				delimiter=$'\t'
 				aligningOn="tab"
 			else
+				# Should we just take first letter of the delimiter?
 				delimiter=$2
 				aligningOn=$2
 			fi
 			# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
-			if [ -z "$3" ]; then truncate=58; else truncate=$(($3+8)); fi
+			if [ -z "$3" ]; then 
+				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"	
+			elif [ "$3" == "average" ] || [ "$3" == "avg" ]; then
+				export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
+				export CURRENTCOL=1
+				export totalAvg=0
+				export colLength=0
+				export truncate=
+				while [ $CURRENTCOL -lt $COLS ]; do 
+					# add up column averages
+					colAvg=$(cut -f $CURRENTCOL $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR+8); } ')
+					totalAvg=$(($colAvg+$totalAvg))
+					#echo "Column #$CURRENTCOL: $colAvg characters, total so far: $totalAvg"
+					export colLength="$colLength $colAvg"
+				#	truncate[$CURRENTCOL]=$colAvg
+					
+					((CURRENTCOL++))
+				done
+				# Handle when totalAvg + COLS exceeds terminal window
+				array=( $(echo "$colLength") )
+				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do 
+					export i=1
+					echo "$line" | tr "$delimiter" '\n' | while read line; do 
+					truncateThis=${array[i]}
+						# Now we are dealing with each column from a row transposed
+						echo "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/" |
+						tr '\n' "$delimiter"; 
+						((i++))
 
-		#	echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
-			# cat truncate.txt | while read line; do echo "$line" | tr '\t' '\n' | while read line; do echo "$line" | sed "s/\(.\{0,5\}\).*/\1/"  | tr '\n' '\t'; done; printf "\n"; done
-		#	cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
-
-
-
-			# This works, but doesn't handle leading whtiespace
-		#	cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
-
-		#	cat $1 | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
-		#	Works, first column 8 chars longer:
-		#	cat $1 | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
-			cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
+					done; 
+					printf "\n"; 
+					i=1
+				done | 
+				column -ts $"$delimiter"
+			else 
+				# Silly trick to see if bash will be able to use $1 as an integer
+				if [ "$3" -eq "$3" ] 2>/dev/null; then
+					#INTEGER="y"
+					truncate=$(($3+8)) 
+				else
+					# INTEGER=""
+					truncate=100
+				fi
+				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
+			fi
 		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
@@ -248,11 +299,13 @@ fi
 			done
 		}
 		alias colorRows=followRows
+		alias WINDOW2="tput cols"
 		makeGrid() {
 		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
 			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
 			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
-			while read line; do 
+			while read line; do
+				# Handle colors from above
 				color=${array[z]}
 				lastColor=$( echo ${array[${#array[@]}-1]} )
 				if [ "$lastColor" == "$color" ]; then 
@@ -313,19 +366,6 @@ fi
 			arrange $1 $2 | makeBlocks x
 		}
 		#########################################################################
-		# Make a custom border							#
-		#########################################################################
-		wall() {
-			border=1
-			WALL=
-			WINDOW=$(tput cols)
-			while [ "$border" -lt "$WINDOW" ]; do
-				WALL="=$WALL";
-				((border++))
-			done
-			export WALL="$reset$color240$WALL$reset"
-		}
-		#########################################################################
 		# This is a way of looking at the top and bottom of a file.
 		#########################################################################
 		headAndTail() {
@@ -345,6 +385,51 @@ fi
 		}
 
 		alias inspect=headAndTail
+		cutColumns() {
+			# usage
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+				echo "Cuts columns from a file and prints to stdout. Doesnot alter original file."
+				echo
+				echo "	$ removeColumns file.txt 2 6 9 5"
+				echo
+				return 0
+			fi
+			# First arg is the file, so let's just grab args after that
+			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
+			# Sometimes multiple files are used, so we need to account for that
+			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+			# error if too many files
+			if [ "$FILENUM" -gt 1 ]; then echo "Please use only one file."; return 0; fi
+
+			# We know that we will be off by at least one argument, because the first arg is the file.
+			OFFSET=$((1+FILENUM))
+			# This will give us a straight list of our arguments separated from the files
+			ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
+			# Convert the argument terms to a number
+			ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
+			i=0
+			argnum=1
+			notRemoving=
+			columnsToRemove=
+			for f in $ARGTERMS; do 
+				# Test for integer
+				if [ "$f" -eq "$f" ] 2>/dev/null; then
+					#INTEGER="y"
+					columnsToRemove="$columnsToRemove \$$f=\"REMOVETHISCOLUMN\"; "
+				else
+					notRemoving="$notRemoving $bg196 $f $reset"
+				fi
+				((argnum++))
+				((i++))
+			done
+			COMMAND="awk '{$columnsToRemove print \$0}' FS='\t' OFS='\t' $1 | sed 's/REMOVETHISCOLUMN\t//g' | sed 's/\tREMOVETHISCOLUMN//g'"
+			eval "$COMMAND"
+			if [ -n "$notRemoving" ]; then
+				echo "The following columns were not removed: $notRemoving"
+			fi
+		}
+		alias nukeColumns=cutColumns
+		alias removeColumns=cutColumns
 		#########################################################################
 		# Template for a function
 		# o - accept multiple (unlimited) files
@@ -386,11 +471,11 @@ fi
 			echo "Arguments: $color240$ARGTERMNUM$reset"
 			echo $WALL
 			i=0
-			ARGNUM=1
+			argnum=1
 			for f in $ARGTERMS; do 
 				color=${array[i]}
-				printf "\e[38;5;${color}m$ARGNUM: $f$reset\n"
-				((ARGNUM++))
+				printf "\e[38;5;${color}m$argnum: $f$reset\n"
+				((argnum++))
 				((i++))
 			done
 			echo $WALL
