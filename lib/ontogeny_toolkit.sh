@@ -69,6 +69,7 @@ fi
 	color201=$(echo -en "\e[38;5;201m")
 	color202=$(echo -en "\e[38;5;202m")
 	color240=$(echo -en "\e[38;5;240m")
+	color247=$(echo -en "\e[38;5;247m")
 	#
 	reset=$(echo -en "\e[0m")
 
@@ -85,20 +86,49 @@ fi
 	#########################################################################
 	umask 002
 
-		#########################################################################
-		# Make a custom border							#
-		#########################################################################
-		wall() {
-			border=1
-			WALL=
-			WINDOW=$(tput cols)
-			while [ "$border" -lt "$WINDOW" ]; do
-				WALL="=$WALL";
-				((border++))
-			done
-			export WALL="$reset$color240$WALL$reset"
-		}
-		wall
+	#########################################################################
+	# For bash functions that require a file, use this template for notfound.
+	# Usage:	if [ ! -s "$FILE" ]; then templateNotFound; return 0; fi
+	#########################################################################
+	templateNotFound() {
+		FILE=$1
+		echo 
+		echo "The file $bg196 $FILE $reset does not exist"
+		echo ""
+		similarfiles=$( ls -d ${FILE:0:1}* | sort | wc -l )
+		echo "    Perhaps you intended to look at one of the following $bg25 $similarfiles $reset files (setting case insensitive for an instant):" 
+		echo ""
+		echo "	$ ls -d ${FILE:0:1}*$color240"
+		# some directories have a ton of files that may match, like srr*, so let's split this up to avoid a flood.
+		matchingFiles="ls -d ${FILE:0:1}* -lpht --time-style='+  %I:%M %p	 %a %b %d, %Y	' | sed 's/  */ /g' | cut -f 6- -d ' ' | ~clay/bin/columnsToGrid.sh stdin | sed 's/^/\t/'"
+		if [ "$similarfiles" -lt 30 ]; then
+			eval "$matchingFiles"
+		else
+			eval "$matchingFiles" | head -15
+			echo ""
+			echo "                $white[ ... ]$color25"
+			echo ""
+			eval "$matchingFiles" | tail -15
+		fi
+		echo ""
+		echo "$reset"
+		return 0
+	}
+
+	#########################################################################
+	# Make a custom border							#
+	#########################################################################
+	wall() {
+		border=1
+		WALL=
+		WINDOW=$(tput cols)
+		while [ "$border" -lt "$WINDOW" ]; do
+			WALL="=$WALL";
+			((border++))
+		done
+		export WALL="$reset$color240$WALL$reset"
+	}
+	wall
 	#################################################################################
 	# General UNIX/Linux tools							#
 	#################################################################################
@@ -106,7 +136,7 @@ fi
 		#########################################################################
 		# UNIX/linux aliases							#
 		#########################################################################
-		alias l="ls -lph"
+		alias l='ls -lph --time-style="+%I:%M %p, %a %b %d, %Y"'
 		alias lf="ls -lph | egrep -v '^d'"
 		alias ldir="ls -lph | egrep '^d' | GREP_COLORS='mt=38;5;25' grep --color=always -P '\S+\/$|'"
 
@@ -114,7 +144,8 @@ fi
 		# Screen formatting (temporary)						#
 		#########################################################################
 		alias noWrap='tput rmam; { sleep 20 && tput smam & };'
-
+		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
+	
 		#########################################################################
 		# ascii									#
 		#########################################################################
@@ -160,7 +191,17 @@ fi
 		# Usage: 
 		# 	$ cat file.txt | format
 		#alias format="  sed 's/\t\t/\t\.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t\./g' | column -ts $'\t' "
-		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
+		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | /usr/bin/column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
+		formatted() {
+			
+			if [ -z "$1" ] || [ "$1" == "tab" ]; then 
+				delimiter=$'\t'
+			else
+				delimiter=$1
+			fi
+			sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
+		}
+
 		align() {
 			wall
 			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
@@ -184,7 +225,7 @@ fi
 			echo 
 			echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
 			echo "$WALL" 
-			cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | column -ts $"$delimiter"
+			cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
 			#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
 			echo "$WALL"
 			tput smam
@@ -212,7 +253,7 @@ fi
 			fi
 			# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
 			if [ -z "$3" ]; then 
-				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"	
+				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"	
 			elif [ "$3" == "average" ] || [ "$3" == "avg" ]; then
 				export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
 				export CURRENTCOL=1
@@ -221,7 +262,7 @@ fi
 				export truncate=
 				while [ $CURRENTCOL -lt $COLS ]; do 
 					# add up column averages
-					colAvg=$(cut -f $CURRENTCOL $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR+8); } ')
+					colAvg=$(cut -f $CURRENTCOL -d"$delimiter" $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR+8); } ')
 					totalAvg=$(($colAvg+$totalAvg))
 					#echo "Column #$CURRENTCOL: $colAvg characters, total so far: $totalAvg"
 					export colLength="$colLength $colAvg"
@@ -244,7 +285,7 @@ fi
 					printf "\n"; 
 					i=1
 				done | 
-				column -ts $"$delimiter"
+				/usr/bin/column -ts $"$delimiter"
 			else 
 				# Silly trick to see if bash will be able to use $1 as an integer
 				if [ "$3" -eq "$3" ] 2>/dev/null; then
@@ -254,22 +295,109 @@ fi
 					# INTEGER=""
 					truncate=100
 				fi
-				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | column -ts $"$delimiter"
+				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"
 			fi
 		}
 		alias splitAndAlign=align
 		alias breakAndSeparate=align
 		alias chop=align
 		alias explode=align
+
+		summarizeColumns() {
+			clear
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+				echo
+				echo "Usage:"
+				echo
+				echo "	${color117}summarizeColumns$color107 file.txt$reset"
+				echo
+				echo "Summarizes columns and gives random example values from each column."
+				echo
+				echo "	${color117}summarizeColumns$color107 file.csv $color25'delimiter'$reset"
+				echo
+				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+				echo
+				echo "	${color117}summarizeColumns$color107 file.tsv ${color25}tab$reset 5 50"
+				echo
+				echo "$color240	If no integer is specified, defaults to 5 examples per column, and truncates to 15 characters.$reset"
+				echo
+				return 0;
+			fi
+			if [ -a "$1" ]; then
+				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+					delimiter=$'\t'
+					aligningOn="tab"
+				else
+					# Should we just take first letter of the delimiter?
+					delimiter=$2
+					aligningOn=$2
+				fi
+				if [ -z "$3" ]; then
+					howMany=5
+				else
+					if [ "$3" -eq "$3" ] 2>/dev/null; then
+						howMany=$3
+					else
+						howMany=5
+					fi
+				fi
+				export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
+				export CURRENTCOL=1
+				export totalAvg=0
+				export colLength=0
+				export truncate=
+				if [ -z "$4" ]; then truncateThis=15; else truncateThis=$4; fi
+				output="#	column title	uniq vals	avg char.	$color25$howMany$reset random values (truncated to $truncateThis characters)
+$WALL"
+				while [ $CURRENTCOL -le $COLS ]; do 
+					# add up column averages
+					colAvg=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } ')
+					totalAvg=$(($colAvg+$totalAvg))
+					colTitle=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | head -n +1 )
+					COLOR=`echo -e "\e[38;5;${color}m"`
+					NORMAL=`echo -e '\033[0m'`
+					crlf=$(grep -U $'\015\|\x0D' $1 | wc -l)
+					# sed "s/^\(.\{0,$truncateThis\}\).*/\1/"
+				#	randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | tr '\n' ',' | sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+					randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then printf "${color25}BLANK"; line2="^[[:blank:]]*$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+					uniqueValues=$(cut -f $CURRENTCOL -d "$delimiter" $1 | tail -n +2 | sort | uniq | wc -l)
+					output="$output
+$CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$colAvg	$randValues"
+					export colLength="$colLength $colAvg"
+					((CURRENTCOL++))
+				done
+				echo "$WALL"
+				echo "$output" | /usr/bin/column -ts $'\t' 
+				maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
+				minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
+				if [ "$maxColumns" == "$minColumns" ]; then
+					columnDetails="$maxColumns columns"
+				else
+					columnDetails="an inconsistent column numbers among the rows. The most columns is $maxColumns, and the least is $minColumns"
+				fi
+				if [ "$crlf" = "0" ]; then CRLF=""; else CRLF="\n\n$bg196 WARNING $reset this file uses clrf for newlines. Please fix them  ($color240$ cat $1 | fixNewLines > ${1}.fixed$reset)"; fi
+				echo "$WALL"
+				printf "${color25}$1$reset contains $(($(cat $1 | wc -l) - 1)) rows and ${columnDetails} using $bg25 $aligningOn $reset as a delimiter. $CRLF\n"
+				echo "$WALL"
+			else 
+				#echo "File doesn't exist"
+				templateNotFound $1
+			fi
+		}
+
+		alias emptyTags="grep $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
+		alias removeEmptyTags="grep -v $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
 		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
 		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
 		alias numColumns="awk -F '\t' '{print NF; exit}'"
+		alias maxColumns="awk -F'\t' '{print NF}' | sort -nu | tail -n 1"
+		alias minColumns="awk -F'\t' '{print NF}' | sort -nu | head -n 1"
 		alias whichColumn="awk -F'\t' ' { for (i = 1; i <= NF; ++i) print i, \$i; exit } ' "
 		# Shows column numbers with header and example row. Usage:
 		# 	cat file.txt | whichColumns
 		alias whichColumns=" head -n 2 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] \"     \t\" \$i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, \"\", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'"
 		describeColumns() {
-			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'
+			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/column -ts $'\t'
 		}
 		alias alternateRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
 		followRows() {
@@ -388,7 +516,7 @@ fi
 		cutColumns() {
 			# usage
 			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
-				echo "Cuts columns from a file and prints to stdout. Doesnot alter original file."
+				echo "Cuts columns from a file and prints to stdout. Does not alter original file."
 				echo
 				echo "	$ removeColumns file.txt 2 6 9 5"
 				echo
@@ -430,105 +558,12 @@ fi
 		}
 		alias nukeColumns=cutColumns
 		alias removeColumns=cutColumns
-		#########################################################################
-		# Template for a function
-		# o - accept multiple (unlimited) files
-		# o - parses multiple (unlimited) arguments 
-		# o - assigns different colors to each argument, with the first 6 and then 13 colors curated for visibility
-		#########################################################################
-		# Usage:
-		# 	allTheArguments "$(ls *.txt)"  arg1 arg2 arg3 arg4
-		allTheArguments() {
-			echo
-			wall
-			# First arg is the file, so let's just grab args after that
-			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
-			# Sometimes multiple files are used, so we need to account for that
-			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
-			# We know that we will be off by at least one argument, because the first arg is the file.
-			OFFSET=$((1+FILENUM))
-			# This will give us a straight list of our arguments separated from the files
-			ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
-			# Convert the argument terms to a number
-			ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
-			#########################################################################
-			# Let's start with very different colors to maintain contrast between matches
-			#########################################################################
-			NEEDEDCOLORS=$((ARGTERMNUM-12))
-			BASECOLORS="117 202 106 196 25 201"
-			# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
-			EXTENDEDCOLORS="240 99 22 210 81 203 105"
-			if [ "$ARGTERMNUM" -lt "7" ]; then
-				array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
-			elif [ "$ARGTERMNUM" -lt "14" ] && [ "$ARGTERMNUM" -gt "6" ]; then
-				array=( $(echo "$BASECOLORS $EXTENDEDCOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
-			else
-				FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
-				array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
-			fi
-			echo $WALL
-			echo "File(s):	$color240$(echo $1 | tr ' ' ',\s' | sed 's/,$//g' )$reset"
-			echo "Arguments: $color240$ARGTERMNUM$reset"
-			echo $WALL
-			i=0
-			argnum=1
-			for f in $ARGTERMS; do 
-				color=${array[i]}
-				printf "\e[38;5;${color}m$argnum: $f$reset\n"
-				((argnum++))
-				((i++))
-			done
-			echo $WALL
-			echo
-		}
-
-		colorize() {
-			printf "";
-		}
-
-		#########################################################################
-		# Template to accept flags in a function
-		# o - be sure to unset any variables and flags needed, or assign them under 'local'
-		# o - set your flags on the while loop
-		# o - shows help with incorrect usage
-		#########################################################################
-		# Usage:
-		# 	functionFlags -a "Let's see" -b "Another thing"
-		functionFlags() {
-			get_help() { echo "usage: command -a <arg> -b <arg>" 1>&2; }
-			# Set your flags as local or they may inherit values from calling itself multiple times
-			local OPTIND f a b flagVar2
-			# Set getopts flags you'll allow. If the flag requires an argument, follow it with a colon
-			while getopts ":a:b:" f; do
-				case "${f}" in
-					a)	a=$OPTARG
-						;;
-					b)	if [ -n "$OPTARG" ]; then
-							flagVar2=$OPTARG
-						fi
-						;;
-					*)	get_help >&2
-						echo "	non-option arguments: $*"
-						return 0
-						;;
-				esac
-			done
-			if [ -n "$a" ]; then
-				echo "Hello, world!"
-			fi
-			shift $((OPTIND-1))
-			echo
-			echo "Here's what you set:"
-			echo "	a: $a"
-			echo "	b: $flagVar2"
-			echo 
-		}
 
 		#########################################################################
 		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
 		#########################################################################
 		allTheThings() {
-			inspect $1 $2 | highlight stdin LINENUMBERS | columns stdin
+			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/columns stdin
 		}
 
 		#########################################################################
@@ -684,8 +719,8 @@ fi
 		#########################################################################
 		# Submissions								#
 		#########################################################################
-#		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-#		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
+		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 #		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
 #		alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
 
@@ -810,5 +845,94 @@ EOF
 			export PS1="[screen] $PS1"; 
 			screenHelp
 		fi
+
+		#########################################################################
+		# Template for a function
+		# o - accept multiple (unlimited) files
+		# o - parses multiple (unlimited) arguments 
+		# o - assigns different colors to each argument, with the first 6 and then 13 colors curated for visibility
+		#########################################################################
+		# Usage:
+		# 	allTheArguments "$(ls *.txt)"  arg1 arg2 arg3 arg4
+		allTheArguments() {
+			echo
+			wall
+			# First arg is the file, so let's just grab args after that
+			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
+			# Sometimes multiple files are used, so we need to account for that
+			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+			# We know that we will be off by at least one argument, because the first arg is the file.
+			OFFSET=$((1+FILENUM))
+			# This will give us a straight list of our arguments separated from the files
+			ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
+			# Convert the argument terms to a number
+			ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
+			#########################################################################
+			# Let's start with very different colors to maintain contrast between matches
+			#########################################################################
+			NEEDEDCOLORS=$((ARGTERMNUM-12))
+			BASECOLORS="117 202 106 196 25 201"
+			# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
+			EXTENDEDCOLORS="240 99 22 210 81 203 105"
+			if [ "$ARGTERMNUM" -lt "7" ]; then
+				array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			elif [ "$ARGTERMNUM" -lt "14" ] && [ "$ARGTERMNUM" -gt "6" ]; then
+				array=( $(echo "$BASECOLORS $EXTENDEDCOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			else
+				FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
+				array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+			fi
+			echo $WALL
+			echo "File(s):	$color240$(echo $1 | tr ' ' ',\s' | sed 's/,$//g' )$reset"
+			echo "Arguments: $color240$ARGTERMNUM$reset"
+			echo $WALL
+			i=0
+			argnum=1
+			for f in $ARGTERMS; do 
+				color=${array[i]}
+				printf "\e[38;5;${color}m$argnum: $f$reset\n"
+				((argnum++))
+				((i++))
+			done
+			echo $WALL
+			echo
+		}
+		#########################################################################
+		# Template to accept flags in a function
+		# o - be sure to unset any variables and flags needed, or assign them under 'local'
+		# o - set your flags on the while loop
+		# o - shows help with incorrect usage
+		#########################################################################
+		# Usage:
+		# 	functionFlags -a "Let's see" -b "Another thing"
+		functionFlags() {
+			get_help() { echo "usage: command -a <arg> -b <arg>" 1>&2; }
+			# Set your flags as local or they may inherit values from calling itself multiple times
+			local OPTIND f a b flagVar2
+			# Set getopts flags you'll allow. If the flag requires an argument, follow it with a colon
+			while getopts ":a:b:" f; do
+				case "${f}" in
+					a)	a=$OPTARG
+						;;
+					b)	if [ -n "$OPTARG" ]; then
+							flagVar2=$OPTARG
+						fi
+						;;
+					*)	get_help >&2
+						echo "	non-option arguments: $*"
+						return 0
+						;;
+				esac
+			done
+			if [ -n "$a" ]; then
+				echo "Hello, world!"
+			fi
+			shift $((OPTIND-1))
+			echo
+			echo "Here's what you set:"
+			echo "	a: $a"
+			echo "	b: $flagVar2"
+			echo 
+		}
 
 
