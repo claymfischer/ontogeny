@@ -6,9 +6,10 @@
 
 if [ -z "$PS1" ]
 then
+	# Non-interactive shell should have zero output. This would be when doing scp, using git, etc.
 	var=
 else
-	# interactive	
+	# Interactive shell can have output for diagnostic reasons, eg. so you know what loaded in a screen session.
 	echo "+-------------------------------------------------------------------------------+"
 	echo "| Loading $PWD/ontogeny_toolkit.sh					|"
 	echo "+-------------------------------------------------------------------------------+"
@@ -22,7 +23,11 @@ fi
 	# aliases to the shell scripts and UNIX command-line tools useful when dealing
 	# with big data.
 	#
-	# The things most users would wnat to change are at the top (except the PS1 variable near the bottom)
+	# The things most users would want to change are at the top (except the PS1 variable near the bottom)
+	#
+	# Functions/aliases are marked as "visualize" or "pipeline" and show usage. 
+	# Visualize means it should not be used as part of a pipeline, only at the end to see the intermediate state.
+	# Pipeline means you can use it in the middle of one.
 
 	#################################################################################
 	# Install									#
@@ -33,538 +38,192 @@ fi
 	# 	source $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh
 
 	#################################################################################
-	# Config									#
+	# Configuration									#
 	#################################################################################
-	# Edit this to what you want. I like a lot of history, and this makes it act sorta like mosh...
-	if [ -n "$ZSH_VERSION" ]; then
-		var=
-	elif [ -n "$BASH_VERSION" ]; then
-		unset HISTFILESIZE
-		HISTSIZE=5000
-		PROMPT_COMMAND="history -a"
-		export HISTSIZE PROMPT_COMMAND
-		shopt -s histappend
-	else
-		var=
-	fi
-	
-	# I edit my .bashrc often enough that this is useful to me.
-	alias load='source ~/.bashrc; source ~/.bash_profile'
-	alias bashrc='vi ~/.bashrc'
-	alias ontogeny_toolkit='vi $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh'
-
-	# Some of my commonly-used background colors:
-	bg25=$(echo -en "\e[48;5;25m")
-	bg107=$(echo -en "\e[48;5;107m")
-	bg117=$(echo -en "\e[48;5;117m")
-	bg196=$(echo -en "\e[48;5;196m")
-	bg201=$(echo -en "\e[48;5;201m")
-	bg202=$(echo -en "\e[48;5;202m")
-	bg240=$(echo -en "\e[48;5;240m")
-	# Some of my commonly-used foreground colors:
-	color25=$(echo -en "\e[38;5;25m")
-	color107=$(echo -en "\e[38;5;107m")
-	color117=$(echo -en "\e[38;5;117m")
-	color196=$(echo -en "\e[38;5;196m")
-	color201=$(echo -en "\e[38;5;201m")
-	color202=$(echo -en "\e[38;5;202m")
-	color240=$(echo -en "\e[38;5;240m")
-	color247=$(echo -en "\e[38;5;247m")
-	#
-	reset=$(echo -en "\e[0m")
-
-	# Setting LANG to anything other than 'C' may affect sort behavior. 
-	# To fix, either 1) set everything =C, 2) LC_COLLATE=C LC_ALL=C after LANG if you insist on using it 3) or sort +0 -1
-	# I set LC_ALL at the end which seems to make my sort work as anticipated.
-	export TERM=xterm-256color
-	export LANG="en_US.UTF-8"
-	export LESSCHARSET=utf-8
-	export LC_ALL=C
-
-	#########################################################################
-	# umask line added to allow groups to write to created directories	#
-	#########################################################################
-	umask 002
-
-	#########################################################################
-	# For bash functions that require a file, use this template for notfound.
-	# Usage:	if [ ! -s "$FILE" ]; then templateNotFound; return 0; fi
-	#########################################################################
-	templateNotFound() {
-		FILE=$1
-		echo 
-		echo "The file $bg196 $FILE $reset does not exist"
-		echo ""
-		similarfiles=$( ls -d ${FILE:0:1}* | sort | wc -l )
-		echo "    Perhaps you intended to look at one of the following $bg25 $similarfiles $reset files (setting case insensitive for an instant):" 
-		echo ""
-		echo "	$ ls -d ${FILE:0:1}*$color240"
-		# some directories have a ton of files that may match, like srr*, so let's split this up to avoid a flood.
-		matchingFiles="ls -d ${FILE:0:1}* -lpht --time-style='+  %I:%M %p	 %a %b %d, %Y	' | sed 's/  */ /g' | cut -f 6- -d ' ' | ~clay/bin/columnsToGrid.sh stdin | sed 's/^/\t/'"
-		if [ "$similarfiles" -lt 30 ]; then
-			eval "$matchingFiles"
+		# Edit this to what you want. I like a lot of history, and this makes it act sorta like mosh...
+		if [ -n "$ZSH_VERSION" ]; then
+			var=
+		elif [ -n "$BASH_VERSION" ]; then
+			unset HISTFILESIZE
+			HISTSIZE=5000
+			PROMPT_COMMAND="history -a"
+			export HISTSIZE PROMPT_COMMAND
+			shopt -s histappend
 		else
-			eval "$matchingFiles" | head -15
-			echo ""
-			echo "                $white[ ... ]$color25"
-			echo ""
-			eval "$matchingFiles" | tail -15
+			var=
 		fi
-		echo ""
-		echo "$reset"
-		return 0
-	}
+		# Setting LANG to anything other than 'C' may affect sort behavior. 
+		# To fix, either 1) set everything =C, 2) LC_COLLATE=C LC_ALL=C after LANG if you insist on using it 3) or sort +0 -1
+		# I set LC_ALL at the end which seems to make my sort work as anticipated.
+		export TERM=xterm-256color
+		export LANG="en_US.UTF-8"
+		export LESSCHARSET=utf-8
+		export LC_ALL=C
 
-	#########################################################################
-	# Make a custom border							#
-	#########################################################################
-	wall() {
-		border=1
-		WALL=
-		WINDOW=$(tput cols)
-		while [ "$border" -lt "$WINDOW" ]; do
-			WALL="=$WALL";
-			((border++))
-		done
-		export WALL="$reset$color240$WALL$reset"
-	}
-	wall
+		#########################################################################
+		# umask line added to allow groups to write to created directories	#
+		#########################################################################
+		umask 002
+
+	#################################################################################
+	# Function/variable libraries								#
+	#################################################################################
+	
+		#########################################################################
+		# Color library usage:
+		#
+		#	echo "Roses are ${color196}red$reset, violets are ${color25}blue$reset..."
+		#
+		# To see more colors, on your command line run ontogeny_palette.sh:
+		#	$ rainbow
+		#
+		#########################################################################
+		# Some of my commonly-used background colors
+		bg25=$(echo -en "\e[48;5;25m")
+		bg107=$(echo -en "\e[48;5;107m")
+		bg117=$(echo -en "\e[48;5;117m")
+		bg196=$(echo -en "\e[48;5;196m")
+		bg201=$(echo -en "\e[48;5;201m")
+		bg202=$(echo -en "\e[48;5;202m")
+		bg240=$(echo -en "\e[48;5;240m")
+		# Some of my commonly-used foreground colors:
+		color25=$(echo -en "\e[38;5;25m")
+		color107=$(echo -en "\e[38;5;107m")
+		color117=$(echo -en "\e[38;5;117m")
+		color196=$(echo -en "\e[38;5;196m")
+		color201=$(echo -en "\e[38;5;201m")
+		color202=$(echo -en "\e[38;5;202m")
+		color240=$(echo -en "\e[38;5;240m")
+		color247=$(echo -en "\e[38;5;247m")
+		#
+		reset=$(echo -en "\e[0m")
+
+
+		#########################################################################
+		# TO DO For bash functions that require a file, use this template to gracefully
+		# handle mis-typed filenames.
+		#
+		# Usage:
+		#	if [ ! -s "$FILE" ]; then 
+		#		templateNotFound; 
+		#		return 0; 
+		#	fi
+		#########################################################################
+		templateNotFound() {
+			FILE=$1
+			echo 
+			echo "The file $bg196 $FILE $reset does not exist"
+			echo ""
+			similarfiles=$( ls -d ${FILE:0:1}* | sort | wc -l )
+			echo "    Perhaps you intended to look at one of the following $bg25 $similarfiles $reset files (setting case insensitive for an instant):" 
+			echo ""
+			echo "	$ ls -d ${FILE:0:1}*$color240"
+			# some directories have a ton of files that may match, like srr*, so let's split this up to avoid a flood.
+			matchingFiles="ls -d ${FILE:0:1}* -lpht --time-style='+  %I:%M %p	 %a %b %d, %Y	' | sed 's/  */ /g' | cut -f 6- -d ' ' | ~clay/bin/columnsToGrid.sh stdin | sed 's/^/\t/'"
+			if [ "$similarfiles" -lt 30 ]; then
+				eval "$matchingFiles"
+			else
+				eval "$matchingFiles" | head -15
+				echo ""
+				echo "                $white[ ... ]$color25"
+				echo ""
+				eval "$matchingFiles" | tail -15
+			fi
+			echo ""
+			echo "$reset"
+			return 0
+		}
+
+		#########################################################################
+		# TO DO - implement
+		#########################################################################
+		detectStdin() {
+			# return 0 for stdin, 1 for no stdin
+			#or we could do handleStdin() which would cat vs. accept piped input into a variable?
+			return 0;
+		}
+		#########################################################################
+		# TO DO - implement
+		#########################################################################
+		needHelp() {
+			# Other scenarios?
+			# o - detect stdin when it is not intended?
+			# o - file not found
+			# o - file not set
+			# command not entered correctly - wrong arguments, arguments not integers where expected, etc
+			if [ "$FILE" == "-h" ] || [ "$FILE" == "--help" ]; then
+				FILE="help"
+			fi
+		}
+
+		#########################################################################
+		# Make a custom border							#
+		#
+		# Usage: if you call it inside a function, it will generate a wall spaced
+		# 	 to your current terminal window size. If you echo $WALL without
+		#	 calling it inside the function, it will make a wall the size of
+		#	 the terminal window when this file was first sourced (at login).
+		#
+		#	myFunction() {
+		#		wall
+		#		echo "$WALL"
+		#	}
+		#
+		#########################################################################
+		wall() {
+			border=1
+			WALL=
+			WINDOW=$(tput cols)
+			while [ "$border" -lt "$WINDOW" ]; do
+				WALL="=$WALL";
+				((border++))
+			done
+			export WALL="$reset$color240$WALL$reset"
+		}
+		wall
+
+	#################################################################################
+	# In-progress functions/temporary aliases
+	#################################################################################
+		# I edit my .bashrc often enough that this is useful to me.
+		alias load='source ~/.bashrc; source ~/.bash_profile'
+		alias bashrc='vi ~/.bashrc'
+		alias ontogeny_toolkit='vi $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh'
+		# For trawling for lab_ tags
+		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
+		
 	#################################################################################
 	# General UNIX/Linux tools							#
 	#################################################################################
 
 		#########################################################################
-		# UNIX/linux aliases							#
+		# Screen formatting (temporary)						#
+		#########################################################################
+		alias noWrap='tput rmam; { sleep 20 && tput smam & };'
+
+		#########################################################################
+		# General UNIX/linux aliases						#
 		#########################################################################
 		alias l='ls -lph --time-style="+%I:%M %p, %a %b %d, %Y"'
 		alias lf="ls -lph | egrep -v '^d'"
 		alias ldir="ls -lph | egrep '^d' | GREP_COLORS='mt=38;5;25' grep --color=always -P '\S+\/$|'"
 
 		#########################################################################
-		# Screen formatting (temporary)						#
-		#########################################################################
-		alias noWrap='tput rmam; { sleep 20 && tput smam & };'
-		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
-	
-		#########################################################################
-		# ascii									#
-		#########################################################################
+		# Visualize ascii
 		# usage:
 		#	cat file.txt | ascii
 		#	cat file.txt | nonascii
+		#########################################################################
 		alias nonascii=' GREP_COLOR="00;48;5;107" LC_CTYPE=C grep --color=always -n -P "[\x80-\xFF]"  | sed "s/:/\t/g" | while read line; do printf "\n"; echo "$line" | fmt -w 150 | sed -e "1s/^/ /" -e '\''2,$s/^/\t/'\''; done  | sed "s/^/\t/" | sed "1s/^/\n\t $bg107 non-ascii characters $reset $bg240 in context $reset\n/"; printf "\n\n"'
 		alias    ascii=' GREP_COLOR="00;48;5;202" LC_CTYPE=C grep -n -P -o ".{0,40}[\x80-\xFF].{0,40}" | sed "s/:/\t/g" | sed "s/^/\t/" | GREP_COLOR="00;48;5;202" LC_CTYPE=C grep --color=always -P "[\x80-\xFF]" | sed "1s/^/\n\t$bg202 non-ascii characters $reset $bg240 trimmed from context $reset\n\n/"; printf "\n\n"'
-		# This will show where you have tabs and multiple spaces. Usage: 
+
+		#########################################################################
+		# Visualize  where you have tabs and multiple spaces. Usage: 
 		#	cat file.txt | cleanUp
-		# GREP_COLOR='00;48;5;201' grep --color=always -e $'\t$' -e ''
+		#########################################################################
 		alias cleanUp=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;117' grep --color=always -e \$'\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg117 tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 		alias cleanUpToo=" GREP_COLOR='00;48;5;202' grep --color=always -E '  |' | GREP_COLOR='00;48;5;107' grep --color=always -e \$'\t\t' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg107 multiple tabs $reset $bg202 multiple spaces $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
 		alias cleanUpEnds="GREP_COLOR='00;48;5;117' grep --color=always -e \$' \$' -e '' |   GREP_COLOR='00;48;5;201' grep --color=always -e \$'\t\$' -e '' | grep -n '' | sed 's/^\([[:digit:]]*\):/\t\1\t/g' | sed '1s/^/\n\t$bg201 tab line endings $reset $bg117 space line endings $reset $reset\n\n/' | sed -e \"\\\$a\\ \""
-		# This is for files that sometimes don't have a newline on the last line... it messes things up...
-		alias fixLastLine="sed -e '\$a\'"
-		# Data from Windows or some rich text will have lines end with both a carriage return and newline character, this fixes it.
-		alias fixCLFR="sed -e 's/[\\r\\n]//g'"
-		alias fixNewLines=fixCLFR
-		alias deleteBlankLines="sed '/^\s*$/d' "
-		# This will reduce multiple blank lines to one.
-		alias reduceMultipleBlankLines='grep -A1 . | grep -v "^--$"'
-		alias columnLengths="awk ' { thislen=length($0); printf(\"%-5s %d\n\", NR, thislen); totlen+=thislen} END { printf(\"average: %d\n\", totlen/NR); } '"
-		# cut -f 3 file.tsv | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } '
-		alias columnAvg="awk ' { thislen=length($0); totlen+=thislen} END { printf(\"%d\n\", totlen/NR); } '"
-
-
-		#########################################################################
-		# If you need a quick folder, don't use foo or temp...			#
-		#########################################################################
-		# alias mkdirtoday='mkdir $(date +%F & "-" & echo $RANDOM)'
-		# date +"%H%M%S" vs. date +%R
- 		alias mkdirRand='mkdir "$(date +%F)-$RANDOM"'
-		alias mkdirNow='mkdir "$(date +%F)-$(date +"%H_%M_%S")"'
-		alias mkdirTime='mkdir "$(date +"%H_%M_%S")"'
-		alias foo='mkdir "$(date +"%b_%d")_$(date +"%I_%M_%p")"'
-
-		#########################################################################
-		# Directory/text file inspection/summary				#
-		#########################################################################
-		# As this takes time to execute du, I would not rely on its accuracy, just as a way of knowing something is being written.:
-		alias writing='echo ""; echo "$(( ($(du  --apparent-size -s | cut -f 1) - $(sleep 1; du --apparent-size -s | cut -f 1)) / -1 | bc -l  )) bytes written in the last second in $PWD"; printf "\n\n"'
-		# Usage: 
-		# 	$ cat file.txt | format
-		#alias format="  sed 's/\t\t/\t\.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t\./g' | column -ts $'\t' "
-		alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | /usr/bin/column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
-		formatted() {
-			
-			if [ -z "$1" ] || [ "$1" == "tab" ]; then 
-				delimiter=$'\t'
-			else
-				delimiter=$1
-			fi
-			sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
-		}
-
-		align() {
-			wall
-			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
-				echo
-				echo "Usage:"
-				echo
-				echo "	${color117}align$color107 file.txt $color25'delimiter'$reset"
-				echo
-				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
-				echo
-				return 0;
-			fi
-			if [ -z "$2" ] || [ "$2" == "tab" ]; then 
-				delimiter=$'\t'
-				aligningOn="tab"
-			else
-				delimiter=$2
-				aligningOn=$2
-			fi
-			tput rmam
-			echo 
-			echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
-			echo "$WALL" 
-			cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
-			#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
-			echo "$WALL"
-			tput smam
-		}
-		# this is like align, but it adds in some strings to be cut out to make the grid later. Not really a useful tool on its own.
-		arrange() {
-			wall
-			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
-				echo
-				echo "Usage:"
-				echo
-				echo "	${color117}align$color107 file.txt $color25'delimiter'$reset"
-				echo
-				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
-				echo
-				return 0;
-			fi
-			if [ -z "$2" ] || [ "$2" == "tab" ]; then 
-				delimiter=$'\t'
-				aligningOn="tab"
-			else
-				# Should we just take first letter of the delimiter?
-				delimiter=$2
-				aligningOn=$2
-			fi
-			# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
-			if [ -z "$3" ]; then 
-				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"	
-			elif [ "$3" == "average" ] || [ "$3" == "avg" ]; then
-				export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
-				export CURRENTCOL=1
-				export totalAvg=0
-				export colLength=0
-				export truncate=
-				while [ $CURRENTCOL -lt $COLS ]; do 
-					# add up column averages
-					colAvg=$(cut -f $CURRENTCOL -d"$delimiter" $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR+8); } ')
-					totalAvg=$(($colAvg+$totalAvg))
-					#echo "Column #$CURRENTCOL: $colAvg characters, total so far: $totalAvg"
-					export colLength="$colLength $colAvg"
-				#	truncate[$CURRENTCOL]=$colAvg
-					
-					((CURRENTCOL++))
-				done
-				# Handle when totalAvg + COLS exceeds terminal window
-				array=( $(echo "$colLength") )
-				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do 
-					export i=1
-					echo "$line" | tr "$delimiter" '\n' | while read line; do 
-					truncateThis=${array[i]}
-						# Now we are dealing with each column from a row transposed
-						echo "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/" |
-						tr '\n' "$delimiter"; 
-						((i++))
-
-					done; 
-					printf "\n"; 
-					i=1
-				done | 
-				/usr/bin/column -ts $"$delimiter"
-			else 
-				# Silly trick to see if bash will be able to use $1 as an integer
-				if [ "$3" -eq "$3" ] 2>/dev/null; then
-					#INTEGER="y"
-					truncate=$(($3+8)) 
-				else
-					# INTEGER=""
-					truncate=100
-				fi
-				cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"
-			fi
-		}
-		alias splitAndAlign=align
-		alias breakAndSeparate=align
-		alias chop=align
-		alias explode=align
-
-		summarizeColumns() {
-			clear
-			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
-				echo
-				echo "Usage:"
-				echo
-				echo "	${color117}summarizeColumns$color107 file.txt$reset"
-				echo
-				echo "Summarizes columns and gives random example values from each column."
-				echo
-				echo "	${color117}summarizeColumns$color107 file.csv $color25'delimiter'$reset"
-				echo
-				echo "$color240	If no delimiter is specified, defaults to tab.$reset"
-				echo
-				echo "	${color117}summarizeColumns$color107 file.tsv ${color25}tab$reset 5 50"
-				echo
-				echo "$color240	If no integer is specified, defaults to 5 examples per column, and truncates to 15 characters.$reset"
-				echo
-				return 0;
-			fi
-			if [ -a "$1" ]; then
-				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
-					delimiter=$'\t'
-					aligningOn="tab"
-				else
-					# Should we just take first letter of the delimiter?
-					delimiter=$2
-					aligningOn=$2
-				fi
-				if [ -z "$3" ]; then
-					howMany=5
-				else
-					if [ "$3" -eq "$3" ] 2>/dev/null; then
-						howMany=$3
-					else
-						howMany=5
-					fi
-				fi
-				export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
-				export CURRENTCOL=1
-				export totalAvg=0
-				export colLength=0
-				export truncate=
-				if [ -z "$4" ]; then truncateThis=15; else truncateThis=$4; fi
-				output="#	column title	uniq vals	avg char.	$color25$howMany$reset random values (truncated to $truncateThis characters)
-$WALL"
-				while [ $CURRENTCOL -le $COLS ]; do 
-					# add up column averages
-					colAvg=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } ')
-					totalAvg=$(($colAvg+$totalAvg))
-					colTitle=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | head -n +1 )
-					COLOR=`echo -e "\e[38;5;${color}m"`
-					NORMAL=`echo -e '\033[0m'`
-					crlf=$(grep -U $'\015\|\x0D' $1 | wc -l)
-					# sed "s/^\(.\{0,$truncateThis\}\).*/\1/"
-				#	randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | tr '\n' ',' | sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
-					randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then printf "${color25}BLANK"; line2="^[[:blank:]]*$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
-					uniqueValues=$(cut -f $CURRENTCOL -d "$delimiter" $1 | tail -n +2 | sort | uniq | wc -l)
-					output="$output
-$CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$colAvg	$randValues"
-					export colLength="$colLength $colAvg"
-					((CURRENTCOL++))
-				done
-				echo "$WALL"
-				echo "$output" | /usr/bin/column -ts $'\t' 
-				maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
-				minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
-				if [ "$maxColumns" == "$minColumns" ]; then
-					columnDetails="$maxColumns columns"
-				else
-					columnDetails="an inconsistent column numbers among the rows. The most columns is $maxColumns, and the least is $minColumns"
-				fi
-				if [ "$crlf" = "0" ]; then CRLF=""; else CRLF="\n\n$bg196 WARNING $reset this file uses clrf for newlines. Please fix them  ($color240$ cat $1 | fixNewLines > ${1}.fixed$reset)"; fi
-				echo "$WALL"
-				printf "${color25}$1$reset contains $(($(cat $1 | wc -l) - 1)) rows and ${columnDetails} using $bg25 $aligningOn $reset as a delimiter. $CRLF\n"
-				echo "$WALL"
-			else 
-				#echo "File doesn't exist"
-				templateNotFound $1
-			fi
-		}
-
-		alias emptyTags="grep $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
-		alias removeEmptyTags="grep -v $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
-		alias linesNotEmpty='grep -c "[^ \\n\\t]"'
-		alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
-		alias numColumns="awk -F '\t' '{print NF; exit}'"
-		alias maxColumns="awk -F'\t' '{print NF}' | sort -nu | tail -n 1"
-		alias minColumns="awk -F'\t' '{print NF}' | sort -nu | head -n 1"
-		alias whichColumn="awk -F'\t' ' { for (i = 1; i <= NF; ++i) print i, \$i; exit } ' "
-		# Shows column numbers with header and example row. Usage:
-		# 	cat file.txt | whichColumns
-		alias whichColumns=" head -n 2 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] \"     \t\" \$i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, \"\", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'"
-		describeColumns() {
-			head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/column -ts $'\t'
-		}
-		alias alternateRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
-		followRows() {
-		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
-			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
-			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
-			while read line; do 
-				color=${array[z]}
-				lastColor=$( echo ${array[${#array[@]}-1]} )
-				if [ "$lastColor" == "$color" ]; then 
-					array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
-					printf ""
-					z=0
-				fi
-				if [ -z "$alternate" ]; then 
-					alternate=0; 
-				else 
-				((alternate++)); 
-				fi; 
-				if [ $((alternate%2)) -eq 0 ]; then 
-					alternateRow=$(echo -en "\e[38;5;255m\e[${fgbg};5;${color}m");
-					((z++)); 
-				else 
-					alternateRow= #$(echo -en "\e[38;5;255m") ; 
-				fi
-				echo "$reset$alternateRow$line$reset";
-			done
-		}
-		alias colorRows=followRows
-		alias WINDOW2="tput cols"
-		makeGrid() {
-		#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
-			BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
-			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
-			while read line; do
-				# Handle colors from above
-				color=${array[z]}
-				lastColor=$( echo ${array[${#array[@]}-1]} )
-				if [ "$lastColor" == "$color" ]; then 
-					array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
-					printf ""
-					z=0
-				fi
-				if [ -z "$alternate" ]; then 
-					alternate=0; 
-				else 
-				((alternate++)); 
-				fi; 
-				if [ $((alternate%2)) -eq 0 ]; then 
-					alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
-					COLOR=`echo -e "\e[48;5;${color}m"`
-					NORMAL=`echo -e '\033[0m'`
-					griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/$NORMAL $COLOR/g" | sed "s/\.\.\.\.\.\.\.\.\././g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
-					((z++)); 
-				else 
-					alternateRow= #$(echo -en "\e[38;5;255m") ; 
-					griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/ /g" | sed "s/\.\.\.\.\.\.\.\.\././g")
-				fi
-				echo "$reset$alternateRow$griddedLine$reset";
-			done
-		}
-		makeBlocks() {
-			if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
-			color=238
-			textColor=252
-			while read line; do 
-				if [ -z "$alternate" ]; then 
-					alternate=0; 
-				else 
-				((alternate++)); 
-				fi; 
-				if [ $((alternate%2)) -eq 0 ]; then 
-					alternateRow=$(echo -en "\e[38;5;${textColor}m\e[${fgbg};5;${color}m"); 
-					COLOR=`echo -e "\e[38;5;${textColor}m\e[48;5;${color}m"`
-					NORMAL=`echo -e '\033[0m'`
-					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
-					((z++)); 
-				else 
-					alternateRow= #$(echo -en "\e[38;5;255m") ; 
-					griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
-				fi
-				echo "$reset$alternateRow$griddedLine$reset";
-			done
-		}
-		organize() {
-			# organize file.tsv tab x
-			align $1 $2 | followRows x
-		}
-		alias mani="organize"
-		grid() {
-			arrange $1 $2 $3 | makeGrid x
-		}
-		blocks() {
-			arrange $1 $2 | makeBlocks x
-		}
-		#########################################################################
-		# This is a way of looking at the top and bottom of a file.
-		#########################################################################
-		headAndTail() {
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ inspect file 10"; return 0; fi
-			if [ -s "$1" ]; then
-				wall
-				BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
-				if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
-				if [ "$BIGENOUGH" -gt "20" ]; then
-					(echo "$WALL"; head -n $PREVIEWLINES; echo $WALL; nl --body-numbering=a  | sed 's/^\([[:blank:]]*[[:digit:]]\+\)\t/\1 /g' | tail -n $PREVIEWLINES; echo $WALL) < $1 
-				else
-					echo "This file is too small to inspect the head and tail."
-				fi
-			else
-				echo "Please provide a filename that exists and has content."
-			fi
-		}
-
-		alias inspect=headAndTail
-		cutColumns() {
-			# usage
-			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
-				echo "Cuts columns from a file and prints to stdout. Does not alter original file."
-				echo
-				echo "	$ removeColumns file.txt 2 6 9 5"
-				echo
-				return 0
-			fi
-			# First arg is the file, so let's just grab args after that
-			ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
-			# Sometimes multiple files are used, so we need to account for that
-			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
-			# error if too many files
-			if [ "$FILENUM" -gt 1 ]; then echo "Please use only one file."; return 0; fi
-
-			# We know that we will be off by at least one argument, because the first arg is the file.
-			OFFSET=$((1+FILENUM))
-			# This will give us a straight list of our arguments separated from the files
-			ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
-			# Convert the argument terms to a number
-			ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
-			i=0
-			argnum=1
-			notRemoving=
-			columnsToRemove=
-			for f in $ARGTERMS; do 
-				# Test for integer
-				if [ "$f" -eq "$f" ] 2>/dev/null; then
-					#INTEGER="y"
-					columnsToRemove="$columnsToRemove \$$f=\"REMOVETHISCOLUMN\"; "
-				else
-					notRemoving="$notRemoving $bg196 $f $reset"
-				fi
-				((argnum++))
-				((i++))
-			done
-			COMMAND="awk '{$columnsToRemove print \$0}' FS='\t' OFS='\t' $1 | sed 's/REMOVETHISCOLUMN\t//g' | sed 's/\tREMOVETHISCOLUMN//g'"
-			eval "$COMMAND"
-			if [ -n "$notRemoving" ]; then
-				echo "The following columns were not removed: $notRemoving"
-			fi
-		}
-		alias nukeColumns=cutColumns
-		alias removeColumns=cutColumns
-
-		#########################################################################
-		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
-		#########################################################################
-		allTheThings() {
-			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/columns stdin
-		}
 
 		#########################################################################
 		# This is useful for looking for chunks that match a pattern, eg. 	#
@@ -573,6 +232,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#	$ showMatches file.txt pattern [10]				#
 		#									#
 		#	The pattern can use basic regex.				#
+		#	Optional [10] integer sets amount of context to display		#
 		#########################################################################
 		showMatches() {
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
@@ -585,6 +245,621 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				echo "Please provide a filename that exists and has content."
 			fi
 		}
+		#########################################################################
+		# This will show the content between two patterns. 
+		#
+		# Limitations: Note that the first match is used.
+		# 
+		# Usage: 
+		#	grabBetween file.txt pattern1 pattern2
+		#
+		#########################################################################
+		grabBetween(){
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabBetween file.txt firstPattern secondPattern"; return 0; fi
+			if [ -s "$1" ]; then
+				# To grab bewteen two line numbers, we could employ:
+				# nl --body-numbering=a
+				cat $1 | grep --no-group-separator -A5000 $2 | grep --no-group-separator -B5000 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+		#########################################################################
+		# Same as above, but lets' you grab specific range between two line numbers.
+		#########################################################################
+		grabLines(){
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
+			if [ -s "$1" ]; then
+				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | GREP_COLOR='00;48;5;25' grep --color=always "^$2.*$\|" | GREP_COLOR='00;48;5;107' grep --color=always "^$3.*$\|" # TO DO: awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+	
+		numberLines() {
+			cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g'
+		}
+
+		#########################################################################
+		# Same as above, but for fastq.gz. This lets you grab between two line numbers.
+		#########################################################################		
+		checkFastq(){
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ checkFastq file.txt firstLine bottomLine"; return 0; fi
+			if [ -s "$1" ]; then
+				# nl --body-numbering=a
+				zcat $1 |  nl --body-numbering=a | grep --no-group-separator -A5000 $2 | grep --no-group-separator -B5000 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+		#########################################################################
+		# Text file pipeline functionality					#
+		#########################################################################
+
+			#########################################################################
+			# This is for files that sometimes don't have a newline on the last line... it messes things up...
+			#########################################################################
+			alias fixLastLine="sed -e '\$a\'"
+
+			#########################################################################
+			# Data from Windows or some rich text will have lines end with both a carriage return and newline character, this fixes it.
+			#########################################################################
+			alias fixCLFR="sed -e 's/[\\r\\n]//g'"
+			alias fixNewLines=fixCLFR
+
+			#########################################################################
+			# This will remove all blank lines in a file.
+			#########################################################################
+			alias deleteBlankLines="sed '/^\s*$/d' "
+
+			#########################################################################
+			# These will reduce multiple blank lines/spaces to one.
+			#########################################################################
+			alias reduceMultipleBlankLines='grep -A1 . | grep -v "^--$"'
+			alias reduceMultipleBlankSpaces="sed 's/  */ /g'" # tr -s ' ' works too and is simpler!
+
+			#########################################################################
+			# To get the average number of characters in each column:
+			#
+			# 	cat file.tab | columnLengths
+			#########################################################################
+			alias columnLengths="awk ' { thislen=length(\$0); printf(\"%-5s %d\n\", NR, thislen); totlen+=thislen} END { printf(\"average: %d\n\", totlen/NR); } '"
+
+			#########################################################################
+			# To get the average number of characters in one column:
+			#
+			# 	cut -f 3 file.tsv | columnAvg
+			#########################################################################
+			alias columnAvg="awk '{ thislen=length(\$0); totlen+=thislen} END { printf(\"%d\n\", totlen/NR); }'"
+			#########################################################################
+			# Counts non-blank lines
+			# Usage:	linesNotEmpty file.txt
+			#########################################################################
+			alias linesNotEmpty='grep -c "[^ \\n\\t]"'
+			#########################################################################
+			# Counts lines that have content - no blank lines, no comments
+			# Usage:	cat file.txt | linesContent
+			#########################################################################
+			alias linesContent='grep -v "^#" | grep -c "[^ \\n\\t]"'
+			#########################################################################
+			# Returns number of columns in a file. Only looks at header, assumes consistent columns per row.
+			# Usage:	numColumns file.tsv
+			#########################################################################
+			alias numColumns="awk -F '\t' '{print NF; exit}'"
+			#########################################################################
+			# Returns maximum number of columns in a file.
+			# Usage:	cat file.tsv | maxColumns
+			#########################################################################
+			alias maxColumns="awk -F'\t' '{print NF}' | sort -nu | tail -n 1"
+			#########################################################################
+			# Returns minimum number of columns in a file.
+			# Usage:	cat file.tsv | minColumns
+			#########################################################################
+			alias minColumns="awk -F'\t' '{print NF}' | sort -nu | head -n 1"
+
+			#########################################################################
+			# Show column number and header for tab-separated files
+			# A very simple way to do this without awk: head -n 1 file.tsv | sed 's/\t/\n/g' | nl
+			# Usage:
+			# 	whichColumn file.tsv
+			#########################################################################
+			alias whichColumn="awk -F'\t' ' { for (i = 1; i <= NF; ++i) print i, \$i; exit } ' "
+
+			#########################################################################
+			# Shows column numbers with header and example row for tab-separatd files. 
+			# Usage:
+			# 	cat file.tsv | whichColumns
+			#########################################################################
+			alias whichColumns=" head -n 2 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] \"     \t\" \$i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, \"\", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | column -ts $'\t'"
+
+			#########################################################################
+			# Same as whichColumns, but can use directly on a file instead of end of a pipe.
+			# Usage:
+			#	describeColumns file.tsv
+			#########################################################################
+			describeColumns() {
+				head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/column -ts $'\t'
+			}
+
+			#########################################################################
+			# TO DO Get column size summaries: mean, mode, median, min, max num of characters
+			#########################################################################
+
+			#########################################################################
+			# Gives a breakdown of a tab-separated file, allowing you to choose delimiter (defaults to tab)
+			#
+			#	o - Tells you how many rows and columns are present using delimiber
+			#	o - Alerts if funky line breaks are present
+			#	o - Alerts if column numbers vary amongst the rows
+			#	o - Column number
+			#	o - Column header
+			#	o - Unique values from that column
+			#	o - Mean characters in that column
+			#	o - Gives random values from that column, and allows you to truncate them (default truncate is 15)
+			#	
+			# Usage:
+			#	summarizeColumns file.tsv
+			#########################################################################
+			summarizeColumns() {
+				clear
+				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+					echo
+					echo "Usage:"
+					echo
+					echo "	${color117}summarizeColumns$color107 file.txt$reset"
+					echo
+					echo "Summarizes columns and gives random example values from each column."
+					echo
+					echo "	${color117}summarizeColumns$color107 file.csv $color25'delimiter'$reset"
+					echo
+					echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+					echo
+					echo "	${color117}summarizeColumns$color107 file.tsv ${color25}tab$reset 5 50"
+					echo
+					echo "$color240	If no integer is specified, defaults to 5 examples per column, and truncates to 15 characters.$reset"
+					echo
+					return 0;
+				fi
+				if [ -a "$1" ]; then
+					if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+						delimiter=$'\t'
+						aligningOn="tab"
+					else
+						# Should we just take first letter of the delimiter?
+						delimiter=$2
+						aligningOn=$2
+					fi
+					if [ -z "$3" ]; then
+						howMany=5
+					else
+						if [ "$3" -eq "$3" ] 2>/dev/null; then
+							howMany=$3
+						else
+							howMany=5
+						fi
+					fi
+					export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
+					export CURRENTCOL=1
+					export totalAvg=0
+					export colLength=0
+					export truncate=
+					if [ -z "$4" ]; then truncateThis=15; else truncateThis=$4; fi
+					output="#	column title	uniq vals	avg char.	$color25$howMany$reset random values (truncated to $truncateThis characters)
+$WALL"
+					while [ $CURRENTCOL -le $COLS ]; do 
+						# add up column averages
+						colAvg=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } ')
+						totalAvg=$(($colAvg+$totalAvg))
+						colTitle=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | head -n +1 )
+						COLOR=`echo -e "\e[38;5;${color}m"`
+						NORMAL=`echo -e '\033[0m'`
+						crlf=$(grep -U $'\015\|\x0D' $1 | wc -l)
+						# sed "s/^\(.\{0,$truncateThis\}\).*/\1/"
+					#	randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | tr '\n' ',' | sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+						randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then printf "${color25}BLANK"; line2="^[[:blank:]]*$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+						uniqueValues=$(cut -f $CURRENTCOL -d "$delimiter" $1 | tail -n +2 | sort | uniq | wc -l)
+						output="$output
+$CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$colAvg	$randValues"
+						export colLength="$colLength $colAvg"
+						((CURRENTCOL++))
+					done
+					echo "$WALL"
+					echo "$output" | /usr/bin/column -ts $'\t' 
+					maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
+					minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
+					if [ "$maxColumns" == "$minColumns" ]; then
+						columnDetails="$maxColumns columns"
+					else
+						columnDetails="an inconsistent column numbers among the rows. The most columns is $maxColumns, and the least is $minColumns"
+					fi
+					if [ "$crlf" = "0" ]; then CRLF=""; else CRLF="\n\n$bg196 WARNING $reset this file uses clrf for newlines. Please fix them  ($color240$ cat $1 | fixNewLines > ${1}.fixed$reset)"; fi
+					echo "$WALL"
+					printf "${color25}$1$reset contains $(($(cat $1 | wc -l) - 1)) rows and ${columnDetails} using $bg25 $aligningOn $reset as a delimiter. $CRLF\n"
+					echo "$WALL"
+				else 
+					#echo "File doesn't exist"
+					templateNotFound $1
+				fi
+			}
+
+			#########################################################################
+			# This is designed to use in a pipeline to remove any number of columns
+			# from 0 to infinite. They must be integers and can be in any order.
+			#
+			# Alerts to columns that didn't get removed (due to not being integers)
+			# 
+			# Usage:
+			# 	cutColumns file.tab 1 2 3
+			#########################################################################
+			cutColumns() {
+				# usage
+				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+					echo "Cuts columns from a file and prints to stdout. Does not alter original file."
+					echo
+					echo "	$ removeColumns file.txt 2 6 9 5"
+					echo
+					return 0
+				fi
+				# First arg is the file, so let's just grab args after that
+				ARGS=$(for f in $@; do echo "${f}"; done | tail -n +2)
+				# Sometimes multiple files are used, so we need to account for that
+				FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+				# error if too many files
+				if [ "$FILENUM" -gt 1 ]; then echo "Please use only one file."; return 0; fi
+
+				# We know that we will be off by at least one argument, because the first arg is the file.
+				OFFSET=$((1+FILENUM))
+				# This will give us a straight list of our arguments separated from the files
+				ARGTERMS=$(for f in $@; do echo "${f}"; done | tail -n +$OFFSET)
+				# Convert the argument terms to a number
+				ARGTERMNUM=$(echo "$ARGTERMS" | wc -l)
+				i=0
+				argnum=1
+				notRemoving=
+				columnsToRemove=
+				for f in $ARGTERMS; do 
+					# Test for integer
+					if [ "$f" -eq "$f" ] 2>/dev/null; then
+						#INTEGER="y"
+						columnsToRemove="$columnsToRemove \$$f=\"REMOVETHISCOLUMN\"; "
+					else
+						notRemoving="$notRemoving $bg196 $f $reset"
+					fi
+					((argnum++))
+					((i++))
+				done
+				COMMAND="awk '{$columnsToRemove print \$0}' FS='\t' OFS='\t' $1 | sed 's/REMOVETHISCOLUMN\t//g' | sed 's/\tREMOVETHISCOLUMN//g'"
+				eval "$COMMAND"
+				if [ -n "$notRemoving" ]; then
+					echo "The following columns were not removed: $notRemoving"
+				fi
+			}
+			alias nukeColumns=cutColumns
+			alias removeColumns=cutColumns
+
+		#########################################################################
+		# If you need a quick folder, don't use foo or temp...			#
+		#########################################################################
+ 		alias mkdirRand='mkdir "$(date +%F)-$RANDOM"'
+		alias mkdirNow='mkdir "$(date +%F)-$(date +"%H_%M_%S")"'
+		alias mkdirTime='mkdir "$(date +"%H_%M_%S")"'
+		alias foo='mkdir "$(date +"%b_%d")_$(date +"%I_%M_%p")"'
+		# Test if current directory is actively writing to / removing from disk (as du takes time to execute, I would not rely on its accuracy, just as a way of knowing something is being written)
+		alias writing='echo ""; echo "$(( ($(du  --apparent-size -s | cut -f 1) - $(sleep 1; du --apparent-size -s | cut -f 1)) / -1 | bc -l  )) bytes written in the last second in $PWD"; printf "\n\n"'
+
+		#########################################################################
+		# Directory/text file inspection/summary
+		# 
+		#	Overwhelmingly these are not intended to be part of a pipeline,
+		#	they are intended to help visualize intermediate states while 
+		#	building up your pipeline.
+		#
+		#########################################################################
+
+			#########################################################################
+			# This is a way of looking at the top and bottom of a file.
+			#########################################################################
+			headAndTail() {
+				if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ inspect file 10"; return 0; fi
+				if [ -s "$1" ]; then
+					wall
+					BIGENOUGH=$(wc -l $1 | cut -f 1 -d " ")
+					if [ -z "$2" ]; then PREVIEWLINES=5; else PREVIEWLINES=$2; fi
+					if [ "$BIGENOUGH" -gt "20" ]; then
+						(echo "$WALL"; head -n $PREVIEWLINES; echo $WALL; nl --body-numbering=a  | sed 's/^\([[:blank:]]*[[:digit:]]\+\)\t/\1 /g' | tail -n $PREVIEWLINES; echo $WALL) < $1 
+					else
+						echo "This file is too small to bother inspecting the head and tail."
+					fi
+				else
+					echo "Please provide a filename that exists and has content."
+				fi
+			}
+
+			alias inspect=headAndTail
+
+			#########################################################################
+			# Pipe to this to align by tabs.
+			# Usage: 
+			# 	$ cat file.txt | pipeline | format
+			#########################################################################
+			alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | /usr/bin/column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
+
+			#########################################################################
+			# Same as above, but let's you choose the delimiter. Defaults to tab if no delimiter set.
+			# Usage:
+			#	cat file.txt | pipeline | formatted "delimiter"
+			#########################################################################
+			formatted() {
+				
+				if [ -z "$1" ] || [ "$1" == "tab" ]; then 
+					delimiter=$'\t'
+				else
+					delimiter=$1
+				fi
+				sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
+			}
+
+			#########################################################################
+			# View a file aligned by a delimiter. Defaults to tab if no delimiter set.
+			# Usage:
+			#	align file.tsv
+			#########################################################################
+			align() {
+				wall
+				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+					echo
+					echo "Usage:"
+					echo
+					echo "	${color117}align$color107 file.txt $color25'delimiter'$reset"
+					echo
+					echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+					echo
+					return 0;
+				fi
+				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+					delimiter=$'\t'
+					aligningOn="tab"
+				else
+					delimiter=$2
+					aligningOn=$2
+				fi
+				tput rmam
+				echo 
+				echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
+				echo "$WALL" 
+				cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
+				#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
+				echo "$WALL"
+				tput smam
+			}
+
+			#########################################################################
+			# This is like align, but it adds in some strings to be cut out to make 
+			# the grid later. Not really a useful tool on its own. it Also truncates
+			# columns so they don't spill over the side of the screen.
+			# Usage:
+			#	arrange file.txt 'delimiter' 100|avg
+			#########################################################################
+			arrange() {
+				wall
+				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
+					echo
+					echo "Usage:"
+					echo
+					echo "	${color117}arrange$color107 file.txt $color25'delimiter'$reset"
+					echo
+					echo "$color240	If no delimiter is specified, defaults to tab.$reset"
+					echo
+					echo '"tab" and "space" can be typed as delimiters.'
+					echo
+					return 0;
+				fi
+				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+					delimiter=$'\t'
+					aligningOn="tab"
+				elif [ "$2" == "space" ]; then
+					delimiter=" "
+					aligningOn="space"
+				else
+					# Should we just take first letter of the delimiter?
+					delimiter=$2
+					aligningOn=$2
+				fi
+				# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
+				if [ -z "$3" ]; then 
+					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"	
+				elif [ "$3" == "average" ] || [ "$3" == "avg" ]; then
+					export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
+					export CURRENTCOL=1
+					export totalAvg=0
+					export colLength=0
+					export truncate=
+					while [ $CURRENTCOL -lt $COLS ]; do 
+						# add up column averages
+						colAvg=$(cut -f $CURRENTCOL -d"$delimiter" $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR+8); } ')
+						totalAvg=$(($colAvg+$totalAvg))
+						#echo "Column #$CURRENTCOL: $colAvg characters, total so far: $totalAvg"
+						export colLength="$colLength $colAvg"
+					#	truncate[$CURRENTCOL]=$colAvg
+						
+						((CURRENTCOL++))
+					done
+					# Handle when totalAvg + COLS exceeds terminal window
+					array=( $(echo "$colLength") )
+					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do 
+						export i=1
+						echo "$line" | tr "$delimiter" '\n' | while read line; do 
+						truncateThis=${array[i]}
+							# Now we are dealing with each column from a row transposed
+							echo "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/" |
+							tr '\n' "$delimiter"; 
+							((i++))
+
+						done; 
+						printf "\n"; 
+						i=1
+					done | 
+					/usr/bin/column -ts $"$delimiter"
+				else 
+					# Silly trick to see if bash will be able to use $1 as an integer
+					if [ "$3" -eq "$3" ] 2>/dev/null; then
+						#INTEGER="y"
+						truncate=$(($3+8)) 
+					else
+						# INTEGER=""
+						truncate=100
+					fi
+					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"
+				fi
+			}
+			alias splitAndAlign=align
+			alias breakAndSeparate=align
+			alias chop=align
+			alias explode=align
+
+
+			#########################################################################
+			# Alternates row background to help organize visually
+			# usage:
+			#	cat file.txt | alternateRows
+			#########################################################################
+			alias alternateRows='while read line; do if [ -z "$alternate" ]; then alternate=0; else ((alternate++)); fi; if [ $((alternate%2)) -eq 0 ]; then alternateRow=$(echo -en "\e[48;5;238m\e[38;5;252m"); else alternateRow=$(echo -en "\e[38;5;250m") ; fi; echo "$reset$alternateRow$line$reset"; done'
+			#########################################################################
+			# Alternates row color (text or background) to help organize visually
+			# Usage:
+			#	cat file.txt | colorRows
+			#	cat file.txt | colorRows x
+			#########################################################################
+			colorRows() {
+			#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
+				BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+				if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+				while read line; do 
+					color=${array[z]}
+					lastColor=$( echo ${array[${#array[@]}-1]} )
+					if [ "$lastColor" == "$color" ]; then 
+						array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+						printf ""
+						z=0
+					fi
+					if [ -z "$alternate" ]; then 
+						alternate=0; 
+					else 
+					((alternate++)); 
+					fi; 
+					if [ $((alternate%2)) -eq 0 ]; then 
+						alternateRow=$(echo -en "\e[38;5;255m\e[${fgbg};5;${color}m");
+						((z++)); 
+					else 
+						alternateRow= #$(echo -en "\e[38;5;255m") ; 
+					fi
+					echo "$reset$alternateRow$line$reset";
+				done
+			}
+			alias colorRows=followRows
+			#########################################################################
+			# Takes input from arrange() and grid-ifies it.
+			#
+			#
+			#
+			#########################################################################
+			makeGrid() {
+			#	BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; FULLCOLORS=$(shuf -i 17-240 ); array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "  ) )
+				BASECOLORS="117 202 106 196 25 201 240 99 22 210 81 203 105"; array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+				if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+				while read line; do
+					# Handle colors from above
+					color=${array[z]}
+					lastColor=$( echo ${array[${#array[@]}-1]} )
+					if [ "$lastColor" == "$color" ]; then 
+						array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; ) )
+						printf ""
+						z=0
+					fi
+					if [ -z "$alternate" ]; then 
+						alternate=0; 
+					else 
+					((alternate++)); 
+					fi; 
+					if [ $((alternate%2)) -eq 0 ]; then 
+						alternateRow=$(echo -en "\e[${fgbg};5;${color}m"); 
+						COLOR=`echo -e "\e[48;5;${color}m"`
+						NORMAL=`echo -e '\033[0m'`
+						griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/$NORMAL $COLOR/g" | sed "s/\.\.\.\.\.\.\.\.\././g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+						((z++)); 
+					else 
+						alternateRow= #$(echo -en "\e[38;5;255m") ; 
+						griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/..CUTMEOUT/ /g" | sed "s/\.\.\.\.\.\.\.\.\././g")
+					fi
+					echo "$reset$alternateRow$griddedLine$reset";
+				done
+			}
+			#########################################################################
+			# Like grid, just uncolored
+			#
+			#
+			#
+			#########################################################################
+			makeBlocks() {
+				if [ -z "$1" ]; then fgbg=38; else fgbg=48; fi
+				color=238
+				textColor=252
+				while read line; do 
+					if [ -z "$alternate" ]; then 
+						alternate=0; 
+					else 
+					((alternate++)); 
+					fi; 
+					if [ $((alternate%2)) -eq 0 ]; then 
+						alternateRow=$(echo -en "\e[38;5;${textColor}m\e[${fgbg};5;${color}m"); 
+						COLOR=`echo -e "\e[38;5;${textColor}m\e[48;5;${color}m"`
+						NORMAL=`echo -e '\033[0m'`
+						griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+						((z++)); 
+					else 
+						alternateRow= #$(echo -en "\e[38;5;255m") ; 
+						griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
+					fi
+					echo "$reset$alternateRow$griddedLine$reset";
+				done
+			}
+			#########################################################################
+			# This is mostly just used to view things like manifests easier.
+			#
+			#
+			#
+			#########################################################################
+			organize() {
+				# organize file.tsv tab x
+				align $1 $2 | followRows x
+			}
+			alias mani="organize"
+		
+			#########################################################################
+			# This puts the functions from above together.
+			# Usage: 
+			#	grid file.tsv 'delimiter' 100
+			#	where 100 is size to truncate - can be an integer, avg/average of column characters
+			#########################################################################
+			grid() {
+				arrange $1 $2 $3 | makeGrid x
+			}
+			#########################################################################
+			# This is like above, but just grey. Doesn't truncate.
+			# Usage:
+			#	blocks file.tsv 'delimiter'
+			#########################################################################
+			blocks() {
+				arrange $1 $2 | makeBlocks x
+			}
+
+		#########################################################################
+		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
+		#########################################################################
+		allTheThings() {
+			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/columns stdin
+		}
+
 		grabTagStorm() {
 			if [ -z "$TAGSTORM" ]; then
 				# Let's grab the most recent file that matches the below configuration
@@ -609,14 +884,12 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				ASSUMED=1
 			fi
 		}
-		needHelp() {
-			if [ "$FILE" == "-h" ] || [ "$FILE" == "--help" ]; then
-				FILE="help"
-			fi
-		}
+		alias emptyTags="grep $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
+		alias removeEmptyTags="grep -v $'^[[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]*$'"
 		
 		#########################################################################
 		# This collapses a tag storm
+		# Usage: listAllTags meta.txt
 		#########################################################################
 		listAllTags() {
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
@@ -645,11 +918,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# This collapses a tag storm, then passes it to highlight. Only valid tags are highlighted.
 		#########################################################################
 		checkTagsValid() {
-		#	grabTagStorm
-
-		#	OR GRAB MANIFEST COLUMN
-		#
-			echo $TAGSTORM
+		#	TO DO: OR GRAB MANIFEST COLUMN
+		#	We could run grabTagStorm then:
+		#	echo $TAGSTORM
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
 			if [ -s "$1" ]; then
 				listAllTags $1 | ~clay/ontogeny/bin/ontogeny_highlight.sh stdin $(listValidTags | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g") | tail -n +5 | sed '$d' | sed '$d'  | sed '$d'
@@ -658,20 +929,40 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			fi
 		}
 		
+
 		#########################################################################
-		# This will show the content between two matches. Note that the first match is used.
+		# This just takes the headers from  a tab-separated file and makes them more cdw-compatible.
+		# It does not check for validity.
+		# usage:
+		#	cat meta.tab | convertMisceFields >> misceFields.txt
 		#########################################################################
-		grabBetween(){
-			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabBetween file.txt firstPattern secondPattern"; return 0; fi
-			if [ -s "$1" ]; then
-				# nl --body-numbering=a
-				cat $1 | grep --no-group-separator -A500 $2 | grep --no-group-separator -B500 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
-			else
-				echo "Please provide a filename that exists and has content."
-			fi
+		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
+
+		#########################################################################
+		# Shows a manifest, and how the meta tags of a tag storm relate to it.
+		#########################################################################
+		mapToManifest() {
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToManifest manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\n"; return 0; fi
+			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
+			if [ -z "$2" ]; then tagStorm="meta.txt"; else meta=$2; fi
+			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
+			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
+			~clay/ontogeny/bin/ontogeny_highlight.sh $manifest $(grep "meta " $tagStorm | cut -f 2 -d " ")
 		}
 
-		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
+		#########################################################################
+		# Shows a tag storm, and how the meta column of the manifest relates to it
+		#########################################################################
+		mapToMeta() {
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToMeta manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\n"; return 0; fi
+			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
+			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
+			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
+			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
+			metaColumn=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | sed 's/^[[:blank:]]*//g' | cut -f 1)
+			~clay/ontogeny/bin/ontogeny_highlight.sh $tagStorm $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
+		}
+
 	#################################################################################
 	# Ontogeny repository/bin aliases						#
 	#################################################################################
@@ -706,6 +997,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
 		alias whatHappened=inspectSubmission
 		alias inspectHere=inspectSubmission
+		alias dataSetSummaries="$ONTOGENY_INSTALL_PATH/bin/ontogeny_dataSetSummaries.sh"
+		alias dataSetsSummary=dataSetSummaries
+		alias dataSetSummary=dataSetSummaries
 		alias checkSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_checkSubmission.sh"
 		#alias inspectSubmission="$ONTOGENY_INSTALL_PATH/bin/ontogeny_inspectSubmission.sh"
 		alias rainbow="$ONTOGENY_INSTALL_PATH/bin/ontogeny_palette.sh"
@@ -721,8 +1015,8 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
 		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-#		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url),FROM_UNIXTIME(startUploadTime),wrangler FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-#		alias submissions="submitted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | tr '\n' ' ') | tail -n +5 | head -n $(submitted | wc -l)"
+		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
+		alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 
 		#########################################################################
 		# Wrangler-curated stuff						#
@@ -791,9 +1085,9 @@ EOF
 		if [ -n "$STY" ]; then 
 			screenMessage=$(printf "\n\n\tYou are in the screen session $color25$STY$reset"); 
 		else 
-			if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
+			#if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
 				screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
-			fi
+			#fi
 		fi
 		screenHelp() {
 			cat << EOF
@@ -827,11 +1121,8 @@ EOF
 		elif [ -n "$BASH_VERSION" ]; then
 			WHICHSERVER=$(uname -n)
 			if [ "$WHICHSERVER" == "hgwdev" ]; then
-				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] 🌀 \[\e[0m\] '
 				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;107m\]\h \[\e[38;5;240m\]\W/\[\e[0m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
 			else
-				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[38;5;240m\]\W/\[\e[0m\]⚡   \[\e[0m\] '
-				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]⚡  \[\e[0m\] '
 				export PS1='\[\e[38;5;240m\][\A] \[\e[38;5;25m\]\u\[\e[38;5;240m\]@\[\e[38;5;166m\]\h \[\e[m\]\[\e[38;5;240m\]\W/\[\e[0m\]\[\e[m\] \[\e[m\]\[\e[38;5;25m\]> \[\e[0m\] '
 			fi
 		else
