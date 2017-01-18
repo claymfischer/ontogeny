@@ -24,10 +24,6 @@ fi
 	# with big data.
 	#
 	# The things most users would want to change are at the top (except the PS1 variable near the bottom)
-	#
-	# Functions/aliases are marked as "visualize" or "pipeline" and show usage. 
-	# Visualize means it should not be used as part of a pipeline, only at the end to see the intermediate state.
-	# Pipeline means you can use it in the middle of one.
 
 	#################################################################################
 	# Install									#
@@ -134,6 +130,36 @@ fi
 			return 0
 		}
 
+		
+		#########################################################################
+		# Test if a file is real
+		#########################################################################
+		isFile() {
+			# tests that a file is real, not a directory and has content.
+			if [ -f "$1" ]; then 
+				return 0; 
+			else 
+				echo "$1 is not a file." >&2; 
+				return 1; 
+			fi
+		}
+		
+		#########################################################################
+		# Test if files are real
+		#########################################################################
+		areFiles() {
+			# Takes arguments as filenames and tests if they are real.
+			# Usage:
+			#	$ arFiles file1.txt file*.txt file?.txt
+			COMMAND=""
+			for x in $@; do 
+				COMMAND="$COMMAND isFile $x &&"; 
+			done
+			COMMAND="$COMMAND return 0"
+			eval "$COMMAND"
+
+		}
+
 		#########################################################################
 		# TO DO - implement
 		#########################################################################
@@ -154,6 +180,45 @@ fi
 			if [ "$FILE" == "-h" ] || [ "$FILE" == "--help" ]; then
 				FILE="help"
 			fi
+		}
+		#########################################################################
+		# TO DO - implement
+		#########################################################################
+		checkInteger() {
+			# simple hack to check if integer. If not an integer, send to stderr. 
+			# Example usage if you wanted to know that "1" and "2" were integers:
+			#	$ checkInteger 1 && checkInteger 2 && echo "Passed"
+			if [ "$1" -eq "$1" ] 2>/dev/null; then 
+				return 0;
+			else 
+				export INTEGERERROR=$(echo "$1 is not an integer." >&2)
+				return 1; 
+			fi
+		}
+		checkIntegers() {
+			# Upon all integers being validated successfully, will return 0
+			# Usage:
+			#	$ if checkIntegers a2 8; then echo "TRUE"; else echo "FALSE"; fi
+			COMMAND=""
+			for x in $@; do 
+				COMMAND="$COMMAND checkInteger $x &&"; 
+			done
+			COMMAND="$COMMAND return 0"
+			eval "$COMMAND"
+		}
+		checkExitStatus(){
+			# Can be useful for debugging.
+			# Usage:
+			# 	$ checkExitStatus commands go here
+			# 	$ checkExitStatus checkInteger 4a
+			#	$ checkExitStatus checkInteger 4 && echo "passed"
+			#	$ checkExitStatus checkIntegers 4 5 8 10a && echo "passed"
+			"$@"
+			local status=$?
+			if [ $status -ne 0 ]; then
+				echo "Error (exit code $status): $1" >&2
+			fi
+			return $status
 		}
 
 		#########################################################################
@@ -269,8 +334,17 @@ fi
 		#########################################################################
 		grabLines(){
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
+			if [ -s "$1" ]; then # TO DO: what if numbers don't make sense? checkfor integers.
+				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | GREP_COLOR='00;48;5;25' grep --color=always "^$2[[:blank:]]\+.*$\|" | GREP_COLOR='00;48;5;107' grep --color=always "^$3[[:blank:]]\+.*$\|" # TO DO: awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
+			else
+				echo "Please provide a filename that exists and has content."
+			fi
+		}
+		# a minimalist form
+		showLines(){
+			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
 			if [ -s "$1" ]; then
-				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | GREP_COLOR='00;48;5;25' grep --color=always "^$2.*$\|" | GREP_COLOR='00;48;5;107' grep --color=always "^$3.*$\|" # TO DO: awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
+				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
 			else
 				echo "Please provide a filename that exists and has content."
 			fi
@@ -284,10 +358,16 @@ fi
 		# Same as above, but for fastq.gz. This lets you grab between two line numbers.
 		#########################################################################		
 		checkFastq(){
+			# Grabs content between two line numbers.
+			# Usage (to grab content between line 100 and 200):
+			#	checkFastq file.fastq.gz 100 200
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ checkFastq file.txt firstLine bottomLine"; return 0; fi
+			# Verify line numbers are integers
+			if [ "$2" -eq "$2" ] 2>/dev/null; then firstLine=$2; else echo "First line number must be an integer."; return 0; fi
+			if [ "$3" -eq "$3" ] 2>/dev/null; then secondLine=$3; else echo "Second line number must be an integer."; return 0; fi
 			if [ -s "$1" ]; then
 				# nl --body-numbering=a
-				zcat $1 |  nl --body-numbering=a | grep --no-group-separator -A5000 $2 | grep --no-group-separator -B5000 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
+				zcat $1 |  nl --body-numbering=a | grep --no-group-separator -A5000 $firstLine | grep --no-group-separator -B5000 -m1 $secondLine | GREP_COLOR='00;48;5;25' grep --color=always "$firstLine\|" | GREP_COLOR='00;48;5;107' grep --color=always "$secondLine\|"
 			else
 				echo "Please provide a filename that exists and has content."
 			fi
@@ -402,6 +482,7 @@ fi
 			#########################################################################
 			summarizeColumns() {
 				clear
+				wall
 				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
 					echo
 					echo "Usage:"
@@ -944,10 +1025,10 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		mapToManifest() {
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToManifest manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\n"; return 0; fi
 			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
-			if [ -z "$2" ]; then tagStorm="meta.txt"; else meta=$2; fi
+			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
-			~clay/ontogeny/bin/ontogeny_highlight.sh $manifest $(grep "meta " $tagStorm | cut -f 2 -d " ")
+			~clay/ontogeny/bin/ontogeny_highlight.sh $manifest $(grep "meta " $tagStorm | cut -f 2 -d " " | sed "s/^/\t/g" | sed "s/$/\t/g" | sort -r)
 		}
 
 		#########################################################################
