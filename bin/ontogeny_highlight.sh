@@ -87,19 +87,6 @@ bg240=$(echo -en "\e[48;5;240m") ;
 
 reset=$(echo -en "\033[0m")
 
-#################################################################################
-# Begin main output								#
-#################################################################################
-echo ""
-	while getopts "ns" opt
-		do
-		case $opt in
-			n) 	echo "test"; SHOWLINENUMBERS=$(echo "-n")
-				;;
-			s) 	SHOWLINENUMBERS=$(echo "-n")
-				;;
-		esac
-	done
 
 #################################################################################
 # Handle stdin
@@ -125,7 +112,8 @@ if [ -t 0 ]; then
 	It can also be used to filter down to only the lines containing the patterns.
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset"
 	printf "    Usage: \n\n\t$color240$ highlight ${color25}file.txt$color117 pattern1 pattern2 ... pattern{n}$reset\n\n"
-	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}stdin$color117 pattern1 pattern2 ... pattern{n}$reset\n"
+	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}stdin$color117 pattern1 pattern2 ... pattern{n}$reset\n\n"
+	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}pipedinput$color117 pattern1 pattern2 ... pattern{n}$reset\n"
 	echo "
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset
     Patterns with special meaning
@@ -158,6 +146,8 @@ $color240  ├──────────────────────
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     Protips
 	
+	If searching for numbers, put them as the first patterns. Colored output contains digits.
+
 	Pipe to ${color240}head$reset or ${color240}less -R$reset if your output is going to flood your terminal.
 
 	For a line-by-line view, employ ${color240}tput rmam$reset to remove automatic margins (nowrap), 
@@ -179,7 +169,7 @@ $color240  ├──────────────────────
 
 	Extensive regex support! For example, try these types of patterns:
 	
-	$bg106 ^[[:blank:]]*GEO $reset $bg25 fastq.gz$ $reset $bg200 file_[[:digit:]]* $reset $bg202 ^[[:blank:]]$ $reset $bg117 $'\$' $reset
+	$bg106 ^[[:blank:]]*GEO $reset $bg25 fastq.gz$ $reset $bg200 file_[[:digit:]]*[A-Z] $reset $bg202 ^[[:blank:]]$ $reset $bg117 $'\$' $reset ${bg196}=[^0][[:digit:]]* $reset
 
  $color240 └────────────────────────────────────────────────────────────────────────────┘$reset
 "
@@ -193,12 +183,14 @@ $color240  ├──────────────────────
 	#	if [ -a "$1" ]; then
 			INPUT=$(cat $FILE)
 			INPUTTEXT="cat $FILE"
+			LINECOUNT=$(cat $FILE | wc -l)
 	#	else
 	#		echo "The file $FILE wasn't found."
 	#		exit 0
 	#	fi
 	fi
 else
+	if [ "$1" == "pipedinput" ]; then pipedinput="y"; fi
 	FILE=stdin
 	INPUT=""
 	INPUTTEXT=""
@@ -268,7 +260,8 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	OCCURRENCES=""
 	TOTES=0
 	SEARCH="printf \"
-        "
+    "
+	
 	for f in $SEARCHTERMS; do 
 		# Count how many pattern matched - NOT how many lines matched - complicated if multiiple files...
 		color=${array[i]}
@@ -290,8 +283,22 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+' $RETURNALL "
 		elif [ "$f" == "CLEANUP" ]; then
-			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+\|  \+' | wc -l)"
-			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+\|  \+' $RETURNALL "
+
+			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;202' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;202m SPACETAB ${OCCURRENCES}\033[0m"
+
+			 if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e '  \+' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;25' grep --color=always -e '  \+' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;25m SPACES ${OCCURRENCES}\033[0m"
+
+			 if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'\t\t\+' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;107' grep --color=always -e $'\t\t\+' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;107m TABS ${OCCURRENCES}\033[0m"
+
+			#OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+\|  \+' | wc -l)"
+			#COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;202' grep --color=always -e $'\t\t\+\|  \+' $RETURNALL "
+
 		elif [ "$f" == "SPACETAB" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
@@ -303,10 +310,12 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e '$f' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e '$f' $RETURNALL "
 		fi
-		if [ "$FILE" == "stdin" ]; then
-			SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} \033[0m"
-		else
-			SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} ($OCCURRENCES) \033[0m"
+		if [ "$f" != "CLEANUP" ]; then
+			if [ "$FILE" == "stdin" ]; then
+				SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} \033[0m"
+			else
+					SEARCH="$SEARCH \e[38;5;255m\e[48;5;${color}m ${f} ($OCCURRENCES) \033[0m"
+			fi
 		fi
 		((i++))
 		((TERMS++))
@@ -320,20 +329,28 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	else
 		CLEANLINE=$(printf " | sed 's/^\\([[:digit:]]*\\):/\\t\\e[38;5;240m\\\1\t\\033[0m/g'")
 	fi
+	if [ "$FILE" == "stdin" ]; then
+		printf ""
+	else
+		LINECOUNT=", $LINECOUNT lines parsed"
+	fi
 	#########################################################################
 	# Keep in mind this search counts  ALL occurrences, while if highlighting 
 	# multiple files you might not see all instances, only the instances where ALL of your terms occur
 	#########################################################################
-	SEARCH="$SEARCH in $FILES ($TERMS total search patterns)\n\n\""
-	if [ "$FILE" == "stdin" ]; then
-		PRINTSEARCHBAR=$(eval "$SEARCH")
+	SEARCH="$SEARCH in $FILES ($TERMS total search patterns$LINECOUNT)\n\n\""
+	if [ "$FILE" == "stdin" ] && [ -z "$pipedinput" ]; then
+		PRINTSEARCHBAR="$(eval "$SEARCH")"
+	elif [ "$pipedinput" == "y" ]; then
+		PRINTSEARCHBAR=""
 	else
-		PRINTSEARCHBAR=$(eval "$SEARCH")
+		PRINTSEARCHBAR="$(eval "$SEARCH")"
 	fi
-	printf "$PRINTSEARCHBAR\n\n"
+	printf "$PRINTSEARCHBAR"
+	if [ "$pipedinput" != "y" ]; then printf "\n\n"; fi
 	#########################################################################
 	# 
 	#########################################################################
 	eval "$COMMAND $CLEANLINE"
-	#echo $COMMAND
-	printf "$PRINTSEARCHBAR\n\n"
+	printf "$PRINTSEARCHBAR"
+	if [ "$pipedinput" != "y" ]; then printf "\n\n"; fi
