@@ -220,7 +220,8 @@ fi
 			fi
 			return $status
 		}
-
+		# TO DO: Turn UNIX timestamp into human-readable time
+		# TO DO: send ls error: $ ls *.notreal 2>/dev/null
 		#########################################################################
 		# Make a custom border							#
 		#
@@ -254,8 +255,6 @@ fi
 		alias load='source ~/.bashrc; source ~/.bash_profile'
 		alias bashrc='vi ~/.bashrc'
 		alias ontogeny_toolkit='vi $ONTOGENY_INSTALL_PATH/lib/ontogeny_toolkit.sh'
-		# For trawling for lab_ tags
-		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
 		
 	#################################################################################
 	# General UNIX/Linux tools							#
@@ -1094,10 +1093,10 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# Submissions								#
 		#########################################################################
-		alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-		alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-		alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-		alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+	#	alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
+	#	alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+	#	alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
+	#	alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 
 		#########################################################################
 		# Wrangler-curated stuff						#
@@ -1307,4 +1306,40 @@ EOF
 			echo 
 		}
 
+		# For trawling for lab_ tags
+		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
+		tagTrawl() {
+			if [ "$1" == "" ]; then printf "Grabs random values from lab_ tabs and puts into file.txt to see if they should be raised. Then can use with highlightTrawl.\nUsage:\n\ttagTrawl file.txt\n"; return 0; fi
+			
+			hgsql cdw -e "describe cdwFileTags" | grep lab_ | cut -f 1 | while read line; do hgsql cdw -e "select distinct($line) from cdwFileTags ORDER BY RAND() LIMIT 5"; done > $1
+		}
 
+		highlightTrawl() {
+			if [ "$1" == "" ]; then printf "Highlights values from a tagTrawl file.\nUsage:\n\thighlightTrawl file.txt\n"; return 0; fi
+			highlight $1 $(cat duplicateTagValues.txt | sort | uniq -c | grep ^[[:blank:]]*2 | sed 's/^[[:blank:]]*[^1] //g' | grep -v ^[0-9]*$ | sed 's/\s/\\s/g' | sed 's/^/^/g' | sed 's/$/$/g' ) | sed 's/^/\t/g' | sed 's/^\tlab_/lab_/g'
+		}
+
+		whichDataSetTagBelongsTo() {
+			if [ "$1" == "" ]; then printf "whichDataSetTagBelongsTo tag_to_look_for\n"; return 0; fi
+			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1<>''"
+		}
+
+
+		grabDistinctTagValues() {
+			if [ "$1" == "" ]; then printf "grabDistinctTagValues tag_to_look_for\n"; return 0; fi
+			hgsql cdw -e "select distinct($1),data_set_id from cdwFileTags WHERE $1 IS NOT NULL;"
+		}
+		tagValues() {
+			# Usage:
+			#	
+			COMMAND=""
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagValues tag_1 tag_2 ... tag_n\n"; return 0; fi
+			numArgs=$(echo "$@" | tr ' ' '\n' | wc -l)
+			for x in $@; do 
+				COMMAND="$COMMAND hgsql cdw -e \"select distinct($x) from cdwFileTags ORDER BY RAND() LIMIT 50;\";" 
+				#COMMAND="$COMMAND hgsql cdw -N -e \"select distinct($x),data_set_id,(SELECT count(distinct(data_set_id)) from cdwFileTags where $x = cdwFileTags.$x ) as numDataSets from cdwFileTags WHERE $x in (select data_set_id from cdwFileTags where $x = cdwFileTags.$x) \";"
+				#COMMAND="$COMMAND hgsql cdw -N -e \"select distinct(\$x) from cdwFileTags WHERE \$x IS NOT NULL ORDER BY RAND() LIMIT 100\" | while read line; do printf \"\$line\t\"; hgsql cdw -N -e \"select distinct(data_set_id) from cdwFileTags where \$x = '\$line';\" | tr '\n' ' '; printf '\n'; done;"
+			done
+			eval "$COMMAND"
+		}
+		
