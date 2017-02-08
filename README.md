@@ -115,9 +115,10 @@ This takes advantage of a simple `grep` loop to color-code the columns. Accepts 
 
 ![Example column coloring](/images/columns/columns_example2_colored.png)
 
-Any additional arguments will color specific columns for comparison. This example also shows how to use `stdin`.
 <details>
 <summary>Learn more</summary>
+
+Any additional arguments will color specific columns for comparison. This example also shows how to use `stdin`.
 
 `$ cat example.tsv | columns stdin 3 6 9 10 17 25`
 
@@ -126,6 +127,7 @@ Any additional arguments will color specific columns for comparison. This exampl
 </details>
 
 --- 
+
 <a name="sequence"></a>
 ## Color-code sequence and quality score data
 
@@ -134,8 +136,10 @@ Color-codes bases in a gzipped fastq file.
 `$ fastq SRR123.fastq.gz`
 
 ![Example fastq color-coding](/images/fastq/fastq.png)
+
 <details>
 <summary>Learn more</summary>
+
 You can also color-code the quality score. Set any third argument.
 
 `$ fastq SRR123.fastq.gz x`
@@ -145,6 +149,7 @@ You can also color-code the quality score. Set any third argument.
 </details>
 
 --- 
+
 <a name="transfer"></a>
 ## Quickly transfer files to-and-from your server
 
@@ -160,7 +165,9 @@ It also takes advantage of filename expansion
 
 ` $ transfer *.txt`
 </details>
+
 --- 
+
 <a name="newls"></a>
 ## New ls and new list
 
