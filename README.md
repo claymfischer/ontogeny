@@ -1,11 +1,10 @@
-<details>
-<summary><span style="font-size: 2.0em; font-weight: bold;">Read more</span></summary>
-    content
-</details>
-
 # About the ontogeny toolkit
 
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
+
+<details>
+<summary><span style="font-size: 2.0em; font-weight: bold;">Read more</span></summary>
+
 
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
@@ -18,6 +17,8 @@ They follow [kent](https://github.com/ucscGenomeBrowser/kent) command convention
 Most UNIX software is designed to be [minimimalist](https://en.wikipedia.org/wiki/Unix_philosophy). This is ideal for UNIX power tools, as it makes dealing with data easier in pipelines. 
 
 On the other hand, most of my software is not designed to be part of a pipeline. These tools were designed to format the data for non-programmers to read more easily. Output tends to have columns formatted to align, lots of color, and spacing on the top, left and bottom. This would throw a wrench in the gears of most data pipelines.
+
+</details>
 
 ---
 
