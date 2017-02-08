@@ -3,7 +3,7 @@
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
 
 <details>
-<summary>Read more</summary>
+<summary>Learn more</summary>
 
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
@@ -79,7 +79,7 @@ Highlight any number of search patterns with a variety of colors. Can accept **s
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
 <details>
-<summary>Read more</summary>
+<summary>Learn more</summary>
 
 **Input:** `stdin` `file.txt` `"multiple.txt files.txt"` `file.*`
 
@@ -116,6 +116,8 @@ This takes advantage of a simple `grep` loop to color-code the columns. Accepts 
 ![Example column coloring](/images/columns/columns_example2_colored.png)
 
 Any additional arguments will color specific columns for comparison. This example also shows how to use `stdin`.
+<details>
+<summary>Learn more</summary>
 
 `$ cat example.tsv | columns stdin 3 6 9 10 17 25`
 
