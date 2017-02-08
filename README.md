@@ -3,8 +3,7 @@
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
 
 <details>
-<summary><span style="font-size: 2.0em; font-weight: bold;">Read more</span></summary>
-
+<summary>Read more</summary>
 
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
@@ -79,6 +78,9 @@ Highlight any number of search patterns with a variety of colors. Can accept **s
 
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
+<details>
+<summary>Read more</summary>
+
 **Input:** `stdin` `file.txt` `"multiple.txt files.txt"` `file.*`
 
 Input examples: 
@@ -94,6 +96,8 @@ Input examples:
 As this can handle any number of patterns (and will color them randomly with 256 colors), it's useful for a lot of QA purposes, making visual connections easier. For example, you could use command substitution to generate your pattern list:
 
 `$ highlight file.txt $( cat listOfAssemblyNames.tsv | cut -f 2 | awk NF | sort | uniq | tr '\n' ' ' )`
+
+</details>
 
 ---
 <a name="columns"></a>
