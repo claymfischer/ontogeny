@@ -123,6 +123,8 @@ Any additional arguments will color specific columns for comparison. This exampl
 
 ![Example column coloring](/images/columns/column_comparisons.png)
 
+</details>
+
 --- 
 <a name="sequence"></a>
 ## Color-code sequence and quality score data
@@ -132,12 +134,15 @@ Color-codes bases in a gzipped fastq file.
 `$ fastq SRR123.fastq.gz`
 
 ![Example fastq color-coding](/images/fastq/fastq.png)
-
+<details>
+<summary>Learn more</summary>
 You can also color-code the quality score. Set any third argument.
 
 `$ fastq SRR123.fastq.gz x`
 
 ![Example fastq color-coding](/images/fastq/fastq_quality.png)
+
+</details>
 
 --- 
 <a name="transfer"></a>
@@ -147,12 +152,14 @@ This is a simple script that generates a color-coded SCP command to upload or do
 
 ![Example transfer](/images/transfer/transfer.png)
 
+<details>
+<summary>Learn more</summary>
 `$ transfer file1.txt file2.txt ... file{n}.txt`
 
 It also takes advantage of filename expansion
 
 ` $ transfer *.txt`
-
+</details>
 --- 
 <a name="newls"></a>
 ## New ls and new list
@@ -172,6 +179,8 @@ This will tell you about any file or directory. It has lazy usage, or more verbo
 
 *This was my first shell script, and really is not a great example of code. However, it's fast and it does what it needs so I've never updated it.*
 
+<details>
+<summary>Learn more</summary>
 ### About files
 
 It will tell you file size, encoding (ASCII or non-ASCII), when the file was last modified in human terms (seconds, minutes, days, weeks, months, years), how many lines it has (and of those, how many are non-blank and how many are actual content, not comments), how many columns (default delimiter is a tab, but you can set it). It also previews the head and foot of a file. 
@@ -185,6 +194,8 @@ It will tell you file size, encoding (ASCII or non-ASCII), when the file was las
 Gives you the real and apparent size of directory (eg. if transferring the contents over a network), the number of files in the top level as well as in all subdirectories, when the directory was last modified, any file extensions and examples with those extensions, and groups files by date modified.
 
 ![Example about](/images/about/about_directory.png)
+
+</details> 
 
 --- 
 
