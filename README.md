@@ -1,3 +1,8 @@
+<details>
+    <summary>Read more</summary>
+    content
+</details>
+
 # About the ontogeny toolkit
 
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
