@@ -1,6 +1,5 @@
 <details>
-# Can I make this a title?
-    <summary>Read more</summary>
+<summary><span style="font-size: 2.0em; font-weight: bold;">Read more</span></summary>
     content
 </details>
 
