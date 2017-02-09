@@ -3,9 +3,8 @@
 Ontogeny tools are designed for biologists with no background in bioinformatics. They use a lot of color and simplicity on the command line to make the transition from wet lab to computer lab more manageable. 
 
 <details>
-<span style="color: #00ff00;">
 <summary>Learn more</summary>
-</span>
+
 The name *ontogeny* refers to the development of an individual from embryo to maturity. I chose this name as my hope is these tools help you to go from terrified of a command line to proficient in bioinformatics.
 
 They are bash shell scripts cobbled together while learning how to work with biological data on UNIX/Linux servers (data wrangling).
@@ -271,14 +270,29 @@ The library functions begin with the prefix `lib_`.
 2. <a href="#grep">grep help</a>
 3. <a href="#tmp">Make better tmp directories</a>
 
-<a name="screen"></a>
-Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
+**noWrap**
+Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
+
+**l**
+Execute `l` (lowercase L) to list everything in the directory in a more human-readable fashion, including the time stamps. It's a simple alias.
+
+**showMatches**
+Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very useful for parsing thigns like error logs.
+
+**grabBetween**
+This grabs all the content between two patterns: `grabBetween file.txt pattern1 pattern2`
+
+> Note that this will grab the first match of the pattern found, and will ignore further matches.
+
+<a name="screen"></a>**screenHelp**
+Your prompt will change when entering a `screen` to alert you that you're in a `screen` session.
 
 ![Example .bashrc aliases](/images/aliases/screen.png)
 
-You can also invoke help either in the screen session or on the command line for a quick refresher, as well as to see a list of screens screens.
+You can also invoke help by simply running `screenHelp` either in the screen session or on the command line for a quick refresher. It will also show you a list of running `screen` sessions or the name of your current screen, if in one.
 
 ![Example .bashrc aliases](/images/aliases/screenHelp.png)
+
 
 <a name="grep"></a>
 Since `grep` is such an important tool for bioinformaticians to learn, there's also a `howtogrep` refresher.
