@@ -432,6 +432,8 @@ This way will preview the second line of the file to help you confirm it's the c
 Returns the lowest number of columns found in a tab-separted file.
 
 <a name="format"></a>
+###Formatting columnar data to be human-legible
+
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
 Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character. Seeing it aligned can be easier to read than coloring the columns.
 
