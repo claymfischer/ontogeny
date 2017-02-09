@@ -271,20 +271,25 @@ The library functions begin with the prefix `lib_`.
 3. <a href="#tmp">Make better tmp directories</a>
 
 **noWrap**
+
 Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
 
 **l**
+
 Execute `l` (lowercase L) to list everything in the directory in a more human-readable fashion, including the time stamps. It's a simple alias.
 
 **showMatches**
+
 Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very useful for parsing thigns like error logs.
 
 **grabBetween**
+
 This grabs all the content between two patterns: `grabBetween file.txt pattern1 pattern2`
 
 > Note that this will grab the first match of the pattern found, and will ignore further matches.
 
 <a name="screen"></a>**screenHelp**
+
 Your prompt will change when entering a `screen` to alert you that you're in a `screen` session.
 
 ![Example .bashrc aliases](/images/aliases/screen.png)
