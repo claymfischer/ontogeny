@@ -254,21 +254,21 @@ If you'd like to start using colors, here is the output from `bin/paletteTest.sh
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
-Inspecting files and directories
-Tab-separated data
-General / introductory help
 
+## Contribute
 
+If you want to contribute some bash functions, there's a library of functions available for handling argument validity (checking if integers, etc), checking for files existing and making suggestions, etc.
+
+The library functions begin with the prefix `lib_`.
+
+## General / introductory help
 1. <a href="#screen">Screen sessions</a>
 2. <a href="#grep">grep help</a>
-3. <a href="#nonascii">Highlight non-ascii characters</a>
-4. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
-5. <a href="#writing">Test if current directory is actively writing</a>
-6. <a href="#tmp">Make better tmp directories</a>
-7. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
-8. <a href="#format">Align your columns so they're easier to read</a>
+3. <a href="#tmp">Make better tmp directories</a>
 
----
+<details>
+<summary>Learn more</summary>
+
 <a name="screen"></a>
 Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
 
@@ -283,6 +283,26 @@ Since `grep` is such an important tool for bioinformaticians to learn, there's a
 
 ![Example .bashrc aliases](/images/aliases/howtogrep.png)
 
+<a name="tmp"></a>
+If you find yourself making a lot of `tmp` `temp` or `foo` directories and getting them mixed up, here are a few commands to make a unique directory that you can keep track of.
+
+![Example .bashrc aliases](/images/aliases/mkdir.png)
+
+</details>
+
+## Inspecting files and directories
+1. <a href="#writing">Test if current directory is actively writing</a>
+
+2. <a href="#nonascii">Highlight non-ascii characters</a>
+
+## Tab-separated data
+1. <a href="#format">Align your columns so they're easier to read</a>
+2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
+3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
+
+
+
+---
 <a name="nonascii"></a>
 Check if a file has non-ascii characters
 
@@ -304,10 +324,7 @@ Test if your current directory is actively writing anything.
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
-<a name="tmp"></a>
-If you find yourself making a lot of `tmp` `temp` or `foo` directories and getting them mixed up, here are a few commands to make a unique directory that you can keep track of.
 
-![Example .bashrc aliases](/images/aliases/mkdir.png)
 
 <a name="cleanUp"></a>
 Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
