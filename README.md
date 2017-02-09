@@ -22,11 +22,10 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 ---
 
 1. <a href="#Contribute">Contribute</a>
-2. <a href="#General">General purpose software</a>
-2. <a href="#toolkit">ontogeny_toolkit.sh (extensions to your bash startup file)</a>
-3. <a href="#Specific">Specific-use software</a>
-4. <a href="#Colors">Palette library</a>
-5. <a href="#Installation">Installation</a>
+2. <a href="#General">General purpose software (standalone scripts)</a>
+2. <a href="#toolkit">Ontogeny Toolkit (extensions to your bash startup file)</a>
+3. <a href="#Specific">Data Wrangling</a>
+4. <a href="#Installation">Installation</a>
 
 ---
 <a name="Contribute"></a>
@@ -74,14 +73,12 @@ Highlight any number of search patterns with a variety of colors. Can accept **s
 
 `$ highlight file.txt pattern1 pattern2 ... pattern{n}`
 
-(Where `file` can take advantage of filename expansion, be multiple files, or `stdin`)
-
 ![Example highlighting](/images/highlight/highlight.sh.png)
 
 <details>
 <summary>Learn more</summary>
 
-**Input:** `stdin` `file.txt` `"multiple.txt files.txt"` `file.*`
+**Input:** `stdin` `pipedinput` `file.txt` `"multiple.txt files.txt"` `file.*`
 
 Input examples: 
 
@@ -91,11 +88,17 @@ Input examples:
 
 `$ cat file.txt | grep pattern1 | highlight stdin pattern2 pattern3 | less -R`
 
+`$ cat file.txt | grep pattern1 | highlight pipedinput pattern2 pattern3 | less -R`
+
+`pipedinput` and `stdin` are both the same, but `stdin` will show you a color legend of what you're highlighting.
+
 > Note: adding multiple files will *filter* to only lines containing all the patterns. You can trick it to filter withinin a single file by also including the empty file `/dev/null`, for example: `$ highlight "/dev/null file.txt" pattern1 pattern2`
 
 As this can handle any number of patterns (and will color them randomly with 256 colors), it's useful for a lot of QA purposes, making visual connections easier. For example, you could use command substitution to generate your pattern list:
 
 `$ highlight file.txt $( cat listOfAssemblyNames.tsv | cut -f 2 | awk NF | sort | uniq | tr '\n' ' ' )`
+
+> Note: there are patterns with special meaning, such as `CLEANUP` to help location errant tabs and spaces in biological data storage.
 
 </details>
 
@@ -229,7 +232,20 @@ It allows you to change your command prompt to any character. It can give you a 
 
 </details>
 
+---
+<a name="Colors"></a>
+# Palette library
+
+If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
+
+![colors](/images/palette_fg.png)
+
+![colors](/images/palette_bg.png)
+
+![colors](/images/gradients.png)
+
 --- 
+
 <a name="toolkit"></a>
 # ontogeny_toolkit.sh - extension to your .bashrc
 
@@ -367,18 +383,6 @@ This gives you a tag-by-tag count of values and totals them for you. Very useful
 This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
 
 ![tagSummary](/images/tagSummary/tagSummary.png)
-
----
-<a name="Colors"></a>
-# Palette library
-
-If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
-
-![colors](/images/palette_fg.png)
-
-![colors](/images/palette_bg.png)
-
-![colors](/images/gradients.png)
 
 ---
 <a name="Installation"></a>
