@@ -409,6 +409,18 @@ This will return the average number of characters. This is for piped input, one 
 
 This will return the average characters in each column. Used in a pipe.
 
+**numColumns** `numColumns file.tsv`
+
+Returns the number of columns in a tab-separated file.
+
+**maxColumns** `cat file.tsv | maxColumns`
+
+Returns the highest number of columns found in a tab-separated file.
+
+**minColumns**
+
+Returns the lowest number of columns found in a tab-separted file.
+
 <a name="format"></a>
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
 Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character. Seeing it aligned can be easier to read than coloring the columns.
