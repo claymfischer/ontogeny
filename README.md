@@ -9,7 +9,7 @@ The name *ontogeny* refers to the development of an individual from embryo to ma
 
 They are bash shell scripts cobbled together while learning how to work with biological data on UNIX/Linux servers (data wrangling).
 
-They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Many also follow UNIX conventions with the `-h` or `--help` flags.
+They follow [kent](https://github.com/ucscGenomeBrowser/kent) command conventions. This means executing the command with no arguments will show usage/help. Most also follow UNIX/Linux conventions by showing usage when run with the `-h` or `--help` flags.
 
 ---
 
@@ -31,13 +31,11 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 <a name="Contribute"></a>
 # Contribute
 
-This largely hasn't been tested on systems other than CentOS. For instance, my Mac OS laptop uses a different `grep` from the servers I work on, and the Mac OS terminal does not color things with `echo`, only with `printf`. 
-
-Portability is important and needs work. Ensuring consistent usage statements (and -h and --help flags) also needs work.
-
-`$ git pull`
+`$ git clone https://github.com/claymfischer/ontogeny.git`
 
 `$ vi file.txt`
+
+`$ git pull`
 
 `$ git add file.txt`
 
@@ -130,6 +128,9 @@ Any additional arguments will color specific columns for comparison. This exampl
 </details>
 
 --- 
+
+<details>
+<summary>Additional software</summary>
 
 <a name="sequence"></a>
 ## Color-code sequence and quality score data
@@ -243,6 +244,8 @@ If you'd like to start using colors, here is the output from `bin/paletteTest.sh
 ![colors](/images/palette_bg.png)
 
 ![colors](/images/gradients.png)
+
+</details> 
 
 --- 
 
