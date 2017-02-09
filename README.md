@@ -391,7 +391,8 @@ Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file
 2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
 3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
 
-<a name="whichcolumns"></a>
+<a name="whichcolumns"></a>**whichColumns**
+
 Figure out which column number you need.
 
 ![Example .bashrc aliases](/images/aliases/whichColumn.png)
@@ -400,22 +401,31 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
+**describeColumns**
+
+`describe file.tsv` Similar to `whichColumns`, in that it provides the column number, column header and first row value for a tab-separated file.
+
+**summarizeColumns**
+
+`summarizeColumns file.tsv` will give a detailed overview of each column and let you know if the column numbers are inconsistent or the file uses Windows-style CRLF line breaks. You can set any delimiter, it defaults to tab. 
+
+> Note that it gives 5 random values from each column so you get an idea of what's going on. You can instruct it to give a specific number of examples, and even truncate each example so they all fix on your screen.
 
 **columnAverage**
 
-This will return the average number of characters. This is for piped input, one column of data.
+`cat file.tsv | cut -f 1 | columnAverage` This will return the average number of characters. This is for piped input, one column of data.
 
 **columnLengths**
 
-This will return the average characters in each column. Used in a pipe.
+`cat file.tsv | columnLengths` This will return the average characters in each column. Used in a pipe.
 
-**numColumns** `numColumns file.tsv`
+**numColumns** 
 
-Returns the number of columns in a tab-separated file.
+`numColumns file.tsv` Returns the number of columns in a tab-separated file.
 
-**maxColumns** `cat file.tsv | maxColumns`
+**maxColumns** 
 
-Returns the highest number of columns found in a tab-separated file.
+`cat file.tsv | maxColumns` Returns the highest number of columns found in a tab-separated file.
 
 **minColumns**
 
