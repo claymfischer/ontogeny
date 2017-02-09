@@ -262,12 +262,13 @@ If you want to contribute some bash functions, there's a library of functions av
 The library functions begin with the prefix `lib_`.
 
 ## General / introductory help
-1. <a href="#screen">Screen sessions</a>
-2. <a href="#grep">grep help</a>
-3. <a href="#tmp">Make better tmp directories</a>
 
 <details>
 <summary>Learn more</summary>
+
+1. <a href="#screen">Screen sessions</a>
+2. <a href="#grep">grep help</a>
+3. <a href="#tmp">Make better tmp directories</a>
 
 <a name="screen"></a>
 Screen sessions change your prompt to alert you that you're in a screen session, and tell you the name of it.
@@ -291,24 +292,41 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 </details>
 
 ## Inspecting files and directories
-1. <a href="#writing">Test if current directory is actively writing</a>
 
+<details>
+<summary>Learn more</summary>
+1. <a href="#writing">Test if current directory is actively writing</a>
 2. <a href="#nonascii">Highlight non-ascii characters</a>
 
-## Tab-separated data
-1. <a href="#format">Align your columns so they're easier to read</a>
-2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
-3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
+<a name="writing"></a>
+Test if your current directory is actively writing anything.
 
+![Example .bashrc aliases](/images/aliases/writing.png)
 
-
----
 <a name="nonascii"></a>
 Check if a file has non-ascii characters
 
 ![Example .bashrc aliases](/images/aliases/ascii.png)
 
 ![Example .bashrc aliases](/images/aliases/nonascii.png)
+
+<a name="cleanUp"></a>
+Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
+
+![Example .bashrc aliases](/images/aliases/cleanUp.png)
+
+</details>
+
+
+
+## Tab-separated data
+
+<details>
+<summary>Learn more</summary>
+
+1. <a href="#format">Align your columns so they're easier to read</a>
+2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
+3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
 
 <a name="whichcolumns"></a>
 Figure out which column number you need.
@@ -319,17 +337,6 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
-<a name="writing"></a>
-Test if your current directory is actively writing anything.
-
-![Example .bashrc aliases](/images/aliases/writing.png)
-
-
-
-<a name="cleanUp"></a>
-Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
-
-![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
 <a name="format"></a>
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
@@ -343,11 +350,18 @@ It's even easier to read than the color-coded `column` program from above:
 
 ![Example .bashrc aliases](/images/aliases/format_colored.png)
 
+
+</details>
+
+
 --- 
 <a name="Specific"></a>
 # Specific use software
 
 The following software is developed for specific use in data wrangling work. I do keep a repository of it here so we can all collaboratively develop (and the source code may be useful to some), but it is unlikely to find general-purpose use.
+
+<details>
+<summary>Learn more about our internal file formats and the software to work with them</summary>
 
 A lot of this software is designed to work for:
 
@@ -364,6 +378,8 @@ This is a list of files with a unique identifer to link the file with metadata a
 **spreadsheets**
 
 In collaborating with off-site folks who are not familiar with the command-line, it can often be easier to share Google Sheets or Excel Spreadsheets. There is some software to generate input for spreadsheets.
+
+---
 
 1. Check submission
 2. Generate spreadsheet input
@@ -403,6 +419,8 @@ This gives you a tag-by-tag count of values and totals them for you. Very useful
 This gives a summary of a tag from a tag storm, providing counts and showing all the different values and the stanza indentation for each.
 
 ![tagSummary](/images/tagSummary/tagSummary.png)
+
+</details>
 
 ---
 <a name="Installation"></a>
