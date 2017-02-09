@@ -150,24 +150,6 @@ You can also color-code the quality score. Set any third argument.
 
 --- 
 
-<a name="transfer"></a>
-## Quickly transfer files to-and-from your server
-
-This is a simple script that generates a color-coded SCP command to upload or download files.
-
-![Example transfer](/images/transfer/transfer.png)
-
-<details>
-<summary>Learn more</summary>
-`$ transfer file1.txt file2.txt ... file{n}.txt`
-
-It also takes advantage of filename expansion
-
-` $ transfer *.txt`
-</details>
-
---- 
-
 <a name="newls"></a>
 ## New ls and new list
 
@@ -213,22 +195,50 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
 ![Example contents](/images/contents/contents.png)
 
---- 
+---
+
+<a name="transfer"></a>
+## Quickly transfer files to-and-from your server
+
+This is a simple script that generates a color-coded SCP command to upload or download files. It was written as a tutorial in bash shell scripting.
+
+![Example transfer](/images/transfer/transfer.png)
+
+<details>
+<summary>Learn more</summary>
+`$ transfer file1.txt file2.txt ... file{n}.txt`
+
+It also takes advantage of filename expansion
+
+` $ transfer *.txt`
+</details>
+
+---
 
 <a name="prompt"></a>
 ## Change your command prompt
 
-![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
+<details>
+<summary>Learn more</summary>
 
 This is a silly piece of software with no practical purpose, it was written as an exercise challenge when learning bash shell scripting.
 
-It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done.
+![Example .bashrc aliases](/images/changePrompt/changePrompt.png)
+
+It allows you to change your command prompt to any character. It can give you a new character at each prompt, or keep the same character, or return you to your old command prompt when done. The prompts chosen requires changing the settings of LC_ALL to allow UNICODE, so will affect `sort` behavior.
+
+</details>
 
 --- 
 <a name="toolkit"></a>
 # ontogeny_toolkit.sh - extension to your .bashrc
 
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
+
+Inspecting files and directories
+Tab-separated data
+General / introductory help
+
 
 1. <a href="#screen">Screen sessions</a>
 2. <a href="#grep">grep help</a>
@@ -305,7 +315,7 @@ The following software is developed for specific use in data wrangling work. I d
 
 A lot of this software is designed to work for:
 
-**ra file, or tag storm**
+**ra file, or Tag Storm**
 
 An ra (relational-alternative) file establishes a record as a set of related tags and values in a blank line-delimited stanza (block of text). Parent stanzas convey tags and values shared with the rest of the file. Indented stanzas inherit parent stanzas, and can override parent settings. 
 
