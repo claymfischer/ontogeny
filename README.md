@@ -280,13 +280,48 @@ Execute `l` (lowercase L) to list everything in the directory in a more human-re
 
 **showMatches**
 
-Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very useful for parsing thigns like error logs.
+Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very fast and useful for parsing files with multiple matches, for example looking for a certain type of error in an error logs.
+
+> Note that patterns have extensive regex support
 
 **grabBetween**
 
 This grabs all the content between two patterns: `grabBetween file.txt pattern1 pattern2`
 
 > Note that this will grab the first match of the pattern found, and will ignore further matches.
+
+> Patterns have extensive regex support
+
+**grabLines**
+
+`grabLines file.txt 100 250`
+
+This will return all content between line numbers. 
+
+**checkFastq**
+
+This grabs the content between specific line numbers in a gzipped fastq file. Same usage as `grabLines`.
+
+**fixLastLine**
+
+Pipe to this to fix issues with CRLF lines. Very common with data saved from spreadsheets or text files from Windows PCs.
+
+**fixNewLines**
+
+Pipe to this to fix CRLF lines in a file. Very common with data saved from spreadsheets or text files from Windows PCs.
+
+**deleteBlankLines**
+
+Does what it says, it removes blank lines from a file. Used in a pipe.
+
+**reduceMultipleBlankLines**
+
+This will fix up a file by reducing regions with multiple blank lines to only one blank line.
+
+**reduceMultipleBlankSpaces**
+
+This will clean up a file, reducing areas with more than one space to only one space.
+
 
 <a name="screen"></a>**screenHelp**
 
@@ -317,6 +352,14 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 <summary>Learn more</summary>
 1. <a href="#writing">Test if current directory is actively writing</a>
 2. <a href="#nonascii">Highlight non-ascii characters</a>
+
+**linesNotEmpty**
+
+Returns number of lines that are not empty or white space.
+
+**linesContent**
+
+Returns number of lines containing content and which so not begin with a hashtag.
 
 <a name="writing"></a>
 Test if your current directory is actively writing anything.
@@ -357,6 +400,14 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
+
+**columnAverage**
+
+This will return the average number of characters. This is for piped input, one column of data.
+
+**columnLengths**
+
+This will return the average characters in each column. Used in a pipe.
 
 <a name="format"></a>
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
