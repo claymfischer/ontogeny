@@ -166,7 +166,7 @@ If you are new to shell scripting, these are fantastic examples to begin modifyi
 
 --- 
 <a name="about"></a>
-## About
+## Quick inspection of file or directory: `about`
 
 This will tell you about any file or directory. It has lazy usage, or more verbose usage that allows detailed previews of the file. 
 
@@ -193,7 +193,7 @@ Gives you the real and apparent size of directory (eg. if transferring the conte
 --- 
 
 <a name="contents"></a>
-## List contents
+## More informative directory contents: `contents`
 
 This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 
@@ -202,7 +202,7 @@ This is an extension of a script I found in 'Wicked Cool Shell Scripts.'
 ---
 
 <a name="transfer"></a>
-## Quickly transfer files to-and-from your server
+## Quickly transfer files to-and-from your server: `transfer`
 
 This is a simple script that generates a color-coded SCP command to upload or download files. It was written as a tutorial in bash shell scripting.
 
@@ -220,7 +220,7 @@ It also takes advantage of filename expansion
 ---
 
 <a name="prompt"></a>
-## Change your command prompt
+## Change your command prompt `promptScript`
 
 <details>
 <summary>Learn more</summary>
@@ -235,7 +235,7 @@ It allows you to change your command prompt to any character. It can give you a 
 
 ---
 <a name="Colors"></a>
-# Palette library
+# Display 256-color palette library: `palette`
 
 If you'd like to start using colors, here is the output from `bin/paletteTest.sh`:
 
@@ -270,7 +270,7 @@ The library functions begin with the prefix `lib_`.
 2. <a href="#grep">grep help</a>
 3. <a href="#tmp">Make better tmp directories</a>
 
-## Temporarily disable text wrapping `noWrap`
+### Temporarily disable text wrapping `noWrap`
 
 Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
 
@@ -300,27 +300,27 @@ This grabs all the content between two patterns: `grabBetween file.txt pattern1 
 
 This will return all content between line numbers. 
 
-### `checkFastq`
+### Grab specific lines out of a gzipped fastq: `checkFastq`
 
 This grabs the content between specific line numbers in a gzipped fastq file. Same usage as `grabLines`.
 
-### `fixLastLine`
+### Fix errors where last line of a file is a funky line break: `fixLastLine`
 
 Pipe to this to fix issues with CRLF lines. Very common with data saved from spreadsheets or text files from Windows PCs.
 
-### `fixNewLines`
+### Fix files that have funky line breaks: `fixNewLines`
 
 Pipe to this to fix CRLF lines in a file. Very common with data saved from spreadsheets or text files from Windows PCs.
 
-### `deleteBlankLines`
+### Remove all blank lines: `deleteBlankLines`
 
 Does what it says, it removes blank lines from a file. Used in a pipe.
 
-### `reduceMultipleBlankLines`
+### Reduce multiple blank lines to one: `reduceMultipleBlankLines`
 
 This will fix up a file by reducing regions with multiple blank lines to only one blank line.
 
-### `reduceMultipleBlankSpaces``
+### Reduce multiple blank spaces to one: `reduceMultipleBlankSpaces`
 
 This will clean up a file, reducing areas with more than one space to only one space.
 
