@@ -255,20 +255,25 @@ If you'd like to start using colors, here is the output from `bin/paletteTest.sh
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
 
-## Contribute
-
-If you want to contribute some bash functions, there's a library of functions available for handling argument validity (checking if integers, etc), checking for files existing and making suggestions, etc.
-
-The library functions begin with the prefix `lib_`.
-
 ## General / introductory help
 
-<details>
-<summary>Learn more</summary>
+* `noWrap`
+* `l`
+* `showMatches`
+* `grabBetween`
+* `grabLines`
+* `checkFastq`
+* `fixLastLine`
+* `fixNewLines`
+* `deleteBlankLines`
+* `reduceMultipleBlankLines`
+* `reduceMultipleBlankSpaces`
+* Changes to screen prompt and `screenHelp`
+* `howToGrep`
+* `mkdirRand`, `mkdirNow`, `MkdirTime`, `foo`
 
-1. <a href="#screen">Screen sessions</a>
-2. <a href="#grep">grep help</a>
-3. <a href="#tmp">Make better tmp directories</a>
+<details>
+<summary>See examples</summary>
 
 ### Temporarily disable text wrapping `noWrap`
 
@@ -459,6 +464,11 @@ It's even easier to read than the color-coded `column` program from above:
 
 </details>
 
+## Want to extend the toolkit with new functionality?
+
+If you want to contribute some bash functions, there's a library of functions available for handling argument validity (checking if integers, etc), checking for files existing and making suggestions, etc.
+
+The library functions begin with the prefix `lib_`.
 
 --- 
 <a name="Specific"></a>
