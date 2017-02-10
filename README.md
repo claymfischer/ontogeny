@@ -272,7 +272,7 @@ The library functions begin with the prefix `lib_`.
 
 ### Temporarily disable text wrapping `noWrap`
 
-Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
+Execute `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
 
 ### Human-readable ls: `l`
 
@@ -282,19 +282,25 @@ Execute `l` (lowercase L) to list everything in the directory in a more human-re
 
 ![ontogeny_toolkit.sh](/images/aliases/showMatches.png)
 
-Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very fast and useful for parsing files with multiple matches, for example looking for a certain type of error in an error logs.
+Execute `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. 
 
-> Note that patterns have extensive regex support
+> Very fast and useful for parsing files with multiple matches, for example looking for a certain type of error in an error logs.
+
+> Note that patterns have extensive regex support, as shown in image above
 
 ### Display all content between two patterns: `grabBetween`
 
-This grabs all the content between two patterns: `grabBetween file.txt pattern1 pattern2`
+![ontogeny_toolkit.sh](/images/aliases/grabBetween.png)
+
+`grabBetween file.txt pattern1 pattern2`
 
 > Note that this will grab the first match of the pattern found, and will ignore further matches.
 
 > Patterns have extensive regex support
 
 ### Display content between two lines: `grabLines`
+
+![ontogeny_toolkit.sh](/images/aliases/grabLines.png)
 
 `grabLines file.txt 100 250`
 
