@@ -280,6 +280,8 @@ Execute `l` (lowercase L) to list everything in the directory in a more human-re
 
 **showMatches**
 
+![ontogeny_toolkit.sh](/images/aliases/showMatches.png)
+
 Run `showMatches file.txt pattern` to show all matches (highlighted) with context. Add another argument to set amount of context you want to include: `showMatches file.txt pattern 10`. Very fast and useful for parsing files with multiple matches, for example looking for a certain type of error in an error logs.
 
 > Note that patterns have extensive regex support
