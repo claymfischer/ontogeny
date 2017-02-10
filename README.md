@@ -255,7 +255,7 @@ If you'd like to start using colors, here is the output from `bin/paletteTest.sh
 The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above software and adding the following functionality:
 
 
-## General / introductory help
+## General utilities included
 
 * `noWrap`
 * `l`
@@ -268,7 +268,7 @@ The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above 
 * `deleteBlankLines`
 * `reduceMultipleBlankLines`
 * `reduceMultipleBlankSpaces`
-* Changes to screen prompt and `screenHelp`
+* `screenHelp` and changes to your prompt when in a screen
 * `howToGrep`
 * `mkdirRand`, `mkdirNow`, `MkdirTime`, `foo`
 
@@ -291,7 +291,7 @@ Execute `showMatches file.txt pattern` to show all matches (highlighted) with co
 
 > Very fast and useful for parsing files with multiple matches, for example looking for a certain type of error in an error logs.
 
-> Note that patterns have extensive regex support, as shown in image above
+> Patterns have extensive regex support, as shown in image above
 
 ### Display all content between two patterns: `grabBetween`
 
@@ -315,23 +315,35 @@ This will return all content between line numbers.
 
 This grabs the content between specific line numbers in a gzipped fastq file. Same usage as `grabLines`.
 
-### Fix errors where last line of a file is a funky line break: `fixLastLine`
+### Fix errors where last line of a file is a funky line break: `fixLastLine`.
+
+`cat file.txt | fixLastLine > file2.txt`
 
 Pipe to this to fix issues with CRLF lines. Very common with data saved from spreadsheets or text files from Windows PCs.
 
+> Note that this is useful because many programs define a line as ending in a line break. If the last line does not ending with a line break, it may cause issues with some software.
+
 ### Fix files that have funky line breaks: `fixNewLines`
+
+`cat file.txt | fixNewLines > file2.txt`
 
 Pipe to this to fix CRLF lines in a file. Very common with data saved from spreadsheets or text files from Windows PCs.
 
 ### Remove all blank lines: `deleteBlankLines`
 
-Does what it says, it removes blank lines from a file. Used in a pipe.
+`cat file.txt | deleteBlankLines > file2.txt`
+
+Removes blank lines from a file. Used in a pipe.
 
 ### Reduce multiple blank lines to one: `reduceMultipleBlankLines`
+
+`cat file.txt | reduceMultipleBlankLines > file2.txt`
 
 This will fix up a file by reducing regions with multiple blank lines to only one blank line.
 
 ### Reduce multiple blank spaces to one: `reduceMultipleBlankSpaces`
+
+`cat file.txt | reduceMultipleBlankSpaces > file2.txt`
 
 This will clean up a file, reducing areas with more than one space to only one space.
 
