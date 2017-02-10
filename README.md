@@ -274,7 +274,7 @@ The library functions begin with the prefix `lib_`.
 
 Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
 
-**l**
+**`l`**
 
 Execute `l` (lowercase L) to list everything in the directory in a more human-readable fashion, including the time stamps. It's a simple alias.
 
