@@ -271,6 +271,7 @@ The `ontogeny_toolkit.sh` extends your `.bashrc` by adding aliases to the above 
 * `screenHelp` and changes to your prompt when in a screen
 * `howToGrep`
 * `mkdirRand`, `mkdirNow`, `MkdirTime`, `foo`
+* `cleanUp`
 
 <details>
 <summary>See examples</summary>
@@ -376,10 +377,15 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 
 ## Inspecting files and directories
 
+* `linesNotEmpty`
+* `linesContent`
+* `writing`
+* `busy`
+* `nonascii`
+* `ascii`
+
 <details>
 <summary>Learn more</summary>
-1. <a href="#writing">Test if current directory is actively writing</a>
-2. <a href="#nonascii">Highlight non-ascii characters</a>
 
 **linesNotEmpty**
 
@@ -401,10 +407,6 @@ Check if a file has non-ascii characters
 
 ![Example .bashrc aliases](/images/aliases/nonascii.png)
 
-<a name="cleanUp"></a>
-Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
-
-![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
 </details>
 
@@ -412,12 +414,17 @@ Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file
 
 ## Tab-separated data
 
-<details>
-<summary>Learn more</summary>
-
 1. <a href="#format">Align your columns so they're easier to read</a>
 2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
 3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
+
+<details>
+<summary>Learn more</summary>
+
+<a name="cleanUp"></a>
+Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
+
+![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
 <a name="whichcolumns"></a>**whichColumns**
 
