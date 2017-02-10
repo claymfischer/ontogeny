@@ -380,30 +380,39 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 * `linesNotEmpty`
 * `linesContent`
 * `writing`
-* `busy`
 * `nonascii`
 * `ascii`
 
 <details>
 <summary>Learn more</summary>
 
-**linesNotEmpty**
+### `linesNotEmpty`
+
+`cat file.txt | linesNotEmpty`
 
 Returns number of lines that are not empty or white space.
 
-**linesContent**
+### `linesContent`
+
+`cat file.txt | linesContent
 
 Returns number of lines containing content and which so not begin with a hashtag.
 
-<a name="writing"></a>
-Test if your current directory is actively writing anything.
+### Test if your current directory is actively writing anything: `writing`
 
 ![Example .bashrc aliases](/images/aliases/writing.png)
 
-<a name="nonascii"></a>
-Check if a file has non-ascii characters
+Simple trick to see if a directory size changes over one second. 
+
+> Note: this uses `du`, then sleeps and uses `du again to determine speed of writing. Large directories can take a while to run `du`, so the rate of writing may be inaccurate.
+
+### Check if a file has non-ascii characters: `ascii` and `nonascii`
+
+`cat file.txt | ascii`
 
 ![Example .bashrc aliases](/images/aliases/ascii.png)
+
+`cat file.txt | nonascii`
 
 ![Example .bashrc aliases](/images/aliases/nonascii.png)
 
