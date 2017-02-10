@@ -469,21 +469,27 @@ Simple trick to see if a directory size changes over one second.
 
 ## Tab-separated data
 
-1. <a href="#format">Align your columns so they're easier to read</a>
-2. <a href="#whichcolumns">Decipher which column number has your data of interest</a>
-3. <a href="#cleanUp">Visually locate multiple spaces/tabs</a>
-
+* `cleanUp` and `highlight file.tab CLEANUP` 
+* `whichColumn`, `whichColumns`
+* `describeColumns`
+* ``
+* ``
+* ``
+* ``
+* ``
+* ``
 <details>
 <summary>Learn more</summary>
 
-<a name="cleanUp"></a>
-Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
+### Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file.txt | cleanUp `
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
+Visually locate multiple spaces/tabs, helpful when data isn't validating the way you expected.
+
 > Tip: `highlight` has a special pattern which works even better. `highlight file.txt CLEANUP`.
 
-<a name="whichcolumns"></a>**whichColumns**
+### Decipher which column number has your data of interest: `whichColumns`
 
 `cat file.txt | whichColumns`
 
@@ -497,9 +503,9 @@ This way will preview the second line of the file to help you confirm it's the c
 
 > Tip: sometimes the file has funky line breaks if copied and pasted from a spreadsheet, so try `cat file.txt | fixNewLines | whichColumns.png` if you encounter troubles.
 
-### `describeColumns`
+### Decipher which column number has your data of interest: `describeColumns`
 
-`describe file.tsv`
+`describeColumns file.tsv`
 
 A fork of `whichColumns`, and also provides the column number, column header and first row value for a tab-separated file.
 
