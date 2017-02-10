@@ -876,7 +876,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 					echo "$reset$alternateRow$line$reset";
 				done
 			}
-			alias colorRows=followRows
+			alias followRows=colorRows
 			#########################################################################
 			# Takes input from arrange() and grid-ifies it.
 			#
