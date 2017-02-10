@@ -752,6 +752,10 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				echo "$WALL"
 				tput smam
 			}
+			alias splitAndAlign=align
+			alias breakAndSeparate=align
+			alias chop=align
+			alias explode=align
 
 			#########################################################################
 			# This is like align, but it adds in some strings to be cut out to make 
@@ -832,10 +836,6 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"
 				fi
 			}
-			alias splitAndAlign=align
-			alias breakAndSeparate=align
-			alias chop=align
-			alias explode=align
 
 
 			#########################################################################
@@ -934,11 +934,11 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 						alternateRow=$(echo -en "\e[38;5;${textColor}m\e[${fgbg};5;${color}m"); 
 						COLOR=`echo -e "\e[38;5;${textColor}m\e[48;5;${color}m"`
 						NORMAL=`echo -e '\033[0m'`
-						griddedLine=$(echo "$line" | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
+						griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/CUTMEOUT/$NORMAL $COLOR/g" ) # sed  "s/\([[:blank:]]\+\)\(.*\)/\1\\\e[48;5;${color}m\2/g" )
 						((z++)); 
 					else 
 						alternateRow= #$(echo -en "\e[38;5;255m") ; 
-						griddedLine=$(echo "$line" | sed "s/CUTMEOUT/ /g")
+						griddedLine=$(echo "$line" | sed 's/^CUTMETOO//g' | sed "s/CUTMEOUT/ /g")
 					fi
 					echo "$reset$alternateRow$griddedLine$reset";
 				done
@@ -970,7 +970,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			#	blocks file.tsv 'delimiter'
 			#########################################################################
 			blocks() {
-				arrange $1 $2 | makeBlocks x
+				arrange $1 $2 $3 | makeBlocks x
 			}
 
 		#########################################################################
