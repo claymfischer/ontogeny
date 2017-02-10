@@ -270,17 +270,15 @@ The library functions begin with the prefix `lib_`.
 2. <a href="#grep">grep help</a>
 3. <a href="#tmp">Make better tmp directories</a>
 
-**noWrap**
+## Temporarily disable text wrapping `noWrap`
 
 Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 seconds your terminal is back to default.
 
-## `l`
+### Human-readable ls: `l`
 
 Execute `l` (lowercase L) to list everything in the directory in a more human-readable fashion, including the time stamps. It's a simple alias.
 
-## Display at matches with context: `showMatches`
-
-### `showMatches`
+### Display at matches with context: `showMatches`
 
 ![ontogeny_toolkit.sh](/images/aliases/showMatches.png)
 
@@ -288,7 +286,7 @@ Run `showMatches file.txt pattern` to show all matches (highlighted) with contex
 
 > Note that patterns have extensive regex support
 
-**grabBetween**
+### Display all content between two patterns: `grabBetween`
 
 This grabs all the content between two patterns: `grabBetween file.txt pattern1 pattern2`
 
@@ -296,40 +294,40 @@ This grabs all the content between two patterns: `grabBetween file.txt pattern1 
 
 > Patterns have extensive regex support
 
-**grabLines**
+### Display content between two lines: `grabLines`
 
 `grabLines file.txt 100 250`
 
 This will return all content between line numbers. 
 
-**checkFastq**
+### `checkFastq`
 
 This grabs the content between specific line numbers in a gzipped fastq file. Same usage as `grabLines`.
 
-**fixLastLine**
+### `fixLastLine`
 
 Pipe to this to fix issues with CRLF lines. Very common with data saved from spreadsheets or text files from Windows PCs.
 
-**fixNewLines**
+### `fixNewLines`
 
 Pipe to this to fix CRLF lines in a file. Very common with data saved from spreadsheets or text files from Windows PCs.
 
-**deleteBlankLines**
+### `deleteBlankLines`
 
 Does what it says, it removes blank lines from a file. Used in a pipe.
 
-**reduceMultipleBlankLines**
+### `reduceMultipleBlankLines`
 
 This will fix up a file by reducing regions with multiple blank lines to only one blank line.
 
-**reduceMultipleBlankSpaces**
+### `reduceMultipleBlankSpaces``
 
 This will clean up a file, reducing areas with more than one space to only one space.
 
+<a name="screen"></a>
+### Make it clear when in a screen, and show screen sessions: `screenHelp`
 
-<a name="screen"></a>**screenHelp**
-
-Your prompt will change when entering a `screen` to alert you that you're in a `screen` session.
+Your prompt will automatically change when entering a `screen` to alert you that you're in a `screen` session.
 
 ![Example .bashrc aliases](/images/aliases/screen.png)
 
@@ -339,11 +337,14 @@ You can also invoke help by simply running `screenHelp` either in the screen ses
 
 
 <a name="grep"></a>
+### grep cheatsheet: `howToGrep`
 Since `grep` is such an important tool for bioinformaticians to learn, there's also a `howtogrep` refresher.
 
 ![Example .bashrc aliases](/images/aliases/howtogrep.png)
 
 <a name="tmp"></a>
+### Make better tmp directories: `mkdirRand`, `mkdirNow`, `MkdirTime`, `foo`
+
 If you find yourself making a lot of `tmp` `temp` or `foo` directories and getting them mixed up, here are a few commands to make a unique directory that you can keep track of.
 
 ![Example .bashrc aliases](/images/aliases/mkdir.png)
