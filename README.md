@@ -49,9 +49,9 @@ On the other hand, most of my software is not designed to be part of a pipeline.
 
 ---
 <a name="General"></a>
-# General purpose software
+# Standalone software
 
-This software is not specific to internal work projects, and much of it can be employed for any general command-line use. 
+This software is not specific to internal work projects, and much of it can be employed for any general command-line use in bioinformatics.
 
 1. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh) <a href="#highlight">Highlight</a>
 2. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_columns.sh) <a href="#columns">Color-code columns</a>
@@ -130,7 +130,7 @@ Any additional arguments will color specific columns for comparison. This exampl
 --- 
 
 <details>
-<summary>Additional software</summary>
+<summary>View more standalone software</summary>
 
 <a name="sequence"></a>
 ## Color-code sequence and quality score data
