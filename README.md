@@ -377,6 +377,13 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 
 ## Inspecting files and directories
 
+* `inspect`
+* `formatted`
+* `align`
+* `alternateRows`
+* `colorRows`
+* `blocks`
+* `grid`
 * `linesNotEmpty`
 * `linesContent`
 * `writing`
@@ -384,7 +391,7 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 * `ascii`
 
 <details>
-<summary>Learn more</summary>
+<summary>See examples</summary>
 
 ### Quickly view the beginning and end of a file: `inspect`
 
@@ -472,12 +479,14 @@ Simple trick to see if a directory size changes over one second.
 * `cleanUp` and `highlight file.tab CLEANUP` 
 * `whichColumn`, `whichColumns`
 * `describeColumns`
-* ``
-* ``
-* ``
-* ``
-* ``
-* ``
+* `summarizeColumns`
+* `cutColumns`
+* `columnAverage`
+* `columnLengths`
+* `numColumns`
+* `maxColumns`
+* `minColumns` 
+
 <details>
 <summary>Learn more</summary>
 
@@ -561,7 +570,7 @@ It's even easier to read than the color-coded `column` program from above:
 
 If you want to contribute some bash functions, there's a library of functions available for handling argument validity (checking if integers, etc), checking for files existing and making suggestions, etc.
 
-The library functions begin with the prefix `lib_`.
+The library functions begin with the prefix `lib_`. There are example bash functions as well, `allTheArguments` to show how handle multiple files and accept unlimited arguments (as well as color results randomly), and `functionFlags` to show how to use flags in a bash function.
 
 --- 
 <a name="Specific"></a>
