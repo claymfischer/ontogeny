@@ -386,6 +386,52 @@ If you find yourself making a lot of `tmp` `temp` or `foo` directories and getti
 <details>
 <summary>Learn more</summary>
 
+### Quickly view the beginning and end of a file: `inspect`
+
+`inspect file.txt`
+
+Default is to include first and last 5 lines, but you can set a different number: `inspect file.txt 20`+
+
+### Quickly align delimited output: `formatted`
+
+`cat file.txt | processing | formatted`
+
+This will allow you to align files in a pipe. Can set any delimiter, but defaults to tab. For example, a csv file: `cat file.txt | formatted ","`
+
+### Align file content: `align file.txt`
+
+`align file.txt "delimiter"`
+
+Aligns a file according to delimiter. If no delimiter set, defaults to tab. 
+
+### Alternate row color, so data is easier to read: `alternateRows`
+
+`cat file.txt | alternateRows`
+
+Gives every other row a gray background color.
+
+### Alternate row output with color: `colorRows`
+
+`cat file.txt | colorRows`
+
+Gives every other row a random color. Set an argument to give it a background color, instead.
+
+### Organize content into gray blocks: `blocks`
+
+`blocks file.tab`
+
+Can set any delimiter as the second argument, defaults to tab.
+
+### Turn small delimited content into colorful, spreadsheet-like grids: `grid`
+
+`grid file.tab`
+
+Can set any delimiter as the second argument, defaults to tab. 
+
+Third argument will truncate line, for example to truncate each column to 10 characters: `grid file.tab tab 10`
+
+It can also truncate to the `average` or `avg` of the column characters: `grid file.tab tab avg`
+
 ### `linesNotEmpty`
 
 `cat file.txt | linesNotEmpty`
@@ -404,7 +450,7 @@ Returns number of lines containing content and which so not begin with a hashtag
 
 Simple trick to see if a directory size changes over one second. 
 
-> Note: this uses `du`, then sleeps and uses `du again to determine speed of writing. Large directories can take a while to run `du`, so the rate of writing may be inaccurate.
+> Note: this uses `du`, then sleeps and uses `du` again to determine speed of writing. Large directories can take a while to run `du`, so the rate of writing may be inaccurate.
 
 ### Check if a file has non-ascii characters: `ascii` and `nonascii`
 
@@ -435,9 +481,13 @@ Visually inspect for multiple spaces or tabs where they shouldn't be. ` cat file
 
 ![Example .bashrc aliases](/images/aliases/cleanUp.png)
 
+> Tip: `highlight` has a special pattern which works even better. `highlight file.txt CLEANUP`.
+
 <a name="whichcolumns"></a>**whichColumns**
 
-Figure out which column number you need.
+`cat file.txt | whichColumns`
+
+Figure out which column number you need. 
 
 ![Example .bashrc aliases](/images/aliases/whichColumn.png)
 
@@ -445,38 +495,47 @@ This way will preview the second line of the file to help you confirm it's the c
 
 ![Example .bashrc aliases](/images/aliases/whichColumns.png)
 
-**describeColumns**
+> Tip: sometimes the file has funky line breaks if copied and pasted from a spreadsheet, so try `cat file.txt | fixNewLines | whichColumns.png` if you encounter troubles.
 
-`describe file.tsv` Similar to `whichColumns`, in that it provides the column number, column header and first row value for a tab-separated file.
+### `describeColumns`
 
-**summarizeColumns**
+`describe file.tsv`
+
+A fork of `whichColumns`, and also provides the column number, column header and first row value for a tab-separated file.
+
+### `summarizeColumns`
 
 `summarizeColumns file.tsv` will give a detailed overview of each column and let you know if the column numbers are inconsistent or the file uses Windows-style CRLF line breaks. You can set any delimiter, it defaults to tab. 
 
 > Note that it gives 5 random values from each column so you get an idea of what's going on. You can instruct it to give a specific number of examples, and even truncate each example so they all fix on your screen.
 
-**columnAverage**
+### `cutColumns`
+
+`cutColumns file.tsv 1 2 3`
+
+Returns the file, but without the columns specified as arguments. Can be in any order.
+
+### `columnAverage`
 
 `cat file.tsv | cut -f 1 | columnAverage` This will return the average number of characters. This is for piped input, one column of data.
 
-**columnLengths**
+### `columnLengths`
 
 `cat file.tsv | columnLengths` This will return the average characters in each column. Used in a pipe.
 
-**numColumns** 
+### `numColumns` 
 
 `numColumns file.tsv` Returns the number of columns in a tab-separated file.
 
-**maxColumns** 
+### `maxColumns`
 
 `cat file.tsv | maxColumns` Returns the highest number of columns found in a tab-separated file.
 
-**minColumns**
+### `minColumns`
 
 Returns the lowest number of columns found in a tab-separted file.
 
-<a name="format"></a>
-###Formatting columnar data to be human-legible
+
 
 Tab-separated data can be difficult to read if the rows vary in character length. Here's an example of using the format alias. 
 Note that to align this, a character needs to be placed in columns or rows with blanks. This will insert a period (.) character. Seeing it aligned can be easier to read than coloring the columns.
@@ -531,6 +590,34 @@ In collaborating with off-site folks who are not familiar with the command-line,
 4. Generate a tag summary
 
 ---
+
+### List all empty tags: `emptyTags`
+
+`cat meta.txt | processing | emptyTags`
+
+Useful to see if your processing messes up any tags.
+
+### Remove all empty tags: `removeEmptyTags`
+
+`cat meta.txt | processing | removeEmptyTags > meta.new`
+
+### Make a list of tags in a Tag Storm: `listAllTags`
+
+`listAllTags meta.txt`
+
+### Show currently-valid tags from cdwCheckValidation.c: `listValidTags`
+
+### Test if a Tag Storm has any invalid tags: `checkTagsValid`
+
+### Convert to tag-style: `convertMisceFields`
+
+`head -n 1 meta.tab | convertMisceFields >> fixedHeader.txt`
+
+This will lower-case, convert spaces and dashes to underbars, and even change camel-cased to tag-format.
+
+### Visually see how you Tag Storm maps to your manifest: `mapToManifest`
+
+### Visually see how your manifest files maps to your Tag Storm: `mapToMeta`
 
 ## Check submission
 
