@@ -110,11 +110,11 @@ This takes advantage of a simple `grep` loop to color-code the columns. Accepts 
 
 `$ cat example.tsv`
 
-![Example column coloring](/images/columns/columns_example2.png)
+![Example column coloring](/images/columns/columns_preview_before.png)
 
 `$ columns example.tsv`
 
-![Example column coloring](/images/columns/columns_example2_colored.png)
+![Example column coloring](/images/columns/columns_preview_after.png)
 
 <details>
 <summary>Learn more</summary>
