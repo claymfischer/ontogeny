@@ -63,7 +63,7 @@ This software is not specific to internal work projects, and much of it can be e
 7. [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_changePrompt.sh) <a href="#prompt">Change your command prompt for no good reason</a>
 
 <a name="highlight"></a>
-## Highlight
+## Visualize patterns in files: `highlight`
  [[view source]](https://github.com/claymfischer/ontogeny/blob/master/bin/ontogeny_highlight.sh)
  
 Highlight any number of search patterns with a variety of colors. Can accept **stdin** (piped input) or use files, and can pipe out (for example to `less -R`). It also has extensive **regex** support. Protips and specifics are available in the [documentation and usage](https://github.com/claymfischer/ontogeny/blob/master/docs_highlight.md).
@@ -102,7 +102,7 @@ As this can handle any number of patterns (and will color them randomly with 256
 
 ---
 <a name="columns"></a>
-## Color-code columnar data
+## Color-code columnar data: `columns`
 
 In bioinformatics we deal with the lowest common denominator format for data, which is generally plain text in tab-separated columns. These tab-separated columns are computer-readable moreso than human-readable, as the columns do not line up. It can be difficult to tell which column you are looking at when you have a screen of line-wrapped text.
 
@@ -133,7 +133,7 @@ Any additional arguments will color specific columns for comparison. This exampl
 <summary>View more standalone software</summary>
 
 <a name="sequence"></a>
-## Color-code sequence and quality score data
+## Color-code sequence and quality score data: `fastq`
 
 Color-codes bases in a gzipped fastq file.
 
@@ -155,7 +155,7 @@ You can also color-code the quality score. Set any third argument.
 --- 
 
 <a name="newls"></a>
-## New ls and new list
+## New ls and new list: `newls` and `list`
 
 This lists directories first, then files. It can color-code different types of files.
 
@@ -278,7 +278,9 @@ Run `noWrap` to temporarily halt line wrapping around your terminal. After 20 se
 
 Execute `l` (lowercase L) to list everything in the directory in a more human-readable fashion, including the time stamps. It's a simple alias.
 
-**showMatches**
+## Display at matches with context: `showMatches`
+
+### `showMatches`
 
 ![ontogeny_toolkit.sh](/images/aliases/showMatches.png)
 
