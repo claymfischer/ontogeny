@@ -1,3 +1,41 @@
+#TO DO prefix lib_
+
+
+jc_hms() { 
+  declare -i i=${1:-$(</dev/stdin)};
+  declare hr=$(($i/3600)) min=$(($i/60%60)) sec=$(($i%60));
+  printf "%02d:%02d:%02d\n" $hr $min $sec;
+}
+
+testStdinA() {
+
+	cat | sed 's/^/\t/g'
+	
+}
+
+testStdinB() {
+
+	while read stdin; do
+		echo "$stdin"
+	done | sed 's/^/\t/g'
+	
+}
+
+testStdinC() {
+
+  declare -i i=${1:-$(</dev/stdin)};
+	echo "$i" | sed 's/^/\t/g'
+}
+
+
+testStdinD() {
+    if read -t 0; then
+        cat
+    else
+        echo "$*"
+    fi
+}
+
 
 #################################################################################
 # https://github.com/claymfischer/ontogeny
@@ -105,6 +143,7 @@ fi
 		#		return 0; 
 		#	fi
 		#########################################################################
+		# TO DO: unlimited files. But dunno how to make it list multiple matches.
 		templateNotFound() {
 			FILE=$1
 			echo 
@@ -304,7 +343,7 @@ fi
 				if [ "$2" == "" ]; then echo "You didn't provide a valid pattern"; return 0; fi
 				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
 				if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
-				cat $1 | nl | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|" 
+				cat $1 | nl --body-numbering=a | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|" 
 			else
 				echo "Please provide a filename that exists and has content."
 			fi
@@ -572,6 +611,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# 	cutColumns file.tab 1 2 3
 			#########################################################################
 			cutColumns() {
+				# TO DO: make first argument the delimiter.
 				# usage
 				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
 					echo "Cuts columns from a file and prints to stdout. Does not alter original file."
@@ -939,7 +979,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		allTheThings() {
 			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/columns stdin
 		}
-
+		# TO DO: rename lib_
 		grabTagStorm() {
 			if [ -z "$TAGSTORM" ]; then
 				# Let's grab the most recent file that matches the below configuration
@@ -1016,7 +1056,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# usage:
 		#	cat meta.tab | convertMisceFields >> misceFields.txt
 		#########################################################################
-		alias convertMisceFields=" head -n 1 | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
+		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
 
 		#########################################################################
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
@@ -1101,7 +1141,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# Wrangler-curated stuff						#
 		#########################################################################
-		alias cdwDataSets="hgsql cdw -e 'select id,name,label,description,metaDivTags,metaLabelTags from cdwDataset\G' | GREP_COLOR='00;38;5;107' grep --color=always \$'^[[:blank:]]*name.*\|' | GREP_COLOR='00;38;5;200' grep --color=always \$'^[[:blank:]]*label.*\|' | GREP_COLOR='00;38;5;117' grep --color=always \$'^[[:blank:]]*description.*\|' | GREP_COLOR='00;38;5;202' grep --color=always \$'^[[:blank:]]*metaDivTags.*\|' | GREP_COLOR='00;38;5;25' grep --color=always \$'^[[:blank:]]*metaLabelTags.*\|' | GREP_COLOR='00;38;5;236' grep --color=always \$'^\**.*\|'"
+		alias cdwDataSets="hgsql cdw -e 'select id,name,label,description,metaDivTags,metaLabelTags from cdwDataset ORDER BY id asc \G' | GREP_COLOR='00;38;5;107' grep --color=always \$'^[[:blank:]]*name.*\|' | GREP_COLOR='00;38;5;200' grep --color=always \$'^[[:blank:]]*label.*\|' | GREP_COLOR='00;38;5;117' grep --color=always \$'^[[:blank:]]*description.*\|' | GREP_COLOR='00;38;5;202' grep --color=always \$'^[[:blank:]]*metaDivTags.*\|' | GREP_COLOR='00;38;5;25' grep --color=always \$'^[[:blank:]]*metaLabelTags.*\|' | GREP_COLOR='00;38;5;236' grep --color=always \$'^\**.*\|'"
 		alias cdwLabs="hgsql cdw -e 'select id,name,pi,institution,url from cdwLab\G' | GREP_COLOR='00;38;5;202' grep --color=always \$'^[[:blank:]]*name.*\|' | GREP_COLOR='00;38;5;200' grep --color=always \$'^[[:blank:]]*institution.*\|' | GREP_COLOR='00;38;5;25' grep --color=always \$'^[[:blank:]]*url.*\|' | GREP_COLOR='00;38;5;117' grep --color=always \$'^[[:blank:]]*pi.*\|' | GREP_COLOR='00;38;5;236' grep --color=always \$'^\**.*\|'"
 
 #########################################################################
@@ -1162,15 +1202,20 @@ EOF
 		DATENOW=$(date +"%B %d")
 		TIMENOW=$(date +"%R %p")
 		# Print a context-sensitive title for screens and screen help
-		if [ -n "$STY" ]; then 
-			screenMessage=$(printf "\n\n\tYou are in the screen session $color25$STY$reset"); 
-		else 
-			#if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
-				screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
-			#fi
-		fi
+		listScreens() {
+			#TO DO
+			if [ -n "$STY" ]; then 
+				screenMessage=$(printf "\n\n\tYou are in the screen session $color25$STY$reset"); 
+			else 
+				#if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
+					screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
+				#fi
+			fi
+		}
 		screenHelp() {
+			listScreens
 			cat << EOF
+			
 		$screenMessage
 	
 		Quick refresher:
@@ -1321,6 +1366,7 @@ EOF
 		}
 
 		highlightTrawl() {
+			# TO DO: make a function that will organize highlight contents as STARTpatternEOL
 			if [ "$1" == "" ]; then printf "Highlights values from a tagTrawl file.\nUsage:\n\thighlightTrawl file.txt\n"; return 0; fi
 			highlight $1 $(cat duplicateTagValues.txt | sort | uniq -c | grep ^[[:blank:]]*2 | sed 's/^[[:blank:]]*[^1] //g' | grep -v ^[0-9]*$ | sed 's/\s/\\s/g' | sed 's/^/^/g' | sed 's/$/$/g' ) | sed 's/^/\t/g' | sed 's/^\tlab_/lab_/g'
 		}
@@ -1348,4 +1394,18 @@ EOF
 			done
 			eval "$COMMAND"
 		}
-		
+		tagStructure() {
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagStructure file.txt\n"; return 0; fi
+			cat $1 | sed 's/^\([[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]\).*$/\1/g' #sed 's/^\([[:blank:]]*.\+ \).*$/\1/g'
+		}
+
+		tagStormSkeleton() {
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagStormSkeleton file.txt\n"; return 0; fi
+			cat $1 | sed 's/^\([[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]\).*$/\1/g' | awk '!x[$0]++' | awk NF
+		}
+
+		tagStormDiv() {
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagStormDiv file.txt\n"; return 0; fi
+			cat $1 | sed 's/^\([[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]\).*$/\1/g' | nl --body-numbering=a | sort -uk2 | sort -nk1 | cut -f2- | awk NF
+		}
+
