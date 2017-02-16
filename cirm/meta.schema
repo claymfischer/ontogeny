@@ -1,0 +1,291 @@
+GEO_Sample_age $ 
+GEO_Sample_platform_id $ GPL*
+GEO_Series_summary $ *
+access $ all group
+age % 1 100
+age_unit $ *
+assay $ ATAC-seq Amplicon-seq CaptureSeq GUIDE-seq Hi-C RRBS WGBS WGS broad-ChIP-seq long-RNA-seq
+assay_method $ *
+assay_platform $ "Hi-seq 4000" "Illumina (unknown)" "Illumina HiSeq 2000" "Illumina HiSeq 2500" "Illumina HiSeq 4000" "Illumina MiSeq" "Illumina NextSeq 500" MiSeq
+average_insert_size $ *
+biomaterial_provider $ 0 SFGH
+biosample_ancestry_population $ Asian-Japanese Australian caucasian
+biosample_cell_type $ *
+biosample_collector_name $ *
+biosample_collectors_email $ *
+biosample_collectors_institution $ *
+biosample_date $ *
+biosample_id $ *
+biosample_isolation_protocol_id $ *
+biosample_repository $ *
+biosample_repository_sample_id $ *
+biosample_source_age_unit $ day week year
+biosample_source_age_value $ *
+biosample_source_gender $ female male mixed unknown
+biosample_source_health_status $ *
+biosample_source_id $ *
+biosample_source_life_stage $ Adult embryo "embryo and organoid" organoid postpartum
+biosample_tissue_type $ *
+cell_count $ *
+cell_culture_type $ *
+cell_enrichment $ All Astrocytes(HEPACAM) Dissection Endothelial(BSC) Microglia(CD45) Neurons(Thy1) Oligodendrocytes(GC) Sort Unpanned sorting
+cell_line $ *
+cellular_reprogramming_method $ *
+cellular_reprogramming_protocol_id $ *
+cellular_reprogramming_reagents $ *
+consent # 1 1
+control_association $ *
+control_type $ iPSC_ChIP_input input "mock IP" untreated
+data_set_id $ *
+differentiation $ *
+direct_reprogramming_method $ *
+direct_reprogramming_protocol_id $ *
+dna_concentration $ *
+donor $ *
+enriched_in $ PCR exon genome open promoter
+experiment $ *
+fluidics_chip $ 0 "Fluidigm C1" "Fluidigm C1 5-10 um IFC" "Fluidigm C1 IFC"
+geo_sample $ *
+geo_series $ *
+immunoprecipitation_reagents $ *
+immunoprecipitation_target $ *
+input_material $ *
+ips_origin_cell $ *
+lab $ *
+lab_baldwin_age $ *
+lab_baldwin_amplification_method $ "Clontech SMARTER Ultra Low Input RNA for Sequencing -HV" "Clontech SMARTER Ultra Low Input RNA for Sequencing -v3"
+lab_baldwin_area $ *
+lab_baldwin_average_cDNA_fragment_length $ *
+lab_baldwin_cell_source $ *
+lab_baldwin_cell_type $ *
+lab_baldwin_condition $ *
+lab_baldwin_data_set_id $ *
+lab_baldwin_factor_1 $ *
+lab_baldwin_factor_2 $ *
+lab_baldwin_file $ *
+lab_baldwin_final_cell_type $ *
+lab_baldwin_id # 1 100
+lab_baldwin_input_RNA $ 10 "10 ng" "2 ng" 5 "5 ng" "7 ng"
+lab_baldwin_lab_baldwin_purification_method $ *
+lab_baldwin_lab_baldwin_strain $ *
+lab_baldwin_parent $ *
+lab_baldwin_pg_cell $ *
+lab_baldwin_qubit % 1 100
+lab_baldwin_sample_name $ *
+lab_baldwin_sequencing_parameters $ *
+lab_baldwin_sequencing_platform $ "Illumina HiSeq" "Illumina NextSeq"
+lab_baldwin_sorting_date $ *
+lab_bruneau_concentration $ *
+lab_bruneau_illumina_index $ *
+lab_bruneau_run_cycles # 1 100
+lab_bruneau_run_type $ *
+lab_bruneau_set $ *
+lab_bruneau_tube_label $ *
+lab_corn_adapter_ligated $ *
+lab_corn_dsodn_probe $ *
+lab_corn_ipsc_name $ *
+lab_corn_rna $ *
+lab_corn_rna_seq $ *
+lab_corn_sample_name $ *
+lab_crooks_RNA_DNA_quant % -10 10
+lab_crooks_R_DNA_process_by $ *
+lab_crooks_cell_num_sorted # 1 100000
+lab_crooks_cell_sort_by $ *
+lab_crooks_cells_sort_by $ *
+lab_crooks_comments $ *
+lab_crooks_date_sorted # 1 1e+08
+lab_crooks_date_submitted_for_sequencing $ *
+lab_crooks_extra_tubes_sorted # 0 0
+lab_crooks_gender_age_gestation $ *
+lab_crooks_label $ *
+lab_crooks_notes $ *
+lab_crooks_person_submitting $ *
+lab_crooks_pop_abbr # 1 100
+lab_crooks_population $ *
+lab_crooks_process $ *
+lab_crooks_processed_by $ *
+lab_crooks_quant_method $ *
+lab_crooks_sample_tracking $ *
+lab_crooks_sorted_by $ *
+lab_crooks_source # 1 10
+lab_crooks_source_spec # 1 1
+lab_crooks_source_spec_num # 1 1
+lab_crooks_status $ *
+lab_crooks_submit $ *
+lab_crooks_submit_to_cor $ *
+lab_crooks_submit_to_core $ *
+lab_crooks_submitted_by $ *
+lab_crooks_tissue $ *
+lab_crooks_tissue_notes $ *
+lab_crooks_tissue_origin $ *
+lab_crooks_trimester $ *
+lab_crooks_ucla_process $ *
+lab_fan_antibody $ *
+lab_fan_barcode $ *
+lab_fan_date $ *
+lab_fan_digest $ *
+lab_fan_disease $ NA "Overgrowth Syndrome" "Prostate cancer" n/a "overgrowth syndrome" "prostate cancer"
+lab_fan_esc_name $ *
+lab_fan_maturity $ adult n/a
+lab_fan_rna_seq_method $ *
+lab_fan_rna_seq_platform $ *
+lab_frazer_analyte $ *
+lab_frazer_ancestry_comment $ *
+lab_frazer_antibody_catalog_number $ *
+lab_frazer_antibody_lot $ *
+lab_frazer_assay_done_by $ *
+lab_frazer_barcode1_name $ *
+lab_frazer_barcode1_sequence $ *
+lab_frazer_barcode2_name $ *
+lab_frazer_barcode2_sequence $ *
+lab_frazer_cardips_consent $ *
+lab_frazer_clone $ 0 1 12 2 3 4 5 6 7 NA
+lab_frazer_collection_mechanism $ *
+lab_frazer_conc % 1 10000
+lab_frazer_culture_vessel $ *
+lab_frazer_data_type $ *
+lab_frazer_date_of_atac_assay $ 18-DEC-2014 20-NOV-2014
+lab_frazer_date_of_size_selection $ 19-DEC-2014 22-DEC-2014 26-NOV-2014
+lab_frazer_diag_physician $ *
+lab_frazer_diag_self $ *
+lab_frazer_diagnose_self $ *
+lab_frazer_differentiation_id $ *
+lab_frazer_ethnicity_group $ *
+lab_frazer_expected_super_pop $ *
+lab_frazer_external_name $ *
+lab_frazer_family_id $ *
+lab_frazer_harvest_day $ *
+lab_frazer_harvest_id $ *
+lab_frazer_height # 1 100
+lab_frazer_height_inches # 1 100
+lab_frazer_hipaa_consent $ *
+lab_frazer_hippa_consent $ *
+lab_frazer_identity_confirmed $ *
+lab_frazer_input_id $ 3ebbac0f-e039-4235-9c0a-1fc1619db429,ea2ad667-3612-47a7-9493-c68a47809bdb,5fb80220-097b-40d3-843a-753ea340479c NA b8e69939-44dc-4635-8994-a2068acdb379,094a68ec-7839-4b18-b42b-0e4722983968
+lab_frazer_lab_frazer_analyte_id $ *
+lab_frazer_lib_seq_manifest_date $ 03-DEC-2014 07-JAN-2015
+lab_frazer_multiplex_barcode_2 $ GCGATCTA NA
+lab_frazer_operator1 $ *
+lab_frazer_operator2 $ *
+lab_frazer_passage # 1 100
+lab_frazer_recorded_race $ AFR "AMR or EUR" EAS EUR NA "No prediction"
+lab_frazer_self_reported_race $ *
+lab_frazer_tissue_id $ *
+lab_frazer_udid $ *
+lab_frazer_weight # 1 1000
+lab_frazer_weight_pounds # 1 1000
+lab_geschwind_barcode $ *
+lab_geschwind_cellular_differentiation_process $ Feeder.free_human.cortical.spheroids MEFs_human.cortical.spheroids
+lab_geschwind_cellular_reprogramming_name $ *
+lab_geschwind_days $ *
+lab_geschwind_differentiated_cell_type $ *
+lab_geschwind_file_identifier $ *
+lab_geschwind_ipsc_name $ *
+lab_geschwind_pool $ Pool-1 Pool-2 Pool-3 Pool-4 Pool-5 Pool-6
+lab_geschwind_rna_seq_protocol $ *
+lab_geschwind_sample_name $ *
+lab_jones_enriched_in $ enhancer-promoter "enhancer-promoter-gene body"
+lab_jones_knockout $ *
+lab_jones_sample_code $ *
+lab_jones_second_treatment $ *
+lab_kriegstein_abnormalities $ MDS Normal
+lab_kriegstein_area $ *
+lab_kriegstein_chamber_act $ analyze fail warning
+lab_kriegstein_chamber_call $ e g gr m m? p r
+lab_kriegstein_chip $ *
+lab_kriegstein_clone $ 0 1323-2 6097-10 6097-9 BJ-4 MDS4-4
+lab_kriegstein_controller # 1 10000
+lab_kriegstein_experiment $ 0 NDSe11 NDSe9
+lab_kriegstein_fluidics_chip $ *
+lab_kriegstein_hemisphere $ 0 Both Left Right knowable
+lab_kriegstein_laminae $ 0 ALL All CP GZ SVZ VZ
+lab_kriegstein_lobe $ 0 Frontal Motor Occipital PFC
+lab_kriegstein_note $ *
+lab_kriegstein_notes $ "\"NDSe9 wk5.5 6097-10 chip 1771045027 NOTE: live dead cell die did not work, only have note on the phase channel, but capture looked good\"" 0 "NDSe9 week10 1323-2" "NDSe9 week10 BJ-4" "NDSe9 wk5.5 BJ-4 chip 1771045029" "NDSe9 wk5.5 MDS4-4 chip 1771045032" "used RNA spikes"
+lab_kriegstein_pool_number $ *
+lab_kriegstein_post_mortem $ 0 "Culture-3 weeks" "Cultured 5 days" Overnight "Same day" Same_day Thaw
+lab_kriegstein_region $ 0 ??? Cortex GE Midbrain_presumptive Retina Rhombic_lip_presumptive Unknown
+lab_kriegstein_region_note $ *
+lab_kriegstein_region_notes $ *
+lab_kriegstein_sequencing_contact $ *
+lab_kriegstein_sister_organoid $ 0 1323-2-NDSe11-A 1323-2-NDSe11-B
+lab_kriegstein_size_estimate % 1 10
+lab_kriegstein_viability_estimate % 0 1
+lab_loring_cell_differentiation_process $ *
+lab_loring_cellular_reprogramming_name $ *
+lab_loring_date $ 6/7/2016 8/13/2016
+lab_loring_differentiated_cell_type $ *
+lab_loring_differentiation_protocol_id $ *
+lab_loring_ipsc_name $ HDF111iPS501 HDF111iPS505 HDF410IPS504 HDF410iPS504 HDF457iPS518
+lab_loring_ipsc_name2 $ *
+lab_loringsample_id $ *
+lab_loringsample_name $ *
+lab_quake_cell $ *
+lab_quake_cell_type $ Myeloid Neoplastic Regular
+lab_quake_cluster_2d # 1 100
+lab_quake_cluster_2d_color $ *
+lab_quake_cluster_cnv_color $ #1F77B4 #AEC7E8 #FF7F0E 1 2 3
+lab_quake_ercc_reads # 1 1e+06
+lab_quake_ercc_to_non_ercc % 0 1000
+lab_quake_excision_site $ Distant Periphery Tumor
+lab_quake_fluidics_chip $ *
+lab_quake_genes_detected # 1 10000
+lab_quake_housekeeping_cluster # 1 10
+lab_quake_housekeeping_cluster_color $ *
+lab_quake_location_color $ #1F77B4 #AEC7E8 #FF7F0E
+lab_quake_multimapping_reads_percent % 0 10
+lab_quake_neoplastic $ Neoplastic Regular
+lab_quake_non_ercc_reads # 1 1e+07
+lab_quake_plate_cell $ *
+lab_quake_plate_id # 1 1e+10
+lab_quake_sample_name $ *
+lab_quake_sample_name_color $ *
+lab_quake_sample_type_color $ *
+lab_quake_selection_color $ #1F77B4 #2CA02C #98DF8A #AEC7E8 #FF7F0E #FFBB78
+lab_quake_splice_sites_AT_AC # 0 10000
+lab_quake_splice_sites_Annotated # 1 1e+07
+lab_quake_splice_sites_GC_AG # 0 10000
+lab_quake_splice_sites_GT_AG # 1 1e+07
+lab_quake_splice_sites_non_canonical # 0 10000
+lab_quake_splice_sites_total # 1 1e+07
+lab_quake_total_reads # 1 1e+07
+lab_quake_unique_reads # 1 1e+07
+lab_quake_unique_reads_percent % 1 100
+lab_quake_unmapped_mismatch % 0 10
+lab_quake_unmapped_other % 0 10
+lab_quake_unmapped_short % 1 100
+lab_yeo_differentiated_cell_type $ *
+lab_yeo_subcellular_fraction $ *
+life_stage $ *
+meta $ *
+multiplex_barcode $ *
+ncbi_bio_project $ *
+ncbi_bio_sample $ *
+organ_anatomical_name $ *
+passage_number $ *
+pcr_cycles # 1 100
+pipeline $ *
+pmid # 1 1e+08
+protocol_id $ *
+ratio_260_280 % 1 10
+replicate # 1 10
+rin $ *
+sample_label $ *
+seq_library_prep $ *
+seq_sample $ *
+sex $ female male unknown
+sorting $ *
+species $ "Homo sapiens" "Mus musculus"
+species_source_common_name $ *
+sra_study $ *
+submission_date $ 11/17/2016 9/22/2016 "Apr 14 2015"
+submitter $ *
+t # 0 100
+t_unit $ day hour
+title $ *
+treatment $ *
+ucsc_db $  hg19 hg38 mm10 mm9
+update_date $ *
+user_clay_yeo_file $ *
+user_kent_body_part $ *
+user_sagar_rna_seq_method $ *
