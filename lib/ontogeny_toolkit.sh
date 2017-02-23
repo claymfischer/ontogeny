@@ -1,5 +1,60 @@
 #TO DO prefix lib_
 
+alias tagStormReformat=~kent/bin/x86_64/tagStormReformat
+
+#
+handleStdinA () {
+    if read -t 0; then
+        cat
+    else
+        echo "$*"
+    fi | while read line; do echo $line; done
+}
+
+		#########################################################################
+		# TO DO - implement
+		#########################################################################
+		lib_needHelp() {
+			# Other scenarios?
+			# o - detect stdin when it is not intended?
+			# o - file not found
+			# o - file not set
+			# command not entered correctly - wrong arguments, arguments not integers where expected, etc
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+				echo $@
+				return 1
+			fi
+		}
+
+lib_numberOfFiles() {
+	FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+	if [ "$FILENUM" -gt "$2" ]; then
+		echo "Sorry, too many files."
+		return 1
+	else
+		for f in $1; do if [ ! -s $f ]; then templateNotFound $f; return 1; fi; done
+		return 0
+	fi
+}
+
+################################################################################
+# Takes arguments over stdin if both are detected
+################################################################################
+
+handleStdinB () {
+	#a Help
+	lib_needHelp "usage"
+	if [ $# -lt 2 ]; then # $# is the number of arguments.
+		lib_numberOfFiles "$1" 1
+		cat
+	else
+		if lib_numberOfFiles "$1" 1; then
+		echo "$*"
+		else
+			return 0;
+		fi
+	fi
+}
 
 jc_hms() { 
   declare -i i=${1:-$(</dev/stdin)};
@@ -79,7 +134,7 @@ fi
 			var=
 		elif [ -n "$BASH_VERSION" ]; then
 			unset HISTFILESIZE
-			HISTSIZE=5000
+			HISTSIZE=50000
 			PROMPT_COMMAND="history -a"
 			export HISTSIZE PROMPT_COMMAND
 			shopt -s histappend
@@ -93,7 +148,7 @@ fi
 		export LANG="en_US.UTF-8"
 		export LESSCHARSET=utf-8
 		export LC_ALL=C
-
+		export VISUAL=vim
 		#########################################################################
 		# umask line added to allow groups to write to created directories	#
 		#########################################################################
@@ -102,7 +157,9 @@ fi
 	#################################################################################
 	# Function/variable libraries								#
 	#################################################################################
-	
+	# These are prefixed by lib_ to indicate they are not useful on their own, rather
+	# they are useful when used inside other functions.
+
 		#########################################################################
 		# Color library usage:
 		#
@@ -198,27 +255,45 @@ fi
 			eval "$COMMAND"
 
 		}
+	
+		# Usage: will execute a command if a pipe has any output, for example:
+		# 	pipe | pipe | if_read cat | mail -s "you have results"
+		if_read() { IFS="" read -rN 1 BYTE && { echo -nE "$BYTE"; cat; } | "$@"; };
+
 
 		#########################################################################
 		# TO DO - implement
 		#########################################################################
+		lib_useStdin() {
+			if read -t 0; then
+				echo "stdin"
+				return 1
+			else
+				echo "file"
+				return 0
+			fi
+		}
+
+		#########################################################################
+		# Function to exit if stdin detected
+		#
+		# Implementation: insert the following at the top of your bash function
+		# 	 lib_detectStdin || return 1
+		#########################################################################
+		lib_detectStdin() {
+			if [ -t 0 ]; then 
+				return 0
+			else
+				printf "\n ${bg196} ERROR $reset stdin detected, $color196${FUNCNAME[1]}$reset does not use stdin\n\n"
+				printf "    For more information, try:\n\n"
+				printf "\t${FUNCNAME[1]} -h\n\n"
+				return 1
+			fi
+		}
 		detectStdin() {
 			# return 0 for stdin, 1 for no stdin
 			#or we could do handleStdin() which would cat vs. accept piped input into a variable?
 			return 0;
-		}
-		#########################################################################
-		# TO DO - implement
-		#########################################################################
-		needHelp() {
-			# Other scenarios?
-			# o - detect stdin when it is not intended?
-			# o - file not found
-			# o - file not set
-			# command not entered correctly - wrong arguments, arguments not integers where expected, etc
-			if [ "$FILE" == "-h" ] || [ "$FILE" == "--help" ]; then
-				FILE="help"
-			fi
 		}
 		#########################################################################
 		# TO DO - implement
@@ -338,12 +413,14 @@ fi
 		#	Optional [10] integer sets amount of context to display		#
 		#########################################################################
 		showMatches() {
+			# TO DO - color the numbers? or add a pipe after them.
+			lib_detectStdin || return 1
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ showMatches file.txt pattern 10"; return 0; fi
 			if [ -s "$1" ]; then
 				if [ "$2" == "" ]; then echo "You didn't provide a valid pattern"; return 0; fi
 				DIVISIONBORDER="\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-"
 				if [ -z "$3" ]; then NUMBER=5; else NUMBER=$3; fi
-				cat $1 | nl --body-numbering=a | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|" 
+				cat $1 | nl --body-numbering=a | sed "s/\(.*$2.*\)/$DIVISIONBORDER\n\1/g" | grep --no-group-separator -A$NUMBER "$DIVISIONBORDER" | GREP_COLOR='00;48;5;201' grep --color=always "$2\|"  | sed 's/^\([[:blank:]]*[[:digit:]]\+\)/\1 | /g'
 			else
 				echo "Please provide a filename that exists and has content."
 			fi
@@ -378,7 +455,7 @@ fi
 				echo "Please provide a filename that exists and has content."
 			fi
 		}
-		# a minimalist form
+		# a minimalist form TO DO no numbers... maybe cal grabContent
 		showLines(){
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
 			if [ -s "$1" ]; then
@@ -1055,8 +1132,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# It does not check for validity.
 		# usage:
 		#	cat meta.tab | convertMisceFields >> misceFields.txt
+		# TO DO multiple capital letters in a row don't work.. eg field_ID
 		#########################################################################
-		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
+		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
 
 		#########################################################################
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
@@ -1133,11 +1211,12 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# Submissions								#
 		#########################################################################
-	#	alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-	#	alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-	#	alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-	#	alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-
+		lemmeTry() {
+			alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
+			alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+			alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
+			alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+		}
 		#########################################################################
 		# Wrangler-curated stuff						#
 		#########################################################################
@@ -1229,7 +1308,7 @@ EOF
 EOF
 
 		}
-
+		alias screenhelp=screenHelp
 
 	#########################################################################
 	# Change my prompt							#
@@ -1408,4 +1487,32 @@ EOF
 			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagStormDiv file.txt\n"; return 0; fi
 			cat $1 | sed 's/^\([[:blank:]]*[a-zA-Z0-9_]\+[[:blank:]]\).*$/\1/g' | nl --body-numbering=a | sort -uk2 | sort -nk1 | cut -f2- | awk NF
 		}
+
+		checkAllTagStorms() {
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck /data/cirm/valData/meta.schema $line; done
+		} 
+updateSchema() {
+	#dirs -c
+	#printf "${color240}Current dir:$reset\t\t\t\t"
+	#pushd .
+	printf "${color240}Copying schema:$reset\t\t\t\t"
+	cp /data/cirm/valData/meta.schema ~clay/ontogeny/cirm && printf "$bg25 done $reset\n"
+	printf "${color240}Changing to repository directory:$reset\t"
+	cd ~clay/ontogeny/cirm && printf "$bg25 done $reset\n"
+	printf "${color240}Adding to git:$reset\t\t\t\t"
+	git add meta.schema && printf "$bg25 done $reset\n"
+	printf "${color240}git status (if any):$reset\n"
+	git diff --stat --cached origin/master
+	#printf "${color240}Returning to previous directory$reset\t\t"
+	#popd | sed 's/\n//g' | sed 's/\n//g' | sed 's/\n//g' &&  printf "$bg25 done $reset\n\n"
+}
+
+cleanUpGspreadCells() {
+#	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '//g" | sed "s/'>$//g" | sed "s/'>]//g" | awk NF
+	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '/'/g" | sed "s/'>$/'/g" | sed "s/'>]//g" | sed "s/''//g" | sed "s/'\([$%#]\)'/\1/g" | awk NF
+}
+cleanUpGspreadSheetList() {
+	sed 's/,/\n/g' | sed "s/^.*'\(.*\)'.*$/\1/g"
+}
+
 

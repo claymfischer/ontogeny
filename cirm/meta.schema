@@ -19,7 +19,7 @@ biosample_id $ *
 biosample_isolation_protocol_id $ *
 biosample_repository $ *
 biosample_repository_sample_id $ *
-biosample_source_age_unit $ day week year
+biosample_source_age_unit $ day week month year second minute hour
 biosample_source_age_value $ *
 biosample_source_gender $ female male mixed unknown
 biosample_source_health_status $ *
