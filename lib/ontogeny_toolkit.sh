@@ -1490,6 +1490,10 @@ EOF
 
 		checkAllTagStorms() {
 			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck /data/cirm/valData/meta.schema $line; done
+		}
+		checkAllCv() {
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;107m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck ~clay/qa/cv.schema $line; done
+			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/cv.schema | cut -f 6-11 -d " ")$reset\n\n" 
 		} 
 updateSchema() {
 	#dirs -c
@@ -1509,10 +1513,15 @@ updateSchema() {
 
 cleanUpGspreadCells() {
 #	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '//g" | sed "s/'>$//g" | sed "s/'>]//g" | awk NF
-	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '/'/g" | sed "s/'>$/'/g" | sed "s/'>]//g" | sed "s/''//g" | sed "s/'\([$%#]\)'/\1/g" | awk NF
+#	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '/'/g" | sed "s/'>$/'/g" | sed "s/'>]//g" | sed "s/''//g" | sed "s/'\([$%#]\)'/\1/g" | awk NF
+	tr ',' '\n' | cut -f 2 -d "'" | sed "s/'\([$%#]\)'/\1/g"
 }
 cleanUpGspreadSheetList() {
 	sed 's/,/\n/g' | sed "s/^.*'\(.*\)'.*$/\1/g"
+}
+
+checkCv() {
+	tagStormCheck ~clay/qa/cv.txt $1
 }
 
 
