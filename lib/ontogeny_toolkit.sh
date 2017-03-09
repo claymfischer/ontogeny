@@ -1539,12 +1539,15 @@ updateSchema() {
 cleanUpGspreadCells() {
 #	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '//g" | sed "s/'>$//g" | sed "s/'>]//g" | awk NF
 #	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '/'/g" | sed "s/'>$/'/g" | sed "s/'>]//g" | sed "s/''//g" | sed "s/'\([$%#]\)'/\1/g" | awk NF
-	tr ',' '\n' | cut -f 2 -d "'" | sed "s/'\([$%#]\)'/\1/g" | awk NF
+	tr ',' '\n' | cut -f 2 -d "'" | sed "s/'\([$%#]\)'/\1/g"
 }
 cleanUpGspreadSheetList() {
 	sed 's/,/\n/g' | sed "s/^.*'\(.*\)'.*$/\1/g"
 }
 
+cleanSimpleDiff() {
+	grep $'^[<>\d]' | sed 's/^[<>][[:blank:]]*//g' | sed '$!N;s/\n/\t>\t/' | formatted
+}
 cleanDiff() {
 	#grep $'^[<>\d]' | sed 's/^[<>][[:blank:]]*//g' | sed '$!N;s/\n/\t>\t/' | formatted
 	sed 's/[[:blank:]]*\([|<>]\)[[:blank:]]*/\t\1\t/g' | sed 's/^[[:blank:]]*\([^|<>]\)/\1/g' | formatted
