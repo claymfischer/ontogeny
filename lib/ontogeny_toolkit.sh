@@ -1539,7 +1539,7 @@ updateSchema() {
 cleanUpGspreadCells() {
 #	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '//g" | sed "s/'>$//g" | sed "s/'>]//g" | awk NF
 #	tr ',' '\n' | sed "s/^[ \[]<Cell R[[:digit:]]*C[[:digit:]]* '/'/g" | sed "s/'>$/'/g" | sed "s/'>]//g" | sed "s/''//g" | sed "s/'\([$%#]\)'/\1/g" | awk NF
-	tr ',' '\n' | cut -f 2 -d "'" | sed "s/'\([$%#]\)'/\1/g"
+	tr ',' '\n' | cut -f 2 -d "'" | sed "s/'\([$%#]\)'/\1/g" | awk NF
 }
 cleanUpGspreadSheetList() {
 	sed 's/,/\n/g' | sed "s/^.*'\(.*\)'.*$/\1/g"

@@ -49,13 +49,17 @@ FILE=$1
 	#########################################################################
 	# Make a custom border							#
 	#########################################################################
-	border=1
-	WINDOW=$(tput cols)
-	while [ "$border" -lt "$WINDOW" ]; do
-		WALL="=$WALL";
-		((border++))
-	done
-	WALL="$color240$WALL$reset"
+		wall() {
+			border=1
+			WALL=
+			WINDOW=$(tput cols)
+			while [ "$border" -lt "$WINDOW" ]; do
+				WALL="=$WALL";
+				((border++))
+			done
+			export WALL="$reset$color240$WALL$reset"
+		}
+		wall
 
 #################################################################################
 # Usage statement								#
@@ -282,11 +286,11 @@ fi
 	colors="1 [\e[38;5;${color}m$color\033[0m]    $colors"
 	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m  $COLUMNLEGEND[$NUMLINES rows]"
 	if [ "$FILE" != "stdin" ]; then
-		COMMAND="cat $FILE | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+		COMMAND="cat $FILE | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*'"
 	else
-		COMMAND="echo \"\$LINES\" | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+		COMMAND="printf \"\$LINES\" | tail -n +2 | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*'"
 	fi
-
+	clear
 	#########################################################################
 	# Format and execute							#
 	#########################################################################
@@ -302,6 +306,6 @@ fi
 		echo
 	fi
 	# Execute the simple grep loop from above
-	printf "\n$COLUMNLEGEND\n$WALL"
+	if [ "$1" == "pipedinput" ]; then printf ""; else printf "$COLUMNLEGEND\n$WALL"; fi
 	eval $COMMAND
-	printf "$WALL\n$COLUMNLEGEND$reset\n\n"
+	if [ "$1" == "pipedinput" ]; then printf ""; else printf "$WALL\n$COLUMNLEGEND$reset\n\n"; fi

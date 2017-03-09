@@ -282,6 +282,23 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		elif [ "$f" == "TABS" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+' $RETURNALL "
+		elif [ "$f" == "DIFFS" ]; then
+
+			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'^.*>.*\$' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;28' grep --color=always -e $'^.*>.*\$' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;28m Lines inserted ${OCCURRENCES}\033[0m"
+
+			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'^.*<.*\$' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;196' grep --color=always -e $'^.*<.*\$' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;196m Lines removed ${OCCURRENCES}\033[0m"
+
+			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'^.*|.*\$' | wc -l)) "; fi
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;25' grep --color=always -e $'^.*|.*\$' $RETURNALL "
+			SEARCH="$SEARCH \e[38;5;255m\e[48;5;25m Lines modified ${OCCURRENCES}\033[0m"
+			
+		elif [ "$f" == "DIFF" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e $'^.*[|<>].*\$' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'^.*[|<>].*$' $RETURNALL "
 		elif [ "$f" == "CLEANUP" ]; then
 
 			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)) "; fi
