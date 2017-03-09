@@ -188,7 +188,7 @@ fi
 		color247=$(echo -en "\e[38;5;247m")
 		#
 		reset=$(echo -en "\e[0m")
-
+		alias removeColor='sed "s,\x1B\[[0-9;]*[a-zA-Z],,g"'
 
 		#########################################################################
 		# TO DO For bash functions that require a file, use this template to gracefully
@@ -579,6 +579,25 @@ fi
 			#########################################################################
 			# TO DO Get column size summaries: mean, mode, median, min, max num of characters
 			#########################################################################
+			transpose() {
+			awk '
+				BEGIN { FS=OFS="\t" }
+				{
+    	    	    	    	    for (rowNr=1;rowNr<=NF;rowNr++) {
+        				cell[rowNr,NR] = $rowNr
+    	    	    	    	    }
+    	    	    	    	    maxRows = (NF > maxRows ? NF : maxRows)
+    	    	    	    	    maxCols = NR
+				}
+				END {
+    	    	    	    	    for (rowNr=1;rowNr<=maxRows;rowNr++) {
+        				for (colNr=1;colNr<=maxCols;colNr++) {
+            	    	    	    	    printf "%s%s", cell[rowNr,colNr], (colNr < maxCols ? OFS : ORS)
+        				}
+    	    	    	    	    }
+				}' | formatted | less -S
+			}
+
 
 			#########################################################################
 			# Gives a breakdown of a tab-separated file, allowing you to choose delimiter (defaults to tab)
@@ -1101,15 +1120,11 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# This parses cdwValid.c and returns a cleaned-up list of tags
 		#########################################################################
 		listValidTags() {
-			#if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ listAllTags meta.txt"; return 0; fi
-			#if [ -s "$1" ]; then
-				cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
-				misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
-				allTags=$( printf "$cdwTags\n$misceTags\n" | sort | uniq)
-				echo "$allTags" # | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g"
-			#else
-			#	echo "Please provide a filename that exists and has content."
-			#fi
+			cat ~clay/qa/tags.schema | cut -f 1 -d " " | grep -v "^#"
+			#	cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
+			#	misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
+			#	allTags=$( printf "$cdwTags\n$misceTags\n" | sort | uniq)
+			#	echo "$allTags" # | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g"
 		}
 		#########################################################################
 		# This collapses a tag storm, then passes it to highlight. Only valid tags are highlighted.
@@ -1134,7 +1149,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#	cat meta.tab | convertMisceFields >> misceFields.txt
 		# TO DO multiple capital letters in a row don't work.. eg field_ID
 		#########################################################################
-		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g'"
+		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
 
 		#########################################################################
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
@@ -1145,7 +1160,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
-			~clay/ontogeny/bin/ontogeny_highlight.sh $manifest $(grep "meta " $tagStorm | cut -f 2 -d " " | sed "s/^/\t/g" | sed "s/$/\t/g" | sort -r)
+			cat $manifest | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(grep "meta " $tagStorm | cut -f 2 -d " " | sed "s/^/\t/g" | sed "s/$/\t/g" | sort -r)
 		}
 
 		#########################################################################
@@ -1158,7 +1173,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
 			metaColumn=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | sed 's/^[[:blank:]]*//g' | cut -f 1)
-			~clay/ontogeny/bin/ontogeny_highlight.sh $tagStorm $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
+			cat $tagStorm | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
 		}
 
 	#################################################################################
@@ -1492,9 +1507,19 @@ EOF
 			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck /data/cirm/valData/meta.schema $line; done
 		}
 		checkAllCv() {
-			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;107m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck ~clay/qa/cv.schema $line; done
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; ~kent/bin/x86_64/tagStormCheck ~clay/qa/cv.schema $line; done
 			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/cv.schema | cut -f 6-11 -d " ")$reset\n\n" 
 		} 
+		checkAllTags() {
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;201m $(echo $line | cut -f 5 -d "/") \e[0m\n"; ~kent/bin/x86_64/tagStormCheck ~clay/qa/tags.schema $line; done
+			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/tags.schema | cut -f 6-11 -d " ")$reset\n\n" 
+		} 
+		fixDates(){
+			if [ -z "$2" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Fixes dates in the MM/DD/YYYY, MM-DD-YYYY or MM_DD_YYYY format to YYYY-MM-DD. \nDoes not write to file. Output to a new file and run a diff.\n\n\tfixDates file.txt tag_to_fix > file2.txt\n\tdiff file.txt file2.txt\n\n"; return 0; fi
+			# sed "s/submission_date \([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)/submission_date \3-\1-\2/g" meta.txt
+			#sed "s/$2 \([[:digit:]]\+\)[_-/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)/$2 \3-\1-\2/g" $1
+			sed "s/$2 \([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\{4\}\)/$2 \3-\1-\2/g" $1
+		}
 updateSchema() {
 	#dirs -c
 	#printf "${color240}Current dir:$reset\t\t\t\t"
@@ -1520,8 +1545,15 @@ cleanUpGspreadSheetList() {
 	sed 's/,/\n/g' | sed "s/^.*'\(.*\)'.*$/\1/g"
 }
 
+cleanDiff() {
+	#grep $'^[<>\d]' | sed 's/^[<>][[:blank:]]*//g' | sed '$!N;s/\n/\t>\t/' | formatted
+	sed 's/[[:blank:]]*\([|<>]\)[[:blank:]]*/\t\1\t/g' | sed 's/^[[:blank:]]*\([^|<>]\)/\1/g' | formatted
+}
+
 checkCv() {
 	tagStormCheck ~clay/qa/cv.txt $1
 }
 
+
+STAMP=$(echo $(date +"%B_%d.%I_%M%p") | tr '[:upper:]' '[:lower:]' )
 
