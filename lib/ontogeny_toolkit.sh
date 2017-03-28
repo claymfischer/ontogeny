@@ -1,96 +1,5 @@
 #TO DO prefix lib_
 
-alias tagStormReformat=~kent/bin/x86_64/tagStormReformat
-
-#
-handleStdinA () {
-    if read -t 0; then
-        cat
-    else
-        echo "$*"
-    fi | while read line; do echo $line; done
-}
-
-		#########################################################################
-		# TO DO - implement
-		#########################################################################
-		lib_needHelp() {
-			# Other scenarios?
-			# o - detect stdin when it is not intended?
-			# o - file not found
-			# o - file not set
-			# command not entered correctly - wrong arguments, arguments not integers where expected, etc
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-				echo $@
-				return 1
-			fi
-		}
-
-lib_numberOfFiles() {
-	FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
-	if [ "$FILENUM" -gt "$2" ]; then
-		echo "Sorry, too many files."
-		return 1
-	else
-		for f in $1; do if [ ! -s $f ]; then templateNotFound $f; return 1; fi; done
-		return 0
-	fi
-}
-
-################################################################################
-# Takes arguments over stdin if both are detected
-################################################################################
-
-handleStdinB () {
-	#a Help
-	lib_needHelp "usage"
-	if [ $# -lt 2 ]; then # $# is the number of arguments.
-		lib_numberOfFiles "$1" 1
-		cat
-	else
-		if lib_numberOfFiles "$1" 1; then
-		echo "$*"
-		else
-			return 0;
-		fi
-	fi
-}
-
-jc_hms() { 
-  declare -i i=${1:-$(</dev/stdin)};
-  declare hr=$(($i/3600)) min=$(($i/60%60)) sec=$(($i%60));
-  printf "%02d:%02d:%02d\n" $hr $min $sec;
-}
-
-testStdinA() {
-
-	cat | sed 's/^/\t/g'
-	
-}
-
-testStdinB() {
-
-	while read stdin; do
-		echo "$stdin"
-	done | sed 's/^/\t/g'
-	
-}
-
-testStdinC() {
-
-  declare -i i=${1:-$(</dev/stdin)};
-	echo "$i" | sed 's/^/\t/g'
-}
-
-
-testStdinD() {
-    if read -t 0; then
-        cat
-    else
-        echo "$*"
-    fi
-}
-
 
 #################################################################################
 # https://github.com/claymfischer/ontogeny
@@ -141,6 +50,7 @@ fi
 		else
 			var=
 		fi
+		alias gitStatus="git status -uno"
 		# Setting LANG to anything other than 'C' may affect sort behavior. 
 		# To fix, either 1) set everything =C, 2) LC_COLLATE=C LC_ALL=C after LANG if you insist on using it 3) or sort +0 -1
 		# I set LC_ALL at the end which seems to make my sort work as anticipated.
@@ -256,9 +166,6 @@ fi
 
 		}
 	
-		# Usage: will execute a command if a pipe has any output, for example:
-		# 	pipe | pipe | if_read cat | mail -s "you have results"
-		if_read() { IFS="" read -rN 1 BYTE && { echo -nE "$BYTE"; cat; } | "$@"; };
 
 
 		#########################################################################
@@ -280,20 +187,89 @@ fi
 		# Implementation: insert the following at the top of your bash function
 		# 	 lib_detectStdin || return 1
 		#########################################################################
+		error_stdin() {
+				printf "\n ${bg196} ERROR $reset stdin detected, $color196${FUNCNAME[2]}$reset does not use stdin\n\n"
+				printf "    For more information, try:\n\n"
+				printf "    ${FUNCNAME[2]} -h\n\n"
+		}
+		error_expectsStdin() {
+				printf "\n ${bg196} ERROR $reset no stdin detected or file provided, $color196${FUNCNAME[2]}$reset requires a file.\n\n"
+				printf "    For more information, try:\n\n"
+				printf "\t${FUNCNAME[2]} -h\n\n"
+		}
 		lib_detectStdin() {
 			if [ -t 0 ]; then 
 				return 0
+			elif [ -z "$1" ]; then
+				# They didn't have stdin, therefore we at least need a file...
+				error_stdin
+				return 1
 			else
-				printf "\n ${bg196} ERROR $reset stdin detected, $color196${FUNCNAME[1]}$reset does not use stdin\n\n"
-				printf "    For more information, try:\n\n"
-				printf "\t${FUNCNAME[1]} -h\n\n"
+				error_stdin
 				return 1
 			fi
 		}
-		detectStdin() {
-			# return 0 for stdin, 1 for no stdin
-			#or we could do handleStdin() which would cat vs. accept piped input into a variable?
-			return 0;
+		#	
+		#
+		#
+		#
+		#
+
+		#########################################################################
+		# TO DO - implement
+		#########################################################################
+		lib_needHelp() {
+			# Other scenarios?
+			# o - detect stdin when it is not intended?
+			# o - file not found
+			# o - file not set
+			# command not entered correctly - wrong arguments, arguments not integers where expected, etc
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+				echo $@
+				return 1
+			fi
+		}
+
+		lib_numberOfFiles() {
+			FILENUM=$(for f in $1; do echo "${f}"; done | wc -l | cut -f 1 -d " ")
+			if [ "$FILENUM" -gt "$2" ]; then
+				echo "Sorry, too many files."
+				return 1
+			else
+				for f in $1; do if [ ! -s $f ]; then templateNotFound $f; return 1; fi; done
+				return 0
+			fi
+		}
+
+		################################################################################
+		# Takes arguments over stdin if both are detected
+		################################################################################
+
+		handleStdinB () {
+			#a Help
+			lib_needHelp "usage"
+			if [ $# -lt 2 ]; then # $# is the number of arguments.
+				lib_numberOfFiles "$1" 1
+				cat
+			else
+				if lib_numberOfFiles "$1" 1; then
+				echo "$*"
+				else
+					return 0;
+				fi
+			fi
+		}
+		exampleFileThenStdin () {
+			# Preference will be be given to arguments (file) rather than stdin
+			if [ $# -lt 1 ]; then 
+				cat
+			else
+				cat "$*"
+			fi
+		}
+		aDifferentTake() {
+			[ $# -ge 1 -a -f "$1" ] && input="$1" || input="-"
+			cat $input
 		}
 		#########################################################################
 		# TO DO - implement
@@ -320,6 +296,33 @@ fi
 			COMMAND="$COMMAND return 0"
 			eval "$COMMAND"
 		}
+		#########################################################################
+		#
+		#########################################################################
+		lib_fatal () {
+			echo "$0: fatal error:" "$@" >&2     # messages to standard error
+			return 1
+		}
+
+		#########################################################################
+		#
+		#########################################################################
+		test_fatal() {
+			if [ $# = 0 ]    # not enough arguments
+			then
+				lib_fatal not enough arguments
+			fi
+		}
+
+		#########################################################################
+		# Usage: will execute a command if a pipe has any output, for example:
+		# 	pipe | pipe | if_read cat | mail -s "you have results"
+		#########################################################################
+		if_read() { IFS="" read -rN 1 BYTE && { echo -nE "$BYTE"; cat; } | "$@"; };
+
+		#########################################################################
+		#
+		#########################################################################
 		checkExitStatus(){
 			# Can be useful for debugging.
 			# Usage:
@@ -333,6 +336,77 @@ fi
 				echo "Error (exit code $status): $1" >&2
 			fi
 			return $status
+		}
+
+		#########################################################################
+		# Takes an argument of unix time and exports variables to divide by, and 
+		# variable describing which period it will divide into
+		#########################################################################
+		unitOfTime() {
+        		#########################################################################
+        		# Display human-readable time. Make modular so it will work for both  	#
+			# time last modified and time last accessed.				#
+        		#########################################################################
+			# Convert to seconds, then output appropriate time unit
+			# unit   	 seconds 
+			#-----------------------
+			# Year		31536000
+			# Month		 2628000
+			# Weeks		     n/a	# gonna skip weeks
+			# Day		   86400
+			# Hour		    3600
+			#-----------------------
+			local x
+			for x in $@; do 
+        			PERIOD="years"
+        			DIVIDE=31536000
+				if [ $x -lt 31536000 ]; then
+                			PERIOD="months"
+                			DIVIDE=2628000
+					if [ $x -lt 2628000 ]; then
+						PERIOD="days"
+						DIVIDE=86400
+
+						if [ $x -lt 86400 ]; then
+							PERIOD="hours"
+							DIVIDE=3600 
+
+							if [ $x -lt 3600 ]; then
+								PERIOD="minutes"
+								DIVIDE=60
+								if [ $x -lt 60 ]; then
+					    	    	    	    PERIOD="seconds"
+					    	    	    	    DIVIDE=1
+								fi
+
+							fi
+						fi
+
+					fi
+				fi
+			done
+			export PERIOD
+			export DIVIDE
+		}
+
+		humanTime() {
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Displays when a file was last modified in human-readable time (weeks ago, months ago, etc).\nCan handle unlimited arguments and uses filename expansion.\n\thumanTime file.txt\n\thumanTime *.txt | formatted\n"; return 0; fi
+			local x
+			for x in $@; do
+				# Get the difference between last modification and now.
+				MODIFIED=$(( ($(date +%s) - $(date -r $x +%s) )))
+				# This will give us the appropriate units and label
+				unitOfTime $MODIFIED
+        			#########################################################################
+        			# Do some math, and format the number of decimal places. I think 2.	#
+        			#########################################################################
+				if [ "$PERIOD" = "months" ] || [ "$PERIOD" = "years" ]; then
+					printf "$x\t%.1f $PERIOD ago " $(echo $MODIFIED/$DIVIDE | bc -l); 
+				else
+					printf "$x\t%.0f $PERIOD ago " $(echo $MODIFIED/$DIVIDE | bc -l); 
+				fi
+				printf '\n'
+			done
 		}
 		# TO DO: Turn UNIX timestamp into human-readable time
 		# TO DO: send ls error: $ ls *.notreal 2>/dev/null
@@ -435,10 +509,9 @@ fi
 		#
 		#########################################################################
 		grabBetween(){
+			lib_detectStdin || return 1
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabBetween file.txt firstPattern secondPattern"; return 0; fi
 			if [ -s "$1" ]; then
-				# To grab bewteen two line numbers, we could employ:
-				# nl --body-numbering=a
 				cat $1 | grep --no-group-separator -A5000 $2 | grep --no-group-separator -B5000 -m1 $3 | GREP_COLOR='00;48;5;25' grep --color=always "$2\|" | GREP_COLOR='00;48;5;107' grep --color=always "$3\|"
 			else
 				echo "Please provide a filename that exists and has content."
@@ -448,6 +521,7 @@ fi
 		# Same as above, but lets' you grab specific range between two line numbers.
 		#########################################################################
 		grabLines(){
+			lib_detectStdin || return 1
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
 			if [ -s "$1" ]; then # TO DO: what if numbers don't make sense? checkfor integers.
 				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | GREP_COLOR='00;48;5;25' grep --color=always "^$2[[:blank:]]\+.*$\|" | GREP_COLOR='00;48;5;107' grep --color=always "^$3[[:blank:]]\+.*$\|" # TO DO: awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
@@ -457,6 +531,7 @@ fi
 		}
 		# a minimalist form TO DO no numbers... maybe cal grabContent
 		showLines(){
+			lib_detectStdin || return 1
 			if [ "$1" == "" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ grabLines file.txt firstLineToGrab lastLineToGrab"; return 0; fi
 			if [ -s "$1" ]; then
 				cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g' | grep --no-group-separator -A5000 $"^$2" | grep --no-group-separator -B5000 -m1 $"^$3" | awk '{$1=""; print $0}' FS='\t' OFS='\t' | sed 's/^\t//g'
@@ -466,6 +541,7 @@ fi
 		}
 	
 		numberLines() {
+			lib_detectStdin || return 1
 			cat $1 | nl --body-numbering=a | sed 's/^[[:blank:]]*//g'
 		}
 
@@ -473,6 +549,7 @@ fi
 		# Same as above, but for fastq.gz. This lets you grab between two line numbers.
 		#########################################################################		
 		checkFastq(){
+			lib_detectStdin || return 1
 			# Grabs content between two line numbers.
 			# Usage (to grab content between line 100 and 200):
 			#	checkFastq file.fastq.gz 100 200
@@ -512,6 +589,7 @@ fi
 			#########################################################################
 			alias reduceMultipleBlankLines='grep -A1 . | grep -v "^--$"'
 			alias reduceMultipleBlankSpaces="sed 's/  */ /g'" # tr -s ' ' works too and is simpler!
+			alias reduceMultipleWhitespaces="sed 's/\t*\t/\t/g' | sed 's/ * / /g'"
 
 			#########################################################################
 			# To get the average number of characters in each column:
@@ -573,7 +651,7 @@ fi
 			#	describeColumns file.tsv
 			#########################################################################
 			describeColumns() {
-				head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/column -ts $'\t'
+				head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/iconv -t utf-8 -c |  /usr/bin/column -ts $'\t'
 			}
 
 			#########################################################################
@@ -595,7 +673,7 @@ fi
             	    	    	    	    printf "%s%s", cell[rowNr,colNr], (colNr < maxCols ? OFS : ORS)
         				}
     	    	    	    	    }
-				}' | formatted | less -S
+				}' $1
 			}
 
 
@@ -666,7 +744,9 @@ $WALL"
 						colAvg=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | awk ' { thislen=length($0); totlen+=thislen} END { printf("%d\n", totlen/NR); } ')
 						totalAvg=$(($colAvg+$totalAvg))
 						colTitle=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | head -n +1 )
+						if [ "$colTitle" == "" ]; then colTitle="<BLANK COLUMN HEADER>"; fi
 						COLOR=`echo -e "\e[38;5;${color}m"`
+						COLORBLANK=`echo -e "\e[38;5;25m"`
 						NORMAL=`echo -e '\033[0m'`
 						crlf=$(grep -U $'\015\|\x0D' $1 | wc -l)
 						# sed "s/^\(.\{0,$truncateThis\}\).*/\1/"
@@ -679,7 +759,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 						((CURRENTCOL++))
 					done
 					echo "$WALL"
-					echo "$output" | /usr/bin/column -ts $'\t' 
+					echo "$output" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $'\t' #| sed "s/<BLANK COLUMN HEADER>/$COLORBLANK<BLANK>$NORMAL/g"
 					maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
 					minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
 					if [ "$maxColumns" == "$minColumns" ]; then
@@ -707,6 +787,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# 	cutColumns file.tab 1 2 3
 			#########################################################################
 			cutColumns() {
+				lib_detectStdin || return 1
 				# TO DO: make first argument the delimiter.
 				# usage
 				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
@@ -776,6 +857,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# This is a way of looking at the top and bottom of a file.
 			#########################################################################
 			headAndTail() {
+				lib_detectStdin || return 1
 				if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then echo "usage:"; echo "	$ inspect file 10"; return 0; fi
 				if [ -s "$1" ]; then
 					wall
@@ -798,7 +880,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# Usage: 
 			# 	$ cat file.txt | pipeline | format
 			#########################################################################
-			alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | /usr/bin/column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
+			alias format="sed 's/\t\t/\t.\t/g' | sed 's/.\t\t/.\t.\t/g' | sed 's/\t$/\t./g' | sed 's/.\t$/\t./g' | sed 's/^\t/.\t/g' | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $'\t' | sed '1s/^/\n$WALL\n/'; printf '$WALL\n\n'"
 
 			#########################################################################
 			# Same as above, but let's you choose the delimiter. Defaults to tab if no delimiter set.
@@ -812,7 +894,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				else
 					delimiter=$1
 				fi
-				sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
+				sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
 			}
 
 			#########################################################################
@@ -843,7 +925,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				echo 
 				echo "$reset${color240}Aligned with $reset$bg25 $aligningOn $reset ${color240}as delimiter.$reset"
 				echo "$WALL" 
-				cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/column -ts $"$delimiter"
+				cat $1 | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
 				#cat $1 | sed "s/$2$2/$2.$2/g" | sed "s/.$2$2/.$2.$2/g" | sed "s/$2$/$2./g" | sed "s/.$2$/$2./g" | sed "s/^$2/.$2/g" | column -ts $"$2"
 				echo "$WALL"
 				tput smam
@@ -887,7 +969,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				fi
 				# this will take CUTMEOUT into consideration, so we need to add 10. The first line will also be about 8 characters longer.
 				if [ -z "$3" ]; then 
-					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"	
+					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,50\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"	
 				elif [ "$3" == "average" ] || [ "$3" == "avg" ]; then
 					export COLS=$(awk -F"$delimiter" '{print NF}' $1 | sort -nu | tail -n 1)
 					export CURRENTCOL=1
@@ -919,7 +1001,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 						printf "\n"; 
 						i=1
 					done | 
-					/usr/bin/column -ts $"$delimiter"
+					/usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
 				else 
 					# Silly trick to see if bash will be able to use $1 as an integer
 					if [ "$3" -eq "$3" ] 2>/dev/null; then
@@ -929,7 +1011,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 						# INTEGER=""
 						truncate=100
 					fi
-					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/column -ts $"$delimiter"
+					cat $1  | sed 's/^/CUTMETOO/g' | sed "s/$delimiter/${delimiter}CUTMEOUT/g" | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | while read line; do echo "$line" | tr "$delimiter" '\n' | while read line; do echo "$line" | sed "s/^\(.\{0,$truncate\}\).*/\1/"  | tr '\n' "$delimiter"; done; printf "\n"; done | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
 				fi
 			}
 
@@ -1073,7 +1155,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# For tab-separated files, this will look at the top, bottom, highlight line numbers and color the columns.
 		#########################################################################
 		allTheThings() {
-			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/columns stdin
+			inspect $1 $2 | highlight stdin LINENUMBERS | /usr/bin/iconv -t utf-8 -c | /usr/bin/columns stdin
 		}
 		# TO DO: rename lib_
 		grabTagStorm() {
@@ -1155,7 +1237,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
 		#########################################################################
 		mapToManifest() {
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToManifest manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\n"; return 0; fi
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToManifest manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\nThis will visualize how the meta values from a Tag Storm map into your manifest file.\n\n"; return 0; fi
 			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
 			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
@@ -1167,13 +1249,16 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# Shows a tag storm, and how the meta column of the manifest relates to it
 		#########################################################################
 		mapToMeta() {
-			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToMeta manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\n"; return 0; fi
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToMeta manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\nThis will vizualize how the meta column of your manifest links to your Tag Storm.\n\n"; return 0; fi
 			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
 			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
+			metaColumns=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | wc -l)
+			if [ "$metaColumns" -gt 1 ]; then echo "There appears to be multiple meta columns in your manifest. We aren't sure which to use."; return 0; fi
 			metaColumn=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | sed 's/^[[:blank:]]*//g' | cut -f 1)
 			cat $tagStorm | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
+			# highlight meta.txt $(cut -f 2 maniFastq.txt | tail -n +2 | tr '\n' ' ' | sed 's/ /\\|/g')
 		}
 
 	#################################################################################
@@ -1299,21 +1384,19 @@ EOF
 		listScreens() {
 			#TO DO
 			if [ -n "$STY" ]; then 
-				screenMessage=$(printf "\n\n\tYou are in the screen session $color25$STY$reset"); 
+				screenMessage=$(printf "\n\tYou are in the screen session $color25$STY$reset"); 
 			else 
 				#if [ "$WHICHSERVER" == "hgwdev" ] || [ "$WHICHSERVER" == "cirm-01" ]; then
-					screenMessage=$(printf "\n\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
+					screenMessage=$(printf "\n\tYour current screen sessions, if any: (when your .bashrc was last sourced $DATENOW at $TIMENOW) $color25\n"; screen -list | sed 's/^/\t\t/g'; printf "$reset"); 
 				#fi
 			fi
 		}
 		screenHelp() {
+			clear
 			listScreens
 			cat << EOF
-			
 		$screenMessage
 	
-		Quick refresher:
-
 		You can exit the screen with ${color240}cntrl+a+d$reset. to close a screen permanently, enter the screen and then type$color25 $ exit$reset
 		You can see a list of your screens with$color25 $ screen -list$reset
 		You can resume a screen with$color25 $ screen -r$color117 123${color240}<tab-complete>$reset
@@ -1559,4 +1642,120 @@ checkCv() {
 
 
 STAMP=$(echo $(date +"%B_%d.%I_%M%p") | tr '[:upper:]' '[:lower:]' )
+
+
+LONGESTLINE() {
+	awk -F"\t" 'BEGIN{b=0}{for(i=1;i<=NF;i++){a=length($i);if(a>b)b=a;}}END{print b}'
+}
+
+columnate() {
+			[ $# -ge 1 -a -f "$1" ] && input="$1" || input="-"
+			cat $input
+#	lib_detectStdin || return 1
+	if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "A more robust version of the UNIX built-in column (which cannot handle non-ASCII).\n\tcolumnate file.txt\n"; return 0; fi
+	if [ $# -lt 1 ]; then 
+		cat
+	else
+		cat "$*"
+	fi | 
+	cols=$(awk -F'\t' '{for (i=1; i<=NF; i++) max[i]=(length($i)>max[i]?length($i):max[i])} END {for (i=1; i<=NF; i++) printf "%d%s", max[i], (i==NF?RS:FS)}' $1)
+	i=1
+	colIndex=
+	colWidths=
+	for col in $cols; do
+		((col++))
+		((col++))
+		colWidths="$colWidths %-${col}s"
+		colIndex="$colIndex \$$i,"
+		((i++))
+	done
+	colWidths=$(echo "$colWidths" | sed 's/$/\\n/g' | sed 's/^ //g') 
+	colIndex=$(echo "$colIndex" | sed 's/,$//g')
+	COMMAND="awk -F'\t' '{printf \"$colWidths\", $colIndex}'"
+	eval "cat - $1 | awk NF | $COMMAND"
+}
+
+sideDiff() {
+
+	sdiff -w$COLUMNS $1 $2
+}
+
+#
+handleStdinA () {
+    if read -t 0; then
+        cat
+    else
+        echo "$*"
+    fi #| while read line; do echo $line; done
+}
+
+
+jc_hms() { 
+  declare -i i=${1:-$(</dev/stdin)};
+  declare hr=$(($i/3600)) min=$(($i/60%60)) sec=$(($i%60));
+  printf "%02d:%02d:%02d\n" $hr $min $sec;
+}
+
+testStdinA() {
+
+	cat | sed 's/^/\t/g'
+	
+}
+
+testStdinB() {
+
+	while read stdin; do
+		echo "$stdin"
+	done | sed 's/^/\t/g'
+	
+}
+
+testStdinC() {
+
+  declare -i i=${1:-$(</dev/stdin)};
+	echo "$i" | sed 's/^/\t/g'
+}
+
+
+testStdinD() {
+    if read -t 0; then
+        cat
+    else
+        echo "$*"
+    fi
+}
+
+
+highlightValidTags() {
+	hgsql cdw -Ne "describe cdwFileTags" | cut -f 1 | highlight piped $(cut -f 1 -d  " " ~clay/qa/tags.schema | sed "s/^/^/g" | sed "s/$/$/g")
+}
+
+convertToCsv() {
+	cat | sed 's/$/, /g' | tr '\n' ' ' | sed 's/, $//g'; printf "\n"
+}
+
+
+
+curateTags() {
+
+	if [ "$1" = "" ]; then export LIMIT=10; else export LIMIT=$1; fi
+	#TAG=`echo -e "\e[38;5;$(( ( RANDOM % 255 )  + 1 ))m"`
+	#VALUE=`echo -e "\e[38;5;25m"`
+	NORMAL=`echo -e '\033[0m'`
+	hgsql cdw -Ne "describe cdwFileTags" | cut -f 1 | grep -v $'accession\|^map_\|^vcf_\|^enrichment_\|^chrom\|^submit_\|^paired_end_\|^sorted_by\|^valid_key\|^file_size\|^read_size\|^seq_depth\|^sample_name\|^geo_\|^GEO_\|^md5' | while read line; do hgsql cdw -Ne "select distinct($line) from cdwFileTags WHERE $line IS NOT NULL ORDER BY RAND() limit $LIMIT" | while read line2; do echo "$line $line2"; done; done > all.tags
+	tagStormCheck -maxErr=5000 ~clay/qa/tags.schema all.tags &> issues.tags
+	cat issues.tags | grep ^Unrecognized | while read line; do TAG=`echo -e "\e[38;5;$(( ( RANDOM % 255 )  + 1 ))m"`; echo $line | sed "s/'\(.*\)'/$TAG\1$NORMAL/g" | sed "s/tagsss \(.*\)$/tag $TAG\1$NORMAL/g"; done | highlight piped  $( cat issues.tags | grep ^Unrec | rev | cut -f 1 -d " " | rev | sort | uniq )
+}
+
+
+curateTagList() {
+
+	if [ "$1" = "" ]; then export LIMIT=10; else export LIMIT=$1; fi
+	#TAG=`echo -e "\e[38;5;$(( ( RANDOM % 255 )  + 1 ))m"`
+	#VALUE=`echo -e "\e[38;5;25m"`
+#	NORMAL=`echo -e '\033[0m'`
+	hgsql cdw -Ne "describe cdwFileTags" | cut -f 1 | grep -v $'accession\|^map_\|^vcf_\|^enrichment_\|^chrom\|^submit_\|^paired_end_\|^sorted_by\|^valid_key\|^file_size\|^read_size\|^seq_depth\|^sample_name\|^geo_\|^GEO_\|^md5' | while read line; do hgsql cdw -Ne "select distinct($line) from cdwFileTags WHERE $line IS NOT NULL ORDER BY RAND() limit $LIMIT" | while read line2; do echo "$line $line2"; done; done > all.tags
+	tagStormCheck -maxErr=5000 ~clay/qa/tags.schema all.tags &> issues.tags
+	cat issues.tags | grep ^Unrecognized | rev | cut -f 1 -d " " | rev | sort | uniq | while read line; do printf "\n$color25$line$reset\n"; grep $line issues.tags | cut -f 2 -d "'" | sed 's/^/\t/g'; done
+}
 

@@ -93,6 +93,11 @@ reset=$(echo -en "\033[0m")
 #################################################################################
 if [ -t 0 ]; then
 
+	if [ "$1" == "pipedinput" ] || [ "$1" == "piped" ] || [ "$1" == "pipe" ]; then 
+		echo "No stdin detected."
+		exit 1	
+	fi
+
 	#################################################################################
 	# If no file is found, display help						#
 	#################################################################################
@@ -133,6 +138,10 @@ if [ -t 0 ]; then
 	 ${bg200} CLEANUP $reset highlights areas with multiple spaces or tabs ${color240}$'\t\t\+\|  \+'$reset
 
      ${bg220} LINENUMBERS $reset highlights the line number, eg. from nl output ${color240}$'^[[:blank:]]*[[:digit:]]\+'$reset
+
+	   ${bg25} DIFFS $reset highlights side-by-side diff output (sdiff -s) ${color240}$'^.*[|<>].*$''$reset
+
+        ${bg240} COMMENTS $reset darkens hashtag comments		 	${color240}$'#.*$'$reset
 
 $color240  ├────────────────────────────────────────────────────────────────────────────┤$reset
     Limitations
@@ -190,7 +199,7 @@ $color240  ├──────────────────────
 	#	fi
 	fi
 else
-	if [ "$1" == "pipedinput" ]; then pipedinput="y"; fi
+	if [ "$1" == "pipedinput" ] || [ "$1" == "piped" ] || [ "$1" == "pipe" ]; then pipedinput="y"; fi
 	FILE=stdin
 	INPUT=""
 	INPUTTEXT=""
@@ -227,7 +236,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	elif [ "$NUMARGS" -lt "14" ] && [ "$NUMARGS" -gt "6" ]; then
 		array=( $(echo "$BASECOLORS $EXTENDEDCOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
 	else
-		FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
+		#FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
+		i=0
+		FULLCOLORS=$(while [ $i -lt $NEEDEDCOLORS ]; do shuf -i 17-240 -n 1; ((i++)); done)
 		array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
 	fi
 
@@ -282,6 +293,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		elif [ "$f" == "TABS" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t\t\+' $RETURNALL "
+		elif [ "$f" == "COMMENTS" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'#.*$' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;38;5;240' grep --color=always -e $'#.*$' $RETURNALL "
 		elif [ "$f" == "DIFFS" ]; then
 
 			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'^.*>.*\$' | wc -l)) "; fi

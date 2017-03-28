@@ -306,6 +306,6 @@ fi
 		echo
 	fi
 	# Execute the simple grep loop from above
-	if [ "$1" == "pipedinput" ]; then printf ""; else printf "$COLUMNLEGEND\n$WALL"; fi
+	if [ "$1" == "piped" -o "$1" == "pipedinput" ]; then printf ""; else printf "$COLUMNLEGEND\n$WALL"; fi
 	eval $COMMAND
-	if [ "$1" == "pipedinput" ]; then printf ""; else printf "$WALL\n$COLUMNLEGEND$reset\n\n"; fi
+	if [ "$1" == "piped" -o "$1" == "pipedinput" ]; then printf ""; else printf "$WALL\n$COLUMNLEGEND$reset\n\n"; fi

@@ -68,6 +68,9 @@ reset=$(echo -en "\033[0m")
 	if [ -z "$1" ]; then
 		delimiter="\t"
 	fi
+	if [ "$1" == "space" ]; then
+		delimiter=" "
+	fi
 # Silly trick to see if bash will be able to use $1 as an integer
 if [ "$2" -eq "$2" ] 2>/dev/null; then
 	SPECIFICCOL="y"
@@ -162,7 +165,7 @@ $line"; done
 	# These are here in order to color the first column.
 	colors="1 [\e[38;5;${color}m$color\033[0m]    $colors"
 	COLUMNLEGEND="\e[38;5;${color}mColumn 1\033[0m  $COLUMNLEGEND[$NUMLINES rows]"
-	COMMAND="echo \"\$LINES\" | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*' | sed 's/^//g'"
+	COMMAND="echo \"\$LINES\" | tr '\015' '\012' | $COMMAND GREP_COLOR='00;38;5;$color' grep --color=always '.*'" # | sed 's/^//g'"
 
 
 	#########################################################################
@@ -181,5 +184,5 @@ $line"; done
 	fi
 	# Execute the simple grep loop from above
 #	printf "\n$COLUMNLEGEND\n$WALL"
-	eval $COMMAND | tail -n +2
+	eval $COMMAND #| tail -n +2
 #	printf "$WALL\n$COLUMNLEGEND$reset\n\n"
