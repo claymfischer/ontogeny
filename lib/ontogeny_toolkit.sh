@@ -101,6 +101,11 @@ fi
 		alias removeColor='sed "s,\x1B\[[0-9;]*[a-zA-Z],,g"'
 
 		#########################################################################
+		# I don't think there's any issue with the -R flag, so assume we always want to use it since we deal with colors.
+		#########################################################################
+		alias less="less -R"
+
+		#########################################################################
 		# TO DO For bash functions that require a file, use this template to gracefully
 		# handle mis-typed filenames.
 		#
@@ -410,6 +415,61 @@ fi
 		}
 		# TO DO: Turn UNIX timestamp into human-readable time
 		# TO DO: send ls error: $ ls *.notreal 2>/dev/null
+
+		#########################################################################
+		#
+		#########################################################################
+		randomColors() {
+			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Returns random colors as values 0-255, requires integer argument for how many values you want.\n\trandomColors 12\n"; return 0; fi
+			if checkInteger $1; then
+					NEEDEDCOLORS=$1
+					# Let's start with very different colors to maintain contrast between matches
+					BASECOLORS="117 202 106 196 25 201"
+					# This will extend the colors. This way we avoid colors too similar if only a few search terms, but have a lot of colo variety with many search terms
+					EXTENDEDCOLORS="240 99 22 210 81 203 105"
+					if [ "$NEEDEDCOLORS" -lt "7" ]; then
+						array=( $(echo "$BASECOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+					elif [ "$NEEDEDCOLORS" -lt "14" ] && [ "$NEEDEDCOLORS" -gt "6" ]; then
+						array=( $(echo "$BASECOLORS $EXTENDEDCOLORS" | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+					else
+						#FULLCOLORS=$(shuf -i 17-240 -n $NEEDEDCOLORS)
+						i=0
+						FULLCOLORS=$(while [ $i -lt $NEEDEDCOLORS ]; do shuf -i 17-240 -n 1; ((i++)); done)
+						array=( $(printf "$BASECOLORS $EXTENDEDCOLORS " | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " "; echo " $FULLCOLORS" | tr '\n' ' ' | sed -r 's/(.[^;]*;)/ \1 /g' | tr " " "\n" | shuf | tr -d " " ) )
+					fi
+					i=0
+					countdown=0
+					while [ "$countdown" -lt "$1" ]; do 
+						color=${array[i]}
+						echo $color
+						((countdown++))
+						((i++))
+					done
+			fi
+		}
+
+		#########################################################################
+		#
+		#########################################################################
+		colorBg() {
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Assigns a background color to a pattern, where color is randomly assigned 0-255 unless specified. Pattern can use regex. Can be used in a pipe.\n\tcolorBg pattern 196\n"; return 0; fi
+			if [ -n "$2" ] && checkInteger $2; then 
+				color=$2; 
+			else 
+				color=$(randomColors 1); 
+			fi
+			LC_CTYPE=C GREP_COLOR="00;48;5;$color" grep --color=always -e $1 -e '' $3
+		}
+		colorFg() {
+			if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Assigns a background color to a pattern, where color is randomly assigned 0-255 unless specified. Pattern can use regex. Can be used in a pipe.\n\tcolorBg pattern 196\n"; return 0; fi
+			if [ -n "$2" ] && checkInteger $2; then 
+				color=$2; 
+			else 
+				color=$(randomColors 1); 
+			fi
+			LC_CTYPE=C GREP_COLOR="00;38;5;$color" grep --color=always -e $1 -e ''
+		}
+
 		#########################################################################
 		# Make a custom border							#
 		#
@@ -894,7 +954,13 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				else
 					delimiter=$1
 				fi
-				sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
+				if [ -z "$2" ] ; then 
+					placeholder="."
+				else
+					placeholder=$2
+				fi
+				#sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter.$delimiter/g" | sed "s/.$delimiter$delimiter/.$delimiter.$delimiter/g" | sed "s/$delimiter$/$delimiter./g" | sed "s/.$delimiter$/$delimiter./g" | sed "s/^$delimiter/.$delimiter/g" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
+				sed 's/  \+/ /g' | sed "s/$delimiter$delimiter/$delimiter$placeholder$delimiter/g" | sed "s/$placeholder$delimiter$delimiter/$placeholder$delimiter$placeholder$delimiter/g" | sed "s/$delimiter$/$delimiter$placeholder/g" | sed "s/$placeholder$delimiter$/$delimiter$placeholder/g" | sed "s/^$delimiter/$placeholder$delimiter/g" | /usr/bin/iconv -t utf-8 -c | /usr/bin/column -ts $"$delimiter"
 			}
 
 			#########################################################################
@@ -1262,6 +1328,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# highlight meta.txt $(cut -f 2 maniFastq.txt | tail -n +2 | tr '\n' ' ' | sed 's/ /\\|/g')
 		}
 		mappingErrors() {
+			# TO DO ignore commented lines. grep -v $'^#'
 			# Handle help/usage
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mappingErrors manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\nThis will let you know if any meta values are duplicated, and let you know which ones don't map between the meta and manifest.\n\n"; return 0; fi
 			# Automatically choose manifest and meta files if not supplied
@@ -1276,7 +1343,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			if [ "$metaColumns" -eq 0 ]; then echo "There appears to be no meta column in your manifest."; return 0; fi
 			metaColumn=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep $'\smeta$' | sed 's/^[[:blank:]]*//g' | cut -f 1)
 			# Before we continue, verify there aren't duplicate "meta" values. We need them to be unique. 
-			metaDups=$(cat $2 | grep "meta " | cut -f 2 -d " " | sort | uniq -c | sed 's/^[[:blank:]]*//g' | grep ^2)
+			metaDups=$(cat $tagStorm | grep "meta " | cut -f 2 -d " " | sort | uniq -c | sed 's/^[[:blank:]]*//g' | grep ^2)
 			if [ -z "$metaDups" ]; then
 				inMeta=$(cat $tagStorm | grep "meta " | cut -f 2 -d  " " | sort | uniq )
 				inManifest=$(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
@@ -1349,11 +1416,11 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# Submissions								#
 		#########################################################################
-		lemmeTry() {
+		sillyWorkaround() {
 			alias cdwSubmitted="hgsql cdw -e \"select distinct(TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)),MAX(id),MAX(FROM_UNIXTIME(startUploadTime)),wrangler from cdwSubmit where url NOT LIKE 'local://localhost//data/cirm/submit/%' group by url order by id\""
-			alias listSubmissions="cdwSubmitted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l) | columns stdin | tail -n +3 | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
-			alias submitted="hgsql cdw -B -N -e \"SELECT id,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),FROM_UNIXTIME(startUploadTime),wrangler,(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
-			alias submissions="submitted | formatted | highlight stdin $(submitted | cut -f 2 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 4 | sort | uniq | sed 's/$/$/g' | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'") | tail -n +5 | head -n $(submitted | wc -l); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+			alias listSubmissions="cdwSubmitted | formatted | highlight stdin $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | tr '\n' ' ') |  tail -n +4 | head -n $(cdwSubmitted | wc -l)  | head -n $(($(cdwSubmitted | wc -l) + 2)); echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
+			alias submitted="hgsql cdw -B -N -e \"SELECT id,FROM_UNIXTIME(startUploadTime),wrangler,TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url))),(SELECT count(*) from cdwFile where submitId = cdwSubmit.id and errorMessage IS NOT NULL and errorMessage<>'') FROM cdwSubmit ORDER BY id;\" " #| tail -n +4 | head -n $(( $(submitted | wc -l) - 6 )) "
+			alias submissions="submitted | formatted | highlight piped $(submitted | cut -f 4 | cut -f 1 -d '/' | sort | uniq | tr '\n' ' ') $(submitted | cut -f 3 | sort | uniq | tr '\n' ' '; printf "\$'[1-9]\+[[:digit:]]*\$'"); echo ; echo $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | sort | uniq | wc -l) data sets and $(cdwSubmitted | tail -n +2 | cut -f 1 -d '/' | wc -l) submissions."
 		}
 		#########################################################################
 		# Wrangler-curated stuff						#
@@ -1636,7 +1703,7 @@ EOF
 			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/tags.schema | cut -f 6-11 -d " ")$reset\n\n" 
 		} 
 		fixDates(){
-			if [ -z "$2" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Fixes dates in the MM/DD/YYYY, MM-DD-YYYY or MM_DD_YYYY format to YYYY-MM-DD. \nDoes not write to file. Output to a new file and run a diff.\n\n\tfixDates file.txt tag_to_fix > file2.txt\n\tdiff file.txt file2.txt\n\n"; return 0; fi
+			if [ -z "$2" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Fixes dates in the MM/DD/YYYY, MM-DD-YYYY or MM_DD_YYYY format to YYYY-MM-DD. \nDoes not write to file. Output to a new file and run a diff.\n\n\tfixDates file.txt tag_to_fix > file2.txt\n\tdiff file.txt file2.txt\n\n\tOr all in one line:\n\tfixDates file.txt tag_to_fix | diff file.txt - | highlight piped DIFFS\n\n"; return 0; fi
 			# sed "s/submission_date \([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)/submission_date \3-\1-\2/g" meta.txt
 			#sed "s/$2 \([[:digit:]]\+\)[_-/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)/$2 \3-\1-\2/g" $1
 			sed "s/$2 \([[:digit:]]\+\)[-_/]\([[:digit:]]\+\)[-_/]\([[:digit:]]\{4\}\)/$2 \3-\1-\2/g" $1
@@ -1791,14 +1858,21 @@ curateTagList() {
 	# along these QA lines, what about checking that file format and file output are always the same? eg. look for all output where format = vcf. They should be the same. How to check for diffs in capitalization? maybe
 	# use bash?
 
-
-	if [ "$1" = "" ]; then export LIMIT=10; else export LIMIT=$1; fi
-	#TAG=`echo -e "\e[38;5;$(( ( RANDOM % 255 )  + 1 ))m"`
-	#VALUE=`echo -e "\e[38;5;25m"`
-#	NORMAL=`echo -e '\033[0m'`
+	if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Makes a Tag Storm out of the cdwFileTags table, then validates against the tagsv5 spreadsheet.\nDefaults to 10 random distinct values for each tag, can override with integer argument.\n\tcurateTagList 10\n"; return 0; fi
+	if [ "$1" = "" ]; then 
+		export LIMIT=10; 
+	else 
+		if checkInteger $1; then
+			export LIMIT=$1; 
+		else
+			return 1
+		fi
+	fi
+	# Would it be quicker to generate a single SQL query, and execute that?
 	hgsql cdw -Ne "describe cdwFileTags" | cut -f 1 | grep -v $'accession\|^map_\|^vcf_\|^enrichment_\|^chrom\|^submit_\|^paired_end_\|^sorted_by\|^valid_key\|^file_size\|^read_size\|^seq_depth\|^sample_name\|^geo_\|^GEO_\|^md5' | while read line; do hgsql cdw -Ne "select distinct($line) from cdwFileTags WHERE $line IS NOT NULL ORDER BY RAND() limit $LIMIT" | while read line2; do echo "$line $line2"; done; done > all.tags
 	tagStormCheck -maxErr=5000 ~clay/qa/tags.schema all.tags &> issues.tags
-	cat issues.tags | grep ^Unrecognized | rev | cut -f 1 -d " " | rev | sort | uniq | while read line; do printf "\n$color25$line$reset\n"; grep $line issues.tags | cut -f 2 -d "'" | sed 's/^/\t/g'; done
+	#cat issues.tags | grep ^Unrecognized | rev | cut -f 1 -d " " | rev | sort | uniq | while read line; do printf "\n$bg25$line$reset\n"; grep $line issues.tags | cut -f 2 -d "'" | sed 's/^/\t/g'; done
+	cat issues.tags | grep ^Unrecognized | rev | cut -f 1 -d " " | rev | sort | uniq | while read line; do export $line; printf "\n$bg25$line$reset\n"; grep $line issues.tags | cut -f 2 -d "'" | while read value; do printf "$value \t$color240"; hgsql cdw -Ne "select distinct(data_set_id) from cdwFileTags where $line = '$value' " | tr '\n' ' '; printf "$reset\n"; done | sed 's/^/\t/g' | formatted tab "-"; done
 }
 
 cdwGroupUsers() {
@@ -1814,5 +1888,52 @@ nonUniqueMeta() {
 		echo "$bg196 FAIL $reset"
 		echo "$list" | sed 's/[[:blank:]]\+/\t/g'
 	fi | awk NF
+}
+
+
+grabRecentMetadata() {
+	if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Grabs most recent metafiles and puts into a directory.\n\tgrabRecentMetadata directoryName\n"; return 0; fi
+	if [ -d $1 ]; then echo "Sorry, that directory already exists."; return 1; fi
+	mkdir $1
+	ls /data/cirm/wrangle | while read line; do 
+		if [ -d /data/cirm/wrangle/$line ]; then 
+			if cp /data/cirm/wrangle/$line/meta.txt $1/${line}.txt 2>/dev/null; then 
+				printf "\e[38;5;25m$line\e[0m was copied\n"
+			else
+				printf "\e[48;5;196m$line\e[0m has no metadata, yet\n"
+			fi
+		fi
+	done
+	printf "\nThe blue metadata files are now available in \e[48;5;25m $1 \e[0m\n\n"
+}
+
+grabAllWords() {
+	if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Takes input and makes into a list of words.\n\tgrabAllWords file.txt\n\tcat file.txt | grabAllWords\n"; return 0; fi
+	grep -oE '\w+' $1 | sort
+}
+
+tagStormValidate() {
+	tagStormCheck ~clay/qa/tags.schema $1 | grep $'^Unrecognized' | rev | cut -f 1 -d " " | rev | sort | uniq | while read line; do 
+		printf "\n$bg25$line$reset\n"; 
+	done
+	echo
+	echo "${color240}Schema generated from tagsV5.xlsx $(humanTime ~clay/qa/tags.schema | cut -f 2)at $(stat -c %y ~clay/qa/tags.schema | cut -f 1 -d .)$reset"
+	echo
+}
+
+
+alias tagStormQuery=~kent/bin/x86_64/tagStormQuery
+
+patternize() {
+	
+	sed 's/[[:blank:]]*//g' $1 | 
+	sed 's/^/^[[:blank:]]*/g' |
+	sed 's/$/[[:blank:]]/'
+}
+
+tagStormColor() {
+	if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Color codes tags in a tag storm.\n\ttagStormColor meta.txt\n"; return 0; fi
+	if [ ! -s $1 ]; then templateNotFound $1; return 1; fi
+	cat $1 | LC_CTYPE=C GREP_COLOR='00;38;5;240' grep --color=always -e $'#.*$' -e '' | highlight text $(listTags $1 | patternize) | less -R
 }
 

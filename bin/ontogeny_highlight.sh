@@ -199,7 +199,7 @@ $color240  ├──────────────────────
 	#	fi
 	fi
 else
-	if [ "$1" == "pipedinput" ] || [ "$1" == "piped" ] || [ "$1" == "pipe" ]; then pipedinput="y"; fi
+	if [ "$1" == "pipedinput" ] || [ "$1" == "piped" ] || [ "$1" == "pipe" ] || [ "$1" == "text" ]; then pipedinput="y"; fi
 	FILE=stdin
 	INPUT=""
 	INPUTTEXT=""
@@ -313,6 +313,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		elif [ "$f" == "DIFF" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e $'^.*[|<>].*\$' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'^.*[|<>].*$' $RETURNALL "
+		elif [ "$f" == "NUMBERS" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e $'[[:digit:]]' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'[[:digit:]]' $RETURNALL "
 		elif [ "$f" == "CLEANUP" ]; then
 
 			if [ "$FILE" != "stdin" ]; then OCCURRENCES="(\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)) "; fi
@@ -377,8 +380,12 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 	else
 		PRINTSEARCHBAR="$(eval "$SEARCH")"
 	fi
+	if [ "$1" == "text" ]; then
+		COMMAND=$(echo "$COMMAND" | sed 's/48;/38;/g' )
+	fi
 	printf "$PRINTSEARCHBAR"
 	if [ "$pipedinput" != "y" ]; then printf "\n\n"; fi
+	
 	#########################################################################
 	# 
 	#########################################################################
