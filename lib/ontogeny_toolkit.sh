@@ -1,6 +1,5 @@
 #TO DO prefix lib_
 
-
 #################################################################################
 # https://github.com/claymfischer/ontogeny
 # ontogeny_toolkit.sh
@@ -47,6 +46,7 @@ fi
 			PROMPT_COMMAND="history -a"
 			export HISTSIZE PROMPT_COMMAND
 			shopt -s histappend
+			shopt -s checkwinsize
 		else
 			var=
 		fi
@@ -246,6 +246,19 @@ fi
 			fi
 		}
 
+		kentUsage() {
+				if [ "$#" == "0" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then return 0; else return 1; fi
+		}
+		nonKentUsage() {
+				if [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then return 0; else return 1; fi
+		}
+
+		kentUsageTest() {
+			if kentUsage $1; then echo "Did this work?"; fi
+		}
+		nonKentUsageTest() {
+			if nonKentUsage $1; then echo "Did this work?"; fi
+		}
 		################################################################################
 		# Takes arguments over stdin if both are detected
 		################################################################################
@@ -1327,6 +1340,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			cat $tagStorm | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
 			# highlight meta.txt $(cut -f 2 maniFastq.txt | tail -n +2 | tr '\n' ' ' | sed 's/ /\\|/g')
 		}
+		if [ -z "$PS1" ]; then
 		mappingErrors() {
 			# TO DO ignore commented lines. grep -v $'^#'
 			# Handle help/usage
@@ -1346,12 +1360,12 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			metaDups=$(cat $tagStorm | grep "meta " | cut -f 2 -d " " | sort | uniq -c | sed 's/^[[:blank:]]*//g' | grep ^2)
 			if [ -z "$metaDups" ]; then
 				inMeta=$(cat $tagStorm | grep "meta " | cut -f 2 -d  " " | sort | uniq )
-				inManifest=$(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
+				inManifest=$(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq )
 				echo "$bg196 Missing from $tagStorm $reset"
-				echo
+				echo ""
 				diff <(echo "$inMeta") <(echo "$inManifest") | grep $'^>' | sed 's/^> //g'
 				echo
-				echo "$bg196 Missing from $manifest $reset"
+				echo "$bg202 Missing from $manifest $reset"
 				echo
 				diff <(echo "$inManifest") <(echo "$inMeta") | grep $'^>'
 			else
@@ -1363,8 +1377,15 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			fi
 			# Output a sed script that matches pattern and can comment out to continue with submission?
 			# sed 's/^\(.*$PATTERN.*\)$/#\1/g'
+			from=$(cat $manifest | tail -n +2 | cut -f 1 -d "/" | sort | uniq | grep -v ^#)
+			if [ "$from" == "raw" ]; then
+				printf ""
+			else
+				printf "\n$bg201 MANIFEST WARNING $reset"
+				printf "\n\nThe manifest $color240$manifest$reset links to files outside of the$color240 raw/$reset directory.\n\n"
+			fi
 		}
-
+		fi
 	#################################################################################
 	# Ontogeny repository/bin aliases						#
 	#################################################################################
@@ -1746,8 +1767,13 @@ checkCv() {
 }
 
 
-STAMP=$(echo $(date +"%B_%d.%I_%M%p") | tr '[:upper:]' '[:lower:]' )
+STAMP() { 
+	echo $(echo $(date +"%B_%d.%I_%M%p") | tr '[:upper:]' '[:lower:]' ) 
+}
 
+bak () {
+	cp $1 $1.$(STAMP)
+}
 
 LONGESTLINE() {
 	awk -F"\t" 'BEGIN{b=0}{for(i=1;i<=NF;i++){a=length($i);if(a>b)b=a;}}END{print b}'
@@ -1880,6 +1906,22 @@ hgsql cdw -e "select userId,(SELECT email from cdwUser where id = cdwGroupUser.u
 
 }
 
+userPermissions() {
+	if kentUsage $1; then printf "Usage:\n\n\tuserPermissions email@domain.com\n"; return 0; fi
+	exists=$(hgsql cdw -Ne "select count(*) from cdwUser where email = '$1'")
+	if [ "$exists" -gt "0" ]; then
+			printf "\n$1 has access to the following groups:\n\n"
+			userId=$(hgsql cdw -Ne "select id from cdwUser where email = '$1'")
+			access=$(hgsql cdw -Ne "select (SELECT name from cdwGroup where id = cdwGroupUser.groupId) as lab_group from cdwGroupUser where userId = $userId order by groupId" | sort -k2)
+			hgsql cdw -Ne "select name from cdwGroup order by name" | sed 's/^/\t/g' | highlight piped $(printf "$access" | tr '\n' ' ')
+			printf "\n\n"
+	else
+		echo
+		echo "Sorry, no users with the email $bg25 $1 $reset"
+		echo
+	fi
+}
+
 nonUniqueMeta() {
 	list=$(cat $1 | grep "meta " | cut -f 2 -d " " | sort | uniq -c | sed 's/^[[:blank:]]*//g' | grep ^2)
 	if [ -z "$list" ]; then
@@ -1937,3 +1979,33 @@ tagStormColor() {
 	cat $1 | LC_CTYPE=C GREP_COLOR='00;38;5;240' grep --color=always -e $'#.*$' -e '' | highlight text $(listTags $1 | patternize) | less -R
 }
 
+
+
+
+tagStormEdited() {
+	printf "\nList of when meta files for each submission was last modified.\n\n"
+	find /data/cirm/wrangle/*/meta.txt -maxdepth 2 -type f  -printf '%Ts\t%p\n' | sort -nr | cut -f 2 | while read line; do echo $line | cut -f 5 -d "/" | tr '\n' '\t'; humanTime $line | cut -f 2; done | formatted
+	echo
+}
+
+heatmap() {
+	while read line; do
+		LINE="$LINE
+$line"
+done
+#				MIN=$(echo "$LINE" | head -n 1)
+#				MAX=$(echo "$LINE" | tail -n 1)
+#				RANGE=((MAX-MIN))
+#				for x in y; do 
+#
+#					 LC_CTYPE=C GREP_COLOR='00;38;5;240' grep --color=always -e $'#.*$' -e ''
+#				done
+#				grep -o . <<< "$LINE" | while read letter; do 
+#
+##					VALUE=$($letter)
+#					VALUE=$((VALUE+232))
+#					printf "\e[48;5;${VALUE}m"
+#					printf "$letter"
+#				done
+#				printf "$reset\n"
+}
