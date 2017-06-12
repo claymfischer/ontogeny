@@ -333,6 +333,9 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 			#OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t\t\+\|  \+' | wc -l)"
 			#COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;202' grep --color=always -e $'\t\t\+\|  \+' $RETURNALL "
 
+		elif [ "$f" == "UUID" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'[[:alnum:]]\{8\}-[[:alnum:]]\{4\}-[[:alnum:]]\{4\}-[[:alnum:]]\{4\}-[[:alnum:]]\{12\}' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'[[:alnum:]]\{8\}-[[:alnum:]]\{4\}-[[:alnum:]]\{4\}-[[:alnum:]]\{4\}-[[:alnum:]]\{12\}' $RETURNALL "
 		elif [ "$f" == "SPACETAB" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'\t ' -o -e \$' \t' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'\t ' -e $' \t' $RETURNALL "
