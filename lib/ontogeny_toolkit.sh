@@ -1992,11 +1992,34 @@ tagStormColor() {
 
 
 
+manifestsEdited() {
+	printf "\nList of when manifest files for each submission was last modified.\n\n"
+	find /data/cirm/wrangle/*/mani*.txt -maxdepth 2 -type f  -printf '%Ts\t%p\n' | sort -nr | cut -f 2 | grep -v kriegsteinSingleSkim | while read line; do 
+		echo $line | cut -f 5- -d "/" | tr '\n' '\t'; humanTime $line | cut -f 2  | tr '\n' '\t'
+		echo
+	done | formatted
+	echo
+
+} 
 
 tagStormEdited() {
 	# TO DO : show if there are mulitple metadata files submitted
 	printf "\nList of when meta files for each submission was last modified.\n\n"
-	find /data/cirm/wrangle/*/meta.txt -maxdepth 2 -type f  -printf '%Ts\t%p\n' | sort -nr | cut -f 2 | while read line; do echo $line | cut -f 5 -d "/" | tr '\n' '\t'; humanTime $line | cut -f 2; done | formatted
+	find /data/cirm/wrangle/*/meta.txt -maxdepth 2 -type f  -printf '%Ts\t%p\n' | sort -nr | cut -f 2 | grep -v kriegsteinSingleSkim | while read line; do 
+		echo $line | cut -f 5 -d "/" | tr '\n' '\t'; humanTime $line | cut -f 2  | tr '\n' '\t'
+		# Figure out submit dir id 
+		url=$(echo "$line" | cut -f 5 -d "/")
+		dir=$(hgsql cdw -Ne "select id from cdwSubmitDir where url like '%$url%' ")
+		# grab all manifests for this submission
+#		hgsql -N cdw -e "select distinct(TRIM(LEADING 'local://localhost//data/cirm/submit/' from (TRIM(LEADING 'local://localhost//data/cirm/wrangle/' FROM url)))) from cdwSubmit where submitDirId = $dir" | sort | uniq | while read line; do 
+#			printf ""
+			# see if all manifests have the same meta fileId
+#			metaFiles=$(hgsql cdw -N -e "select metaFileId from cdwSubmit where url LIKE '%$line%' order by metaFileId DESC LIMIT 1" )
+#			numMetaFiles=$(echo "$metaFiles" | wc -l)
+#			if [ "$numMetaFiles" -gt "1" ]; then printf "Manifests were submitted with $numMetaFiles different meta files"; fi
+#		done
+		echo
+	done | formatted
 	echo
 }
 alias heatmap=~clay/ontogeny/bin/ontogeny_heatmap.sh
@@ -2030,6 +2053,9 @@ testCron() {
 	cat job.log
 }
 
+allIntegers() {
+	grep -o $'[[:digit:]]\+' $1 | awk NF | sed 's/[^0-9]//g' | sed 's/[[:blank:]]*//g' | sort -n | uniq
+}
 sortedIntegers() {
 	grep -o $'\(^\|[[:blank:]]\)[[:digit:]]\+\($\|\.\|,\|[[:blank:]]\)' $1 | awk NF | sed 's/[^0-9]//g' | sed 's/[[:blank:]]*//g' | sort -n | uniq
 }
@@ -2061,7 +2087,7 @@ grayscale() {
 	eval "$HEATMAP"
 }
 
-blueScale() {
+oldScale() {
 	array=(
 		$(
 		i=0; 
@@ -2081,6 +2107,37 @@ blueScale() {
 	#BINSIZE=$(printf "%.1f\n" $( echo $SPAN/5 | bc -l) )
 	SPAN=$(printf "%.10f\n" $( echo "$MAX - $MIN" | bc -l) )
 	BINSIZE=$(printf "%.10f\n" $( echo "$SPAN / 18" | bc -l) )
+	HEATMAP=$(
+		echo "$RANGE" | while read n; do
+			b=$(printf "%.0f" $(echo $n/$BINSIZE | bc -l) )
+			i=b
+			color=${array[i]}
+			printf "LC_CTYPE=C GREP_COLOR='00;48;5;${color}' grep --color=always -e \$'\\([[:blank:]]\\|^\\)$n\\([[:blank:]]\\|\$\\|\.\\|,\\)' -e '' | " 
+		done
+	)
+	HEATMAP="$HEATMAP grep ''"
+	eval "$HEATMAP"
+
+}
+
+blueScale() {
+	array=(
+		$(
+		i=0; 
+		START=21;
+		START=$((START + 30))
+		while [ "$i" -lt 6 ]; do 
+			printf "$START "; 
+			((i++)); 
+			START=$((START - 6)); 
+		done
+		)
+	)
+	RANGE=$(echo "$@" | tr ' ' '\n')
+	MAX=$(echo "$RANGE" | tail -n 1)
+	MIN=$(echo "$RANGE" | head -n 1)
+	SPAN=$((MAX-MIN))
+	BINSIZE=$(printf "%.1f\n" $( echo $SPAN/5 | bc -l) )
 	HEATMAP=$(
 		echo "$RANGE" | while read n; do
 			b=$(printf "%.0f" $(echo $n/$BINSIZE | bc -l) )
@@ -2129,5 +2186,22 @@ integerRange() {
 }
 
 
+
+
+csvToHtmlTable() {
+	if kentUsage $1; then printf "Usage:\n\n\tcsvToHtmlTable file.csv\n"; return 0; fi
+	if [ ! -f "$1" ]; then templateNotFound $1; return 0; fi
+	printf '<style>tr:nth-child(even) {background: #CCC}; tr:nth-child(odd) {background: #FFF}</style>'
+	echo "<table style=\"border: 1px #ccc solid; \">" ;
+	#print_header=true
+	while read INPUT ; do
+		#if $print_header;then
+		#echo "<tr><th>$INPUT" | sed -e 's/:[^,]*\(,\|$\)/<\/th><th>/g'
+		#print_header=false
+		#fi
+		echo "<tr><td>${INPUT//,/</td><td>}</td></tr>" ;
+	done < $1
+	echo "</table>"
+}
 
 
