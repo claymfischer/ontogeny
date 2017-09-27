@@ -118,7 +118,7 @@ if [ -t 0 ]; then
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset"
 	printf "    Usage: \n\n\t$color240$ highlight ${color25}file.txt$color117 pattern1 pattern2 ... pattern{n}$reset\n\n"
 	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}stdin$color117 pattern1 pattern2 ... pattern{n}$reset\n\n"
-	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}pipedinput$color117 pattern1 pattern2 ... pattern{n}$reset\n"
+	printf "	$color240$ cat${color25} file.txt$color240 | highlight ${color25}piped$color117 pattern1 pattern2 ... pattern{n}$reset\n"
 	echo "
  $color240 ├────────────────────────────────────────────────────────────────────────────┤$reset
     Patterns with special meaning
@@ -281,6 +281,19 @@ LINES=$(echo $INPUT | wc -l | cut -f 1 -d " ")
 		if [ "$f" == "ASCII" ]; then
 			OCCURRENCES="\$($INPUTTEXT | LC_CTYPE=C grep -o -P '[\x80-\xFF]'  | wc -l)"
 			COMMAND=" $COMMAND | GREP_COLOR='00;48;5;$color' LC_CTYPE=C grep --color=always -P '[\x80-\xFF]$RETURNALL2'"
+
+
+#$'[[:digit:]]*\.[[:digit:]]*'
+# Make a NUM pattern. Highlights integers and floating points.
+# Probably do floating point first, then do digits?
+# https://superuser.com/questions/655715/regex-does-not-begin-by-pattern
+
+		elif [ "$f" == "FLOAT" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'[^\[;][[:digit:]]\+\.[[:digit:]]\+' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'[^\[;][[:digit:]]\+\.[[:digit:]]\+' $RETURNALL "
+		elif [ "$f" == "INT" ]; then
+			OCCURRENCES="\$($INPUTTEXT | grep -o -e \$'[^[;\.][[:digit:]]\+[^.]' | wc -l)"
+			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e $'[^[;\.][[:digit:]]\+[^.]' $RETURNALL "
 		elif [ "$f" == "SPACE" ]; then
 			OCCURRENCES="\$($INPUTTEXT | grep -o -e ' ' | wc -l)"
 			COMMAND=" $COMMAND | LC_CTYPE=C GREP_COLOR='00;48;5;$color' grep --color=always -e ' ' $RETURNALL "
