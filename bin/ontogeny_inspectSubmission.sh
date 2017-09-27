@@ -367,6 +367,8 @@ $color240 └──────────────────────�
 		echo "	To see file a list of files, try:	$color240 hgsql cdw -e \"SET @rank=0; select @rank:=@rank+1 AS '#', id,submitId,submitFileName,cdwFileName,md5,(select groupId from cdwGroupFile where cdwGroupFile.fileId = id limit 1) from cdwFile where submitDirId=$currentDirId order by id ASC\"$reset"
 		echo "						 To clean up, pipe to $color240	| cut -f 4,5,6 | sed 's/raw\///g' | sed 's/201[[:digit:]]\/[[:digit:]]*\/[[:digit:]]*\///g' | formatted"
 		echo
+		echo "	To give a list to the lab:		$color240 hgsql cdw -e 'SET @rank=0; select md5,submitFileName,cdwFileName,round(size/1024/1024,1) as megabytes from cdwFile where submitDirId=$currentDirId order by id ASC'$reset"
+		echo 
 		echo "To see the full table of submissions:"
 		echo "hgsql cdw -e \"$submitted\" | formatted | less -RS"
 		echo
