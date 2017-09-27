@@ -724,6 +724,7 @@ fi
 			#	describeColumns file.tsv
 			#########################################################################
 			describeColumns() {
+				if kentUsage $1; then printf "Usage:\n\n\tdescribeColumns file.txt\n"; return 0; fi
 				head -n 2 $1 | awk -F'\t' '{ for (i = 1; i <= NF; i++) f[i] = f[i] "     \t" $i ; if (NF > n) n = NF } END { for (i = 1; i <= n; i++) sub(/^ */, "", f[i]) ; for (i = 1; i <= n; i++) print i, f[i] } ' | /usr/bin/iconv -t utf-8 -c |  /usr/bin/column -ts $'\t'
 			}
 
@@ -820,11 +821,15 @@ $WALL"
 						if [ "$colTitle" == "" ]; then colTitle="<BLANK COLUMN HEADER>"; fi
 						COLOR=`echo -e "\e[38;5;${color}m"`
 						COLORBLANK=`echo -e "\e[38;5;25m"`
+						COLORNULL=`echo -e "\e[38;5;196m"`
 						NORMAL=`echo -e '\033[0m'`
 						crlf=$(grep -U $'\015\|\x0D' $1 | wc -l)
 						# sed "s/^\(.\{0,$truncateThis\}\).*/\1/"
 					#	randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | tr '\n' ',' | sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
-						randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then printf "${color25}BLANK"; line2="^[[:blank:]]*$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+						#randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then printf "${color25}BLANK"; line2="^[[:blank:]]*$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
+						randValues=$(cut -f $CURRENTCOL -d"$delimiter"  $1 | tail -n +2 | sort -R | uniq | head -n $howMany | while read line; do if [ "$line" == "" ]; then 
+							printf "${color25}BLANK"; line2="^[[:blank:]]*$"; 
+						elif [ "$line" == "NULL" ]; then printf "${color196}"; line2="^NULL$"; else line2=$line; fi; printf "$line" | sed "s/^\(.\{0,$truncateThis\}\).*/\1/"; printf " $reset["; cut -f $CURRENTCOL -d"$delimiter" $1 | grep "$line2" | wc -l | tr '\n' ']'; printf ","; done |  sed "s/^/$COLOR/g" | sed "s/,[[:blank:]]*$//g" | sed "s/,/$NORMAL, $COLOR/g"; echo "$reset" )
 						uniqueValues=$(cut -f $CURRENTCOL -d "$delimiter" $1 | tail -n +2 | sort | uniq | wc -l)
 						output="$output
 $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$colAvg	$randValues"
@@ -859,6 +864,75 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# Usage:
 			# 	cutColumns file.tab 1 2 3
 			#########################################################################
+			listEmptyColumns() {
+				if kentUsage $1; then printf "Usage:\n\n\tlistEmptyColumns file.tsv\n"; return 0; fi
+	
+				lib_detectStdin || return 1
+				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+					delimiter=$'\t'
+				else
+					delimiter=$2
+				fi
+				maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
+				minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
+				if [ "$maxColumns" == "$minColumns" ]; then
+					columnDetails="$maxColumns columns"
+				else
+					columnDetails="an inconsistent column numbers among the rows. The most columns is $maxColumns, and the least is $minColumns"
+					return 1
+				fi
+				i=1
+				#col=$maxColumns
+				columnsEmpty=
+				while [ "$i" -le "$maxColumns" ]; do 
+					blanks=$(cut -f $i -d "$delimiter" $1 | tail -n +2 | awk NF | sort | uniq | wc -l)
+					if [ "$blanks" -eq "0" ]; then
+						columnsEmpty="$i $columnsEmpty"
+					fi
+					if [ "$blanks" -eq "1" ]; then
+						columnsSingle="$i $columnsSingle"
+					fi
+					((i++));
+				done
+				echo $columnsEmpty
+			}
+			listNullColumns() {
+				if kentUsage $1; then printf "Usage:\n\n\tlistEmptyColumns file.tsv\n"; return 0; fi
+	
+				lib_detectStdin || return 1
+				if [ -z "$2" ] || [ "$2" == "tab" ]; then 
+					delimiter=$'\t'
+				else
+					delimiter=$2
+				fi
+				maxColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
+				minColumns=$(cat $1 | awk -F"$delimiter" '{print NF}' | sort -nu | head -n 1)
+				if [ "$maxColumns" == "$minColumns" ]; then
+					columnDetails="$maxColumns columns"
+				else
+					columnDetails="an inconsistent column numbers among the rows. The most columns is $maxColumns, and the least is $minColumns"
+					return 1
+				fi
+				i=1
+				#col=$maxColumns
+				columnsNull=
+				while [ "$i" -le "$maxColumns" ]; do 
+					nulls=$(cut -f $i -d "$delimiter" $1 | tail -n +2 | awk NF | sort | uniq)
+					nullsCount=$(cut -f $i -d "$delimiter" $1 | tail -n +2 | awk NF | sort | uniq | wc -l)
+					if [ "$nullsCount" -eq "1" ] && [ "$nulls" == "NULL" ]; then
+						columnsNull="$i $columnsNull"
+					fi
+					((i++));
+				done
+				echo $columnsNull
+			}
+			deleteEmptyColumns() {
+				if kentUsage $1; then printf "Usage:\n\n\tdeleteEmptyColumns file.tsv > file2.tsv\n"; return 0; fi
+				cutColumns $1 $(listEmptyColumns $1)
+			}
+				
+			#TO DO - check if integer argument = BLANK and then remove any blank columns by adding them to ARGTERMS
+			# Or just make a listEmptyColumns - can do cutColumns file.tsv $(listEmptyColumns file.tsv)
 			cutColumns() {
 				lib_detectStdin || return 1
 				# TO DO: make first argument the delimiter.
@@ -1280,6 +1354,12 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# This parses cdwValid.c and returns a cleaned-up list of tags
 		#########################################################################
+		cdwValidTags() {
+				cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
+				misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
+				allTags=$( printf "$cdwTags\n$misceTags\n" | sort | uniq)
+				echo "$allTags" # | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g"
+		}
 		listValidTags() {
 			cat ~clay/qa/tags.schema | cut -f 1 -d " " | grep -v "^#"
 			#	cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
@@ -1310,7 +1390,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#	cat meta.tab | convertMisceFields >> misceFields.txt
 		# TO DO multiple capital letters in a row don't work.. eg field_ID
 		#########################################################################
-		alias convertMisceFields=" head -n 1 | sed 's/\S\([A-Z]\)/_\1/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
+		alias convertMisceFields=" head -n 1 | sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
 
 		#########################################################################
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
@@ -1328,6 +1408,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# Shows a tag storm, and how the meta column of the manifest relates to it
 		#########################################################################
 		mapToMeta() {
+			# TO DO make match to end of line.
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mapToMeta manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\nThis will vizualize how the meta column of your manifest links to your Tag Storm.\n\n"; return 0; fi
 			if [ -z "$1" ]; then manifest="maniFastq.txt"; else manifest=$1; fi
 			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
@@ -1335,9 +1416,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
 			metaColumns=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | wc -l)
 			if [ "$metaColumns" -gt 1 ]; then echo "There appears to be multiple meta columns in your manifest. We aren't sure which to use."; return 0; fi
-			if [ "$metaColumns" -eq 0 ]; then echo "There appears to be no meta column in your manifest."; return 0; fi
+			if [ "$metaColumns" -eq 0 ]; then echo "There appears to be no meta column in your manifest. Verify the manifest file is your first argument and has headers."; return 0; fi	
 			metaColumn=$(head -1 $manifest | sed 's/\t/\n/g' | nl | grep meta | sed 's/^[[:blank:]]*//g' | cut -f 1)
-			cat $tagStorm | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq)
+			cat $tagStorm | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(cut -f $metaColumn $manifest | tail -n +2 | sort | uniq | sed 's/$/$/g')
 			# highlight meta.txt $(cut -f 2 maniFastq.txt | tail -n +2 | tr '\n' ' ' | sed 's/ /\\|/g')
 		}
 
@@ -1371,7 +1452,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 				diffs1=$(diff <(echo "$inMeta") <(echo "$inManifest") | grep $'^>' | sed 's/^> //g')
 				echo "$diffs1"
 				echo
-				echo "$bg202 Missing from $manifest $reset"
+				echo "$bg202 Missing from $manifest $reset (not a problem)" # TO DO - put line number it's at? 
 				echo
 				diffs2=$(diff <(echo "$inManifest") <(echo "$inMeta") | grep $'^>')
 				echo "$diffs2"
@@ -1384,17 +1465,17 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			fi
 			# Output a sed script that matches pattern and can comment out files in manifest which have no metadata to continue with submission?
 			# echo "$diffs1" | awk NF | cut -f 2 -d " " | while read line; do printf "sed 's/^\(.*\\\t$line\\\t.*\)/#\\\1/g' $manifest\n"; done
-			from=$(cat $manifest | tail -n +2 | cut -f 1 -d "/" | sort | uniq | grep -v ^#)
-			if [ "$from" == "raw" ]; then
-				printf ""
-			else
-				printf "\n$bg201 MANIFEST WARNING $reset"
-				printf "\n\nThe manifest $color240$manifest$reset links to files outside of the$color240 raw/$reset directory.\n\n"
-			fi
-			numMissing=$(echo "$diffs1" | awk NF | wc -l)
-			if [ "$numMissing" -gt "0" ]; then
-				echo "echo "$diffs1" | awk NF | cut -f 2 -d " " | while read line; do printf \"sed 's/^\(.*\\\t$line\\\t.*\)/#\\\1/g' $manifest\n\"; done"
-			fi
+		#	from=$(cat $manifest | tail -n +2 | cut -f 1 -d "/" | sort | uniq | grep -v ^#)
+		#	if [ "$from" == "raw" ]; then
+		#		printf ""
+		#	else
+		#		printf "\n$bg201 MANIFEST WARNING $reset"
+		#		printf "\n\nThe manifest $color240$manifest$reset links to files outside of the$color240 raw/$reset directory.\n\n"
+		#	fi
+		#	numMissing=$(echo "$diffs1" | awk NF | wc -l)
+		#	if [ "$numMissing" -gt "0" ]; then
+		#		echo "echo "$diffs1" | awk NF | cut -f 2 -d " " | while read line; do printf \"sed 's/^\(.*\\\t$line\\\t.*\)/#\\\1/g' $manifest\n\"; done"
+		#	fi
 		}
 
 	#################################################################################
@@ -1404,6 +1485,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#########################################################################
 		# General UNIX software							#
 		#########################################################################
+		alias splitColumns="$ONTOGENY_INSTALL_PATH/bin/ontogeny_splitColumns.sh"
 		alias columns="$ONTOGENY_INSTALL_PATH/bin/ontogeny_columns.sh"
 		alias colorCode="$ONTOGENY_INSTALL_PATH/bin/ontogeny_columnColorizer.sh"
 		alias highlight="$ONTOGENY_INSTALL_PATH/bin/ontogeny_highlight.sh"
@@ -1686,27 +1768,69 @@ EOF
 		}
 
 		whichDataSetTagBelongsTo() {
+			echo
 			if [ "$1" == "" ]; then printf "whichDataSetTagBelongsTo tag_to_look_for\n"; return 0; fi
-			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1<>''"
+			if echo "$@" | grep $'\s'; then echo "there is a space in your tag name, this is only returns the data set for the particular (single) tag $bg196 $1 $reset"; fi 
+			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1<>''" 2> /dev/null
+			numOfDataSets=$(hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1<>''" 2> /dev/null | wc -l)
+			echo
+			echo "There are $bg240 $numOfDataSets $reset data sets which contain the tag $bg25 $1 $reset"
+			if echo "$@" | grep $'\s'; then echo "there is a space in your tag name, this is only returns the data set for the particular (single) tag $bg196 $1 $reset"; fi 
+			echo
+		}
+		whichDataSetTagValueBelongsTo() {
+			echo
+			if [ "$1" == "" ]; then printf "whichDataSetTagValueBelongsTo tag value\n"; return 0; fi
+			if [ "$2" == "" ]; then printf "whichDataSetTagValueBelongsTo tag value\n"; return 0; fi
+			tagValue=$(echo "$@" | reduceMultipleWhitespaces | cut -f 2- -d " ")
+			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 = '$tagValue'" 2> /dev/null
+			numOfDataSets=$(hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 = '$tagValue'" 2> /dev/null  | wc -l)
+
+			echo "There are $bg240 $numOfDataSets $reset data sets which contain the tag $bg25 $1 $reset with the value $bg201 $tagValue $reset"
+			echo
 		}
 
 
 		grabDistinctTagValues() {
 			if [ "$1" == "" ]; then printf "grabDistinctTagValues tag_to_look_for\n"; return 0; fi
-			hgsql cdw -e "select distinct($1),data_set_id from cdwFileTags WHERE $1 IS NOT NULL;"
+			hgsql cdw -e "select distinct($1),data_set_id from cdwFileTags WHERE $1 IS NOT NULL;" 2> /dev/null
 		}
 		tagValues() {
-			# Usage:
-			#	
+			TAGNAME=
 			COMMAND=""
-			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagValues tag_1 tag_2 ... tag_n\n"; return 0; fi
+			if kentUsage $1; then
+				printf "Give it any patterns as arguments and it will return tags that match in the database. Use ? as wildcard and %% as glob.\n\n\tTip: if the first argument is an integer, it return that many random values of each tag. Default is 10 random values.\n\nWill search for related tags - eg. biosample will return biosample_source_id \n\n\ttagValues tag_1 tag_2 ... tag_n\n";
+			return 0; fi
+			if [ "$1" -eq "$1" ] 2>/dev/null; then 
+				LIMIT=$1; 
+				ARGS=$(echo "$@" | tr ' ' '\n' | tail -n +2)
+			else 
+				ARGS=$(echo "$@" | tr ' ' '\n' )
+				LIMIT=10; 
+			fi
 			numArgs=$(echo "$@" | tr ' ' '\n' | wc -l)
-			for x in $@; do 
-				COMMAND="$COMMAND hgsql cdw -e \"select distinct($x) from cdwFileTags ORDER BY RAND() LIMIT 50;\";" 
-				#COMMAND="$COMMAND hgsql cdw -N -e \"select distinct($x),data_set_id,(SELECT count(distinct(data_set_id)) from cdwFileTags where $x = cdwFileTags.$x ) as numDataSets from cdwFileTags WHERE $x in (select data_set_id from cdwFileTags where $x = cdwFileTags.$x) \";"
-				#COMMAND="$COMMAND hgsql cdw -N -e \"select distinct(\$x) from cdwFileTags WHERE \$x IS NOT NULL ORDER BY RAND() LIMIT 100\" | while read line; do printf \"\$line\t\"; hgsql cdw -N -e \"select distinct(data_set_id) from cdwFileTags where \$x = '\$line';\" | tr '\n' ' '; printf '\n'; done;"
+			for x in $ARGS; do
+				TAGNAME="$TAGNAME 
+$(hgsql cdw -Ne "SHOW COLUMNS FROM cdwFileTags LIKE '%$x%'" | cut -f 1)"
+			done
+			COLUMNSFIXED=$(echo "$TAGNAME" | sort | uniq )
+			for x in $COLUMNSFIXED; do
+				COMMAND="$COMMAND hgsql cdw -e \"select distinct($x) from cdwFileTags ORDER BY RAND() LIMIT $LIMIT;\"; printf '\n';" 
 			done
 			eval "$COMMAND"
+			echo
+			echo "Tags that match your search term(s):"
+			TAGCOUNT=$(
+				echo "$COLUMNSFIXED" | awk NF | while read line; do 
+					hgsql cdw -Ne "select count(distinct($line)) from cdwFileTags;" | tr '\n' '\t'
+					printf "$line\n"; 
+				done | formatted 
+			)
+			echo "$color240$TAGCOUNT$reset"
+			echo
+			#echo "$color196$TAGNAME$reset"
+			#echo "$color107$COLUMNSFIXED$reset"
+			#echo "$COMMAND"
 		}
 		tagStructure() {
 			if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "tagStructure file.txt\n"; return 0; fi
@@ -1783,6 +1907,7 @@ STAMP() {
 }
 
 bak () {
+	# TO DO do a diff first, if diff then proceed
 	cp $1 $1.$(STAMP)
 }
 
@@ -1983,6 +2108,12 @@ patternize() {
 	sed 's/^/^[[:blank:]]*/g' |
 	sed 's/$/[[:blank:]]/'
 }
+patternize2() {
+	
+	sed 's/[[:blank:]]*//g' $1 | 
+	sed 's/^/./g' |
+	sed 's/$/./'
+}
 
 tagStormColor() {
 	if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ] ; then printf "Color codes tags in a tag storm.\n\ttagStormColor meta.txt\n"; return 0; fi
@@ -2054,7 +2185,7 @@ testCron() {
 }
 
 allIntegers() {
-	grep -o $'[[:digit:]]\+' $1 | awk NF | sed 's/[^0-9]//g' | sed 's/[[:blank:]]*//g' | sort -n | uniq
+	grep -o $'[[:digit:]]\+' $1 | awk NF | sed 's/[^0-9]//g' | sed 's/[[:blank:]]*//g' | sed 's/^0*//g' | sort -n | uniq
 }
 sortedIntegers() {
 	grep -o $'\(^\|[[:blank:]]\)[[:digit:]]\+\($\|\.\|,\|[[:blank:]]\)' $1 | awk NF | sed 's/[^0-9]//g' | sed 's/[[:blank:]]*//g' | sort -n | uniq
@@ -2204,4 +2335,110 @@ csvToHtmlTable() {
 	echo "</table>"
 }
 
+listFileExtensions() {
+# TO DO alert if no stdin detected
+	# Should it also have file size? du -abh
+	if [ -d "$1" ]; then
+		find $1 -type f | rev | cut -f 1 -d "/" | rev | grep -v $'^\.' | grep $'\.' | cut -f 2- -d . | sort | uniq | rev | cut -f 1,2 -d . | rev | sort | uniq
+	else 
+		echo "$1 is not a directory".
+	fi
+}
+
+
+deleteLines() {
+	if kentUsage $1; then printf "Usage:\n\n\tdeleteLines file.txt patterns to match and delete\n\n\tAny number of patterns will work\n"; return 0; fi
+	if [ ! -f "$1" ]; then templateNotFound $1; return 0; fi
+	if [ -z "$2" ];  then echo "No patterns provided to delete from $1."; return 0; fi
+	PATTERNS=$(echo "$@" | cut -f 2- -d " ")
+	COMMAND=
+	for x in $PATTERNS; do COMMAND="$COMMAND | grep -v $'$x'"; done
+	eval "cat $1 $COMMAND"
+}
+
+computedData() {
+
+	if kentUsage $1; then printf "Usage:\n\n\tcomputedData meta.txt\n"; return 0; fi
+	if [ ! -f "$1" ]; then templateNotFound $1; return 0; fi
+
+	COMPUTEDFIELDS="accession,enrichment_chrM,enrichment_chrX,enrichment_chrY,enrichment_coding,enrichment_common_snp,enrichment_exon,enrichment_intron,enrichment_open,enrichment_promoter,enrichment_utr,enrichment_utr3,enrichment_utr5,file_size,geo_sample,GEO_Sample_age,GEO_Sample_platform_id,geo_series,GEO_Series_summary,map_ratio,map_target_base_count,map_target_seq_count,map_to_ecoli,map_to_fly,map_to_human,map_to_mouse,map_to_rat,map_to_repeat,map_to_ribosome,map_to_worm,map_to_yeast,md5,paired_end_concordance,paired_end_distance_max,paired_end_distance_mean,paired_end_distance_min,paired_end_distance_std,paired_end_mate,paired_end_reads,read_size,read_size_max,read_size_mean,read_size_min,read_size_std,seq_depth,sorted_by_target,submit_dir,submit_file_name,valid_key,vcf_common_snp_ratio,vcf_dp,vcf_genotype_count,vcf_haploid_ratio,vcf_pass_ratio,vcf_snp_ratio"
+	#COMPUTEDFIELDS2=$(echo "$COMPUTEDFIELDS" | tr ',' '\n' | sed 's/^/ /g' | sed 's/$/ IS NOT NULL AND/g' | tr '\n' ' ' | sed 's/AND $//g')
+	ALLFIELDS="listAllTags $1 | tr '\n' ',' | sed 's/ //g' | sed 's/,$//g'"
+	hgsql cdw -e "select $(echo "$COMPUTEDFIELDS") from cdwFileTags where data_set_id = '$(pwd | rev | cut -f 1 -d "/" | rev)'"
+}
+
+
+listManifestFiles() {
+	cd /data/cirm/wrangle
+	ls | while read maniDir; do
+		export maniDir
+		if [ -d $maniDir ]; then
+				ls -1a /data/cirm/wrangle/$maniDir/mani*.txt 2>/dev/null  
+		fi
+	done
+}
+
+listSubmittedManifests() {
+	# No usage, only I will use
+	# These are manifests that both exist in /data/cirm/wrangle and also were submitted at some point
+	listManifestFiles  | while read line; do if [ "$(hgsql cdw -Ne "select url from cdwSubmit where url like '%$line'" | wc -l)" -gt 0 ]; then echo "$line"; else printf ""; fi; done
+} 
+
+listUnsubmittedManifests() {
+	# No usage, only I will use
+	# These are manifests that exist in /data/cirm/wrangle but have yet to be submitted
+	listManifestFiles  | while read line; do if [ "$(hgsql cdw -Ne "select url from cdwSubmit where url like '%$line'" | wc -l)" -gt 0 ]; then printf ""; else echo $line; fi; done
+} 
+
+listMetaUpFiles() {
+	cd /data/cirm/wrangle
+	ls | while read maniDir; do
+		export maniDir
+		if [ -d $maniDir ]; then
+				ls -1a /data/cirm/wrangle/$maniDir/metaUp.sh 2>/dev/null  
+		fi
+	done
+}
+
+
+checkMetaUp() {
+	# first submittedManifests=$(listSubmittedManifests)
+	echo "$submittedManifests" | colorBg $(pwd | cut -f 5 -d "/") 196 | highlight piped $(grep cdwSubmit metaUp.sh | grep -v $'^#' | reduceMultipleWhitespaces | cut -f 3 -d " ")
+}
+
+	columnsToFiles() {
+		if kentUsage $1; then 
+			printf "Usage:\n\n\tsplitColumns file.tsv prefix_ \";\"\n\n\tPrefix and delimiter are optional, default is no prefix and tab for delimiter.\n\n\tprotip: you can use a directory as the prefix\n\n\tsplitColumns file.tsv newDir/prefix_ ;\n\n"; 
+			printf "\tIf you want the output files the named by column number (1.txt, 2.txt, 3.txt...), ensure first line blank:\n\t\thead -n 1 file.tsv | sed 's/\\S//g' # put this output as the first line\n\n"
+			return 0; 
+		fi
+		FILE=$1
+		if [ ! -f "$FILE" ]; then templateNotFound $1; exit 1; fi
+		prefix=$2
+		if [ -z "$3" ] || [ "$3" == "tab" ]; then 
+			delimiter=$'\t'
+		else
+			# Should we just take first letter of the delimiter?
+			delimiter=$3
+		fi
+
+
+		# Get column lengths
+		COLS=$(cat $FILE | awk -F"$delimiter" '{print NF}' | sort -nu | tail -n 1)
+
+		CURRENTCOL=1
+		BLANKNUM=0
+		filesMade=
+		while [ $CURRENTCOL -le $COLS ]; do 
+			colTitle=$(head -n 1 $FILE | cut -f $CURRENTCOL -d "$delimiter" | sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g') 
+			if [ "$colTitle" == "" ]; then colTitle=$CURRENTCOL; ((BLANKNUM++)); fi
+			cut -f $CURRENTCOL -d "$delimiter" $FILE > $prefix${colTitle}.txt
+			filesMade="$filesMade
+			$prefix${colTitle}.txt"
+			((CURRENTCOL++))
+		done
+
+		echo "Split $FILE into the following $COLS files:"
+		echo "$filesMade"
+	}
 
