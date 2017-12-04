@@ -214,11 +214,16 @@ fi
 				return 1
 			fi
 		}
-		#	
-		#
-		#
-		#
-		#
+
+		fileBeforeStdin () {
+			# Preference will be be given to arguments (file) rather than stdin
+			if [ $# -lt 1 ]; then 
+				cat
+			else
+				cat "$*"
+			fi
+			
+		}
 
 		#########################################################################
 		# TO DO - implement
@@ -1355,8 +1360,8 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# This parses cdwValid.c and returns a cleaned-up list of tags
 		#########################################################################
 		cdwValidTags() {
-				cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
-				misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~ceisenhart/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
+				cdwTags=$(grep --no-group-separator -A1000 cdwAllowedTags ~clay/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",$//g')
+				misceTags=$(grep --no-group-separator -A1000 misceAllowedTags ~clay/kent/src/hg/cirm/cdw/lib/cdwValid.c | grep --no-group-separator -B200 -m1 "}" | tail -n +2 | sed '$d' | sed 's/^[[:blank:]]*"//g' | sed 's/",[[:blank:]]*$//g' )
 				allTags=$( printf "$cdwTags\n$misceTags\n" | sort | uniq)
 				echo "$allTags" # | sed "s/'//g" | sed "s/^/^[[:blank:]]*/g" | sed "s/$/\\\s/g"
 		}
@@ -1428,6 +1433,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		# cronjobs needing to source this have issues with the <(process substitution)
 		#########################################################################
 		#alias mappingErrors=~clay/ontogeny/bin/ontogeny_mappingErrors.sh
+		# TO DO: handle leading white spaces instead of tabs. 
 		mappingErrors() {
 			# Handle help/usage
 			if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then printf "Usage:\n	mappingErrors manifest.txt meta.txt\n\nIf no files set, assumes maniFastq.txt and meta.txt\n\nThis will let you know if any meta values are duplicated, and let you know which ones don't map between the meta and manifest.\n\n"; return 0; fi
@@ -1445,8 +1451,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			# Before we continue, verify there aren't duplicate "meta" values. We need them to be unique. 
 			metaDups=$(cat $tagStorm | grep "meta " | cut -f 2 -d " " | sort | uniq -c | sed 's/^[[:blank:]]*//g' | grep ^2)
 			if [ -z "$metaDups" ]; then
-				inMeta=$(cat $tagStorm | grep "meta " | cut -f 2 -d  " " | sort | uniq )
-				inManifest=$(cat $manifest | grep -v "^#" | cut -f $metaColumn | tail -n +2 | sort | uniq )
+				inMeta=$(cat $tagStorm | grep "meta " | sed 's/^[[:blank:]]*//g' | reduceMultipleBlankSpaces | cut -f 2 -d  " " | sort | uniq )
+			#	inMeta=$(cat $tagStorm | grep "meta " | cut -f 2 -d  " " | sort | uniq )
+				inManifest=$(cat $manifest | grep -v $'^#' | cut -f $metaColumn | tail -n +2 | sort | uniq )
 				echo "$bg196 Missing from $tagStorm $reset"
 				echo 
 				diffs1=$(diff <(echo "$inMeta") <(echo "$inManifest") | grep $'^>' | sed 's/^> //g')
@@ -1754,7 +1761,7 @@ EOF
 		}
 
 		# For trawling for lab_ tags
-		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep ^[[:blank:]]*2"
+		alias raiseTags="hgsql cdw -e \"describe cdwFileTags;\" | grep lab_ | cut -f 1 | sed 's/lab_[[:alnum:]]*_//g' | sort | uniq -c | grep -v $'^[[:blank:]]*1' | sort"
 		tagTrawl() {
 			if [ "$1" == "" ]; then printf "Grabs random values from lab_ tabs and puts into file.txt to see if they should be raised. Then can use with highlightTrawl.\nUsage:\n\ttagTrawl file.txt\n"; return 0; fi
 			
@@ -1768,6 +1775,7 @@ EOF
 		}
 
 		whichDataSetTagBelongsTo() {
+			# TO DO should this return any column name similar to $1?
 			echo
 			if [ "$1" == "" ]; then printf "whichDataSetTagBelongsTo tag_to_look_for\n"; return 0; fi
 			if echo "$@" | grep $'\s'; then echo "there is a space in your tag name, this is only returns the data set for the particular (single) tag $bg196 $1 $reset"; fi 
@@ -1783,13 +1791,24 @@ EOF
 			if [ "$1" == "" ]; then printf "whichDataSetTagValueBelongsTo tag value\n"; return 0; fi
 			if [ "$2" == "" ]; then printf "whichDataSetTagValueBelongsTo tag value\n"; return 0; fi
 			tagValue=$(echo "$@" | reduceMultipleWhitespaces | cut -f 2- -d " ")
-			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 = '$tagValue'" 2> /dev/null
-			numOfDataSets=$(hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 = '$tagValue'" 2> /dev/null  | wc -l)
+			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 like '%$tagValue%'" 2> /dev/null
+			numOfDataSets=$(hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 like '%$tagValue%'" 2> /dev/null  | wc -l)
+
+			echo "There are $bg240 $numOfDataSets $reset data sets which contain the tag $bg25 $1 $reset with the value $bg201 %$tagValue% $reset"
+			echo
+		}
+
+		whichDataSetExactTagValueBelongsTo() {
+			echo
+			if [ "$1" == "" ]; then printf "whichDataSetExactTagValueBelongsTo tag value\n"; return 0; fi
+			if [ "$2" == "" ]; then printf "whichDataSetExactTagValueBelongsTo tag value\n"; return 0; fi
+			tagValue=$(echo "$@" | reduceMultipleWhitespaces | cut -f 2- -d " ")
+			hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 like '$tagValue'" 2> /dev/null
+			numOfDataSets=$(hgsql cdw -N -e "select distinct(data_set_id) from cdwFileTags where $1 like '$tagValue'" 2> /dev/null  | wc -l)
 
 			echo "There are $bg240 $numOfDataSets $reset data sets which contain the tag $bg25 $1 $reset with the value $bg201 $tagValue $reset"
 			echo
 		}
-
 
 		grabDistinctTagValues() {
 			if [ "$1" == "" ]; then printf "grabDistinctTagValues tag_to_look_for\n"; return 0; fi
@@ -2442,3 +2461,56 @@ checkMetaUp() {
 		echo "$filesMade"
 	}
 
+
+	removeDuplicates() {
+		# removes duplicates without having to sort, preserving order
+		if nonKentUsage $1; then
+			printf "Usage:"
+			printf "\n\n\tremoveDuplicates file.txt"
+			printf "\n\n\tcat file.txt | removeDuplicates\n\n"
+			return 0; 
+		fi
+		if [ -n $1 ] && [ ! -f $1 ]; then templateNotFound $1; fi
+		cat $1 | awk '!seen[$0]++'
+	}
+
+
+
+	checkManifestFiles() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\tcheckManifestFiles maniFastq.txt\n\n"
+			printf "Returns a list of files that are listed in the manifest but do not exist.\n"
+			return 0
+		fi
+		if [ -n $1 ] && [ ! -f $1 ]; then templateNotFound $1; fi
+		cut -f 1 $1 | tail -n +2 | grep -v $'^#' | while read line; do 
+			if [ ! -f "$line" ]; then echo $line; fi; 
+		done
+
+	}
+
+
+	cdwWebsiteAccess() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\tcdwWebsiteAccess email@domain.com\n\n"
+			printf "Provides access to the CIRM secure site (cirmdcm.soe.ucsc.edu) or updates their password for existing access.\n\nNote that this does not give permission to lab-specific files, you need to use cdwGroupUser for that.\n\n"
+			printf "To see a list of users with access, run$color202 cdwWebSiteAccess users$reset\n\n"
+			return 0
+		fi
+		if [ "$1" == "users" ]; then
+			echo "The following users have access to the secure site:"
+			cat  /etc/cirm/htpasswd | cut -f 1 -d ":" | sort | uniq | cut -f 2 -d "@" | sort | uniq | while read line; do printf "\n$bg25$line$reset\n"; cat /etc/cirm/htpasswd | grep $line | cut -f 1 -d ":" | sed 's/^/\t/g'; done
+			return 0
+		fi
+		emailExists=$(hgsql cdw -Ne "select * from cdwUser where email = '$1'" | wc -l)
+		if [ "$emailExists" -eq "1" ]; then
+			htpasswd /etc/cirm/htpasswd $1
+		else
+			echo "$bg196 $1 $reset is not an email address in the cdw.cdwUser table."
+			echo
+			echo "Try running$color25 cdwUsers$reset to see if the user is associated with a separate email."
+		fi
+	}
+
+
+# in a fcuntion try `basename $0`
