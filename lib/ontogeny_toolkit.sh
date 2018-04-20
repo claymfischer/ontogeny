@@ -82,6 +82,7 @@ fi
 		# Some of my commonly-used background colors
 		bg25=$(echo -en "\e[48;5;25m")
 		bg107=$(echo -en "\e[48;5;107m")
+		bg112=$(echo -en "\e[48;5;112m")
 		bg117=$(echo -en "\e[48;5;117m")
 		bg196=$(echo -en "\e[48;5;196m")
 		bg201=$(echo -en "\e[48;5;201m")
@@ -772,7 +773,7 @@ fi
 			#	summarizeColumns file.tsv
 			#########################################################################
 			summarizeColumns() {
-				clear
+				#clear
 				wall
 				if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then 
 					echo
@@ -1395,7 +1396,9 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 		#	cat meta.tab | convertMisceFields >> misceFields.txt
 		# TO DO multiple capital letters in a row don't work.. eg field_ID
 		#########################################################################
-		alias convertMisceFields=" head -n 1 | sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
+		#alias convertMisceFields=" head -n 1 | sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
+		alias convertMisceFields=" head -n 1 | sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t/\t/g' "
+		alias convertMisceToComputer=" sed 's/\(\S\)\([A-Z]\)/\1_\2/g' | sed 's/[^[A-Za-z0-9_\t ]//g' | tr '[[:upper:]]' '[[:lower:]]' | tr ' ' '_' | tr '-' '_' | sed 's/__/_/g' | sed 's/_\t//g' "
 
 		#########################################################################
 		# Shows a manifest, and how the meta tags of a tag storm relate to it.
@@ -1406,7 +1409,7 @@ $CURRENTCOL	$(echo "$colTitle" | sed "s/^\(.\{0,30\}\).*/\1/")	$uniqueValues	$co
 			if [ -z "$2" ]; then tagStorm="meta.txt"; else tagStorm=$2; fi
 			if [ ! -f "$manifest" ]; then templateNotFound $1; return 0; fi
 			if [ ! -f "$tagStorm" ]; then templateNotFound $2; return 0; fi
-			cat $manifest | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(grep "meta " $tagStorm | cut -f 2 -d " " | sed "s/^/\t/g" | sed "s/$/\t/g" | sort -r)
+			cat $manifest | ~clay/ontogeny/bin/ontogeny_highlight.sh pipedinput $(grep "meta " $tagStorm | cut -f 2 -d " " | sed "s/^/\t/g" | sed "s/$/\t/g" | sort -r) | colorFg $'^#.*$' 240
 		}
 
 		#########################################################################
@@ -1870,11 +1873,11 @@ $(hgsql cdw -Ne "SHOW COLUMNS FROM cdwFileTags LIKE '%$x%'" | cut -f 1)"
 			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck /data/cirm/valData/meta.schema $line; done
 		}
 		checkAllCv() {
-			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; ~kent/bin/x86_64/tagStormCheck ~clay/qa/cv.schema $line; done
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;25m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck ~clay/qa/cv.schema $line; done
 			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/cv.schema | cut -f 6-11 -d " ")$reset\n\n" 
 		} 
 		checkAllTags() {
-			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;201m $(echo $line | cut -f 5 -d "/") \e[0m\n"; ~kent/bin/x86_64/tagStormCheck ~clay/qa/tags.schema $line; done
+			ls /data/cirm/wrangle/*/meta.txt | while read line; do printf "\n\e[48;5;201m $(echo $line | cut -f 5 -d "/") \e[0m\n"; tagStormCheck ~clay/qa/tags.schema $line; done
 			printf "\n\nTag schema updated from the tagsv5.xlsx spreadsheet at $color25$(ls -lph --time-style="+%I:%M %p, %a %b %d, %Y" ~clay/qa/tags.schema | cut -f 6-11 -d " ")$reset\n\n" 
 		} 
 		fixDates(){
@@ -1927,7 +1930,16 @@ STAMP() {
 
 bak () {
 	# TO DO do a diff first, if diff then proceed
+	if kentUsage $1; then printf "Usage:\n\n\tbak file.txt\n\n\tMakes a backup of a file and appends a timestamp to the end, then does a diff to look for differences.\n\n"; return 0; fi
+	if [ ! -s $1 ]; then templateNotFound $1; return 1; fi
 	cp $1 $1.$(STAMP)
+	if diff $1 $1.$(STAMP); then 
+		echo
+		echo "$color240$1$reset was backed up to $color25$1.$(STAMP)$reset successfully, and the backup was verified."
+		echo
+	else
+		echo "It appears there was a problem backing up $1."
+	fi
 }
 
 LONGESTLINE() {
@@ -2069,6 +2081,13 @@ userPermissions() {
 			userId=$(hgsql cdw -Ne "select id from cdwUser where email = '$1'")
 			access=$(hgsql cdw -Ne "select (SELECT name from cdwGroup where id = cdwGroupUser.groupId) as lab_group from cdwGroupUser where userId = $userId order by groupId" | sort -k2)
 			hgsql cdw -Ne "select name from cdwGroup order by name" | sed 's/^/\t/g' | highlight piped $(printf "$access" | tr '\n' ' ')
+			printf "\n\n"
+			websiteAccess=$(grep -i $1 /etc/cirm/htpasswd | wc -l)
+			if [ "$websiteAccess" -gt 0 ]; then
+				echo "$1 $bg112 has access $reset to the secure website cirmdcm.soe.ucsc.edu."
+			else
+				echo "$color196$1 cannot access cirmdcm.soe.ucsc.edu$reset, run cdwWebsiteAccess to give access"
+			fi
 			printf "\n\n"
 	else
 		echo
@@ -2474,9 +2493,18 @@ checkMetaUp() {
 		cat $1 | awk '!seen[$0]++'
 	}
 
+	
+	sortBelowHeader() {
+		if kentUsage; then headerSize=1; else headerSize=$1; fi
+		((headerSize++))
+		sorted="awk 'NR<2{print \$0;next}{print \$0| \"sort\"}'"
+		eval $sorted
+	}
 
 
 	checkManifestFiles() {
+		# TO DO check that the files have read and write permission
+		stamp=$(STAMP)
 		if kentUsage $1; then
 			printf "Usage:\n\n\tcheckManifestFiles maniFastq.txt\n\n"
 			printf "Returns a list of files that are listed in the manifest but do not exist.\n"
@@ -2484,11 +2512,11 @@ checkMetaUp() {
 		fi
 		if [ -n $1 ] && [ ! -f $1 ]; then templateNotFound $1; fi
 		cut -f 1 $1 | tail -n +2 | grep -v $'^#' | while read line; do 
-			if [ ! -f "$line" ]; then echo $line; fi; 
+			if stat -L $line; then printf ""; else echo $line; fi &>> failed.txt.$stamp
+			#if [ ! -f "$line" ] && [ -r "$line" ]; then echo $line; fi; 
 		done
-
+		cat failed.txt.$stamp  | grep cannot | cut -f 2 -d $'\''
 	}
-
 
 	cdwWebsiteAccess() {
 		if kentUsage $1; then
@@ -2513,4 +2541,131 @@ checkMetaUp() {
 	}
 
 
+	tagAssociation() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\ttagAssociation tag_to_see known_tag known_tag_value\n\n\tLimits to 20 random associations.\n\n"
+		else
+			hgsql cdw -Ne "select $1 from cdwFileTags where $2 like '%$3%' order by RAND()" | sort | uniq
+			echo
+			echo "Looking for $bg25 $1 $reset values where the values of $bg25 $2 $reset match %${color25}$3$reset%."
+			echo
+		fi
+	
+	}
+
+	poolTabs() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\tpoolTabs file1.tab file2.tab ... file{n}.tab\n\n"
+			echo "Outputs information on the header, alerts to rows that don't join"
+			echo ""
+			echo ""
+			echo
+			return 0
+		fi
+		# To handle more than two files:
+		# join file1 file2 | join - file3 > output
+		# Need to sort, ignore header?
+
+	}
+
+
+	consolidateTabs() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\tconsolidateTabs file1.tab file2.tab ... file{n}.tab\n\n"
+			echo "Requires files are sorted, joins on any rows that are similar."
+			echo ""
+			echo "Protiip:$color25 consolidateTabs *$reset works"
+			echo
+			return 0
+		fi
+		# To handle more than two files:
+		f1=$1
+		f2=$2
+		shift 2 
+		if [ $# -gt 0 ]; then
+			#output=$(join <(sort $f1) <(sort $f2) | consolidateTabs - "$@")
+			#output=$(join <(cat $f1 | (read -r; printf "%s\n" "$REPLY"; sort)) <(cat $f2 | (read -r; printf "%s\n" "$REPLY"; sort)) | consolidateTabs - "$@")
+			#output=$(join --nocheck-order <(head -n 2 $f1 && tail -n +3 $f1 | sort) <(head -n 2 $f2 && tail -n +3 $f2 | sort) | consolidateTabs - "$@")
+			
+			#output=$(join <(awk 'NR<3{print $0;next}{print $0| "sort -r"}' $1) <(awk 'NR<3{print $0;next}{print $0| "sort -r"}' $f2 ) | consolidateTabs - "$@")
+
+			output=$(join -t $'\t' --nocheck-order <(cat $f1 | (read -r; printf "%s\n" "$REPLY"; sort) ) <(cat $f2 | (read -r; printf "%s\n" "$REPLY"; sort) ) | consolidateTabs - "$@" )
+			echo "$output"
+		else
+			#output=$(join <(sort $f1) <(sort $f2))
+			#output=$(join <(sort $f1) <(sort $f2))
+			output=$(join -t $'\t' --nocheck-order <(cat $f1 | (read -r; printf "%s\n" "$REPLY"; sort) ) <(cat $f2 | (read -r; printf "%s\n" "$REPLY"; sort) ) )
+			echo "$output"
+		fi
+		#consolidateTabs <(cat 3.tab | (read -r; printf "%s\n" "$REPLY"; sort)) 2.tab
+
+		# compare columns to see if good keys?
+		# diff <(cut -f 9 loring_2.tab | tail -n +2 | sort | uniq) <(cut -f 3 loring_1.tab | tail -n +2 | sort | uniq)
+
+	}
+	consolidateUnsortedTabs() {
+		sorted="consolidateTabs"
+		for i in $@; do
+			sorted="$sorted <(cat $i | (read -r; printf \"%s\\n\" \"$REPLY\"; sort))"
+		done
+		#consolidateTabs 
+		echo $sorted
+
+	}
+
+
+	checkCaseIssues() {
+		if kentUsage $1; then
+			printf "Usage:\n\n\tcheckCaseIssues tagStorm.txt\n\n"
+			return 0
+		fi
+		# shoudl turn this into an exit code 1 when results are found if someone wants to use it in a function
+		cat $1 | sed 's/^[[:blank:]]*//g' | cut -f 1 -d " " | sort | uniq | while read line; do echo $line | if grep -q [A-Z]; then echo "Case error: $color196$line$reset"; fi; done; 
+	}
+# Usage: join [OPTION]... FILE1 FILE2
+# For each pair of input lines with identical join fields, write a line to
+# standard output.  The default join field is the first, delimited
+# by whitespace.  When FILE1 or FILE2 (not both) is -, read standard input.
+# 
+#   -a FILENUM        also print unpairable lines from file FILENUM, where
+#                       FILENUM is 1 or 2, corresponding to FILE1 or FILE2
+#   -e EMPTY          replace missing input fields with EMPTY
+#   -i, --ignore-case  ignore differences in case when comparing fields
+#   -j FIELD          equivalent to '-1 FIELD -2 FIELD'
+#   -o FORMAT         obey FORMAT while constructing output line
+#   -t CHAR           use CHAR as input and output field separator
+#   -v FILENUM        like -a FILENUM, but suppress joined output lines
+#   -1 FIELD          join on this FIELD of file 1
+#   -2 FIELD          join on this FIELD of file 2
+#   --check-order     check that the input is correctly sorted, even
+#                       if all input lines are pairable
+#   --nocheck-order   do not check that the input is correctly sorted
+#   --header          treat the first line in each file as field headers,
+#                       print them without trying to pair them
+#   -z, --zero-terminated     end lines with 0 byte, not newline
+#       --help     display this help and exit
+#       --version  output version information and exit
+# 
+# Unless -t CHAR is given, leading blanks separate fields and are ignored,
+# else fields are separated by CHAR.  Any FIELD is a field number counted
+# from 1.  FORMAT is one or more comma or blank separated specifications,
+# each being 'FILENUM.FIELD' or '0'.  Default FORMAT outputs the join field,
+# the remaining fields from FILE1, the remaining fields from FILE2, all
+# separated by CHAR.  If FORMAT is the keyword 'auto', then the first
+# line of each file determines the number of fields output for each line.
+# 
+# Important: FILE1 and FILE2 must be sorted on the join fields.
+# E.g., use "sort -k 1b,1" if 'join' has no options,
+# or use "join -t ''" if 'sort' has no options.
+# Note, comparisons honor the rules specified by 'LC_COLLATE'.
+# If the input is not sorted and some lines cannot be joined, a
+# warning message will be given.
+# 
+# GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+
+
 # in a fcuntion try `basename $0`
+#TO DO prefix lib_
+
+#################################################################################
+# https://github.com/claymfischer/ontogeny
